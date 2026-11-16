@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2ed4e9d150967344b6dc7c0fa13f8c5, type: 3}
+  m_Name: world_meadow_01
+  m_EditorClassIdentifier: Assembly-CSharp::Pokemon.Project.Data.WorldDefinitionAsset
+  data:
+    schemaVersion: 1
+    id: world_meadow_01
+    displayName: "Prairie de d\xE9monstration"
+    seed: 481516
+    generatorVersion: 0.1.0
+    size:
+      x: 128
+      z: 128
+    origin:
+      x: -64
+      z: -64
+    mapResolution:
+      width: 64
+      height: 64
+    layers:
+    - id: height
+      manifestPath: maps/world_meadow_01/height/manifest.json
+    - id: humidity
+      manifestPath: maps/world_meadow_01/humidity/manifest.json
+    - id: temperature
+      manifestPath: maps/world_meadow_01/temperature/manifest.json
+    - id: vegetation_density
+      manifestPath: maps/world_meadow_01/vegetation_density/manifest.json
+    biomeIds:
+    - meadow
+    - forest
+    notes: "Dataset technique de d\xE9monstration. Les valeurs et seuils ne sont
+      pas des r\xE9glages de gameplay valid\xE9s."

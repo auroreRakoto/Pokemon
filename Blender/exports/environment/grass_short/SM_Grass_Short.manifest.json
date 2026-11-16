@@ -1,0 +1,39 @@
+{
+  "animations": [],
+  "asset_id": "environment.grass_short",
+  "asset_type": "static_mesh",
+  "dependencies": [],
+  "domain": "environment",
+  "export": {
+    "format": "fbx",
+    "path": "SM_Grass_Short.fbx",
+    "profile": "static_mesh"
+  },
+  "extra": {
+    "authoring": "Blender procedural mesh",
+    "generator_version": "0.2.0",
+    "seed": 1,
+    "test_only": true
+  },
+  "geometry": {
+    "edge_count": 308,
+    "object_count": 1,
+    "polygon_count": 154,
+    "vertex_count": 168
+  },
+  "pipeline": {
+    "core_version": "0.1.0"
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "Blender/source/environment/grass_short/"
+  },
+  "unity": {
+    "destination": "Assets/Project/Content/Models/Environment/_ART_TEST/grass_short/SM_Grass_Short.fbx"
+  },
+  "validation": {
+    "errors": [],
+    "status": "passed",
+    "warnings": []
+  }
+}

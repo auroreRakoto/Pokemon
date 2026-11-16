@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokemon-project.local/schemas/world.schema.json",
+  "title": "World Definition",
+  "type": "object",
+  "required": ["schemaVersion", "id", "seed", "generatorVersion", "size", "origin", "mapResolution", "layers", "biomeIds"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "displayName": { "type": "string", "minLength": 1 },
+    "seed": { "type": "integer" },
+    "generatorVersion": { "type": "string", "minLength": 1 },
+    "size": { "$ref": "#/$defs/size" },
+    "origin": { "$ref": "#/$defs/origin" },
+    "mapResolution": { "type": "object", "required": ["width", "height"], "properties": { "width": { "type": "integer", "minimum": 2 }, "height": { "type": "integer", "minimum": 2 } }, "additionalProperties": false },
+    "layers": { "type": "array", "items": { "type": "object", "required": ["id", "manifestPath"], "properties": { "id": { "type": "string" }, "manifestPath": { "type": "string" } }, "additionalProperties": false } },
+    "biomeIds": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "size": { "type": "object", "required": ["x", "z"], "properties": { "x": { "type": "number", "exclusiveMinimum": 0 }, "z": { "type": "number", "exclusiveMinimum": 0 } }, "additionalProperties": false },
+    "origin": { "type": "object", "required": ["x", "z"], "properties": { "x": { "type": "number" }, "z": { "type": "number" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

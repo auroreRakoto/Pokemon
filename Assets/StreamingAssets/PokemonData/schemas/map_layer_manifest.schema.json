@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokemon-project.local/schemas/map_layer_manifest.schema.json",
+  "title": "Continuous Map Layer Manifest",
+  "type": "object",
+  "required": ["schemaVersion", "id", "worldId", "layerType", "semantic", "dataFile", "encoding", "byteOrder", "channels", "width", "height", "units", "valueRange", "coordinateSystem", "origin", "worldSize", "rowOrder", "sampling", "generator"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string" },
+    "worldId": { "type": "string" },
+    "layerType": { "const": "continuous" },
+    "semantic": { "type": "string" },
+    "dataFile": { "type": "string" },
+    "encoding": { "const": "float32" },
+    "byteOrder": { "const": "little" },
+    "channels": { "const": 1 },
+    "width": { "type": "integer", "minimum": 2 },
+    "height": { "type": "integer", "minimum": 2 },
+    "units": { "type": "string" },
+    "valueRange": { "$ref": "#/$defs/range" },
+    "coordinateSystem": { "const": "world_xz" },
+    "origin": { "type": "object", "required": ["x", "z"], "properties": { "x": { "type": "number" }, "z": { "type": "number" } }, "additionalProperties": false },
+    "worldSize": { "type": "object", "required": ["x", "z"], "properties": { "x": { "type": "number", "exclusiveMinimum": 0 }, "z": { "type": "number", "exclusiveMinimum": 0 } }, "additionalProperties": false },
+    "rowOrder": { "const": "south_to_north" },
+    "sampling": { "enum": ["bilinear", "nearest"] },
+    "generator": { "type": "object", "required": ["id", "version", "seed"], "properties": { "id": { "type": "string" }, "version": { "type": "string" }, "seed": { "type": "integer" } }, "additionalProperties": false }
+  },
+  "$defs": { "range": { "type": "object", "required": ["min", "max"], "properties": { "min": { "type": "number" }, "max": { "type": "number" } }, "additionalProperties": false } },
+  "additionalProperties": false
+}

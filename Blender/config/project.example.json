@@ -1,0 +1,20 @@
+{
+  "project_name": "Pokemon",
+  "unity_models_root": "Assets/Project/Content/Models",
+  "exports_root": "Blender/exports",
+  "default_export_profiles": {
+    "static_mesh": {
+      "axis_forward": "-Z",
+      "axis_up": "Y"
+    },
+    "skinned_mesh": {
+      "axis_forward": "-Z",
+      "axis_up": "Y"
+    },
+    "animated_mesh": {
+      "axis_forward": "-Z",
+      "axis_up": "Y"
+    }
+  },
+  "note": "Valeurs d'axes provisoires : valider par round-trip Unity."
+}

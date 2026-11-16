@@ -1,0 +1,39 @@
+{
+  "animations": [],
+  "asset_id": "environment.leaf_litter",
+  "asset_type": "static_mesh",
+  "dependencies": [],
+  "domain": "environment",
+  "export": {
+    "format": "fbx",
+    "path": "SM_Leaf_Litter.fbx",
+    "profile": "static_mesh"
+  },
+  "extra": {
+    "authoring": "Blender procedural mesh",
+    "generator_version": "0.2.0",
+    "seed": 1,
+    "test_only": true
+  },
+  "geometry": {
+    "edge_count": 672,
+    "object_count": 1,
+    "polygon_count": 384,
+    "vertex_count": 312
+  },
+  "pipeline": {
+    "core_version": "0.1.0"
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "Blender/source/environment/leaf_litter/"
+  },
+  "unity": {
+    "destination": "Assets/Project/Content/Models/Environment/_ART_TEST/leaf_litter/SM_Leaf_Litter.fbx"
+  },
+  "validation": {
+    "errors": [],
+    "status": "passed",
+    "warnings": []
+  }
+}

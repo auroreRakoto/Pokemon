@@ -1,0 +1,39 @@
+{
+  "animations": [],
+  "asset_id": "environment.fallen_log",
+  "asset_type": "static_mesh",
+  "dependencies": [],
+  "domain": "environment",
+  "export": {
+    "format": "fbx",
+    "path": "SM_Fallen_Log.fbx",
+    "profile": "static_mesh"
+  },
+  "extra": {
+    "authoring": "Blender procedural mesh",
+    "generator_version": "0.2.0",
+    "seed": 1,
+    "test_only": true
+  },
+  "geometry": {
+    "edge_count": 30,
+    "object_count": 1,
+    "polygon_count": 12,
+    "vertex_count": 20
+  },
+  "pipeline": {
+    "core_version": "0.1.0"
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "Blender/source/environment/fallen_log/"
+  },
+  "unity": {
+    "destination": "Assets/Project/Content/Models/Environment/_ART_TEST/fallen_log/SM_Fallen_Log.fbx"
+  },
+  "validation": {
+    "errors": [],
+    "status": "passed",
+    "warnings": []
+  }
+}

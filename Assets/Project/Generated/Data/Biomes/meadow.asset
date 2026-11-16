@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: meadow
+  m_EditorClassIdentifier: Assembly-CSharp:Pokemon.Project.Data:BiomeDefinitionAsset
+  data:
+    schemaVersion: 1
+    id: meadow
+    displayName: Prairie
+    priority: 10
+    conditions:
+      humidity:
+        min: 0.2
+        max: 0.75
+        weight: 1
+      temperature:
+        min: 0.35
+        max: 0.9
+        weight: 1
+      vegetationDensity:
+        min: 0.1
+        max: 0.75
+        weight: 0.8
+      height:
+        min: 0
+        max: 0.85
+        weight: 0.4
+    presentation:
+      paletteId: palette_meadow_lowpoly
+      placementProfileId: placement_meadow

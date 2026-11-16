@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokemon-project.local/schemas/biome.schema.json",
+  "title": "Biome Definition",
+  "type": "object",
+  "required": ["schemaVersion", "id", "displayName", "priority", "conditions", "presentation"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "displayName": { "type": "string", "minLength": 1 },
+    "priority": { "type": "integer" },
+    "conditions": { "type": "object", "required": ["humidity", "temperature", "vegetationDensity", "height"], "properties": { "humidity": { "$ref": "#/$defs/weightedRange" }, "temperature": { "$ref": "#/$defs/weightedRange" }, "vegetationDensity": { "$ref": "#/$defs/weightedRange" }, "height": { "$ref": "#/$defs/weightedRange" } }, "additionalProperties": false },
+    "presentation": { "type": "object", "required": ["paletteId", "placementProfileId"], "properties": { "paletteId": { "type": "string" }, "placementProfileId": { "type": "string" } }, "additionalProperties": false }
+  },
+  "$defs": { "weightedRange": { "type": "object", "required": ["min", "max", "weight"], "properties": { "min": { "type": "number" }, "max": { "type": "number" }, "weight": { "type": "number", "minimum": 0 } }, "additionalProperties": false } },
+  "additionalProperties": false
+}
