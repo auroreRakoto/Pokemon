@@ -136,7 +136,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7082633026579470874}
-  - component: {fileID: 8948669886640407919}
+  - component: {fileID: 7225922440560798858}
   m_Layer: 0
   m_Name: FruitBush
   m_TagString: Untagged
@@ -161,7 +161,7 @@ Transform:
   - {fileID: 4972991182656770122}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8948669886640407919
+--- !u!114 &7225922440560798858
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -170,7 +170,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8190113657092763707}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c23e24743c0bca45840ff4252ef7205, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cb2a35fc636fba4e96a0bb6046d3e43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FruitBush
   fruitType: 0

@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f25b0b894523c84da9279c5ddb6ac05, type: 3}
+  m_Script: {fileID: 11500000, guid: ccee5c23889c69447ac2211be341a23e, type: 3}
   m_Name: Caterpie
   m_EditorClassIdentifier: Assembly-CSharp::PokemonDefinition
-  pokemonName: Chenipotte
-  pokemonPrefab: {fileID: 5135588731594242178, guid: 132bce162b88d844f81c71206b121f5e, type: 3}
+  pokemonName: 
+  pokemonPrefab: {fileID: 0}
   spawnCount: 10
-  maxPopulation: 500
+  maxPopulation: 100
   minForestWeight: 0
   maxForestWeight: 1
   minVegetation: 0
@@ -24,21 +24,22 @@ MonoBehaviour:
   maxHumidity: 1
   maxWater: 0.05
   eatsVegetation: 1
-  minFoodDensity: 0.01
-  foodConsumptionRate: 1
-  hungerRecoveryPerFood: 10
+  preferredFood: 1
+  minFoodDensity: 0.15
+  foodConsumptionRate: 0.08
+  hungerRecoveryPerFood: 100
   initialSatiety: 100
   satietyDrainPerSecond: 0.5
-  satietySearchThreshold: 30
-  satietyResumeThreshold: 87.2
-  fruitNeedInterval: 300
+  satietySearchThreshold: 35
+  satietyResumeThreshold: 75
   canDie: 1
   starvationDeathTime: 120
-  moveSpeed: 0.8
+  moveSpeed: 2
   wanderRadius: 8
-  foodSearchRadius: 500
+  foodSearchRadius: 12
   eatingDistance: 1.5
   canReproduce: 1
-  reproductionSatietyThreshold: 51.1
-  reproductionInterval: 500
+  reproductionSatietyThreshold: 85
+  reproductionPreparationTime: 60
+  reproductionCooldown: 300
   offspringSpawnRadius: 1.5

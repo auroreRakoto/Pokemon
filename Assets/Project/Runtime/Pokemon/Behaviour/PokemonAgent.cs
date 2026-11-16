@@ -324,50 +324,28 @@ public class PokemonAgent : MonoBehaviour
 
     private void UpdateSimulationClock()
     {
-        if (secondsPerDay <= 0f)
-            return;
+        float calculatedHour;
 
-        float elapsedDayFraction =
-            (Time.time / secondsPerDay) % 1f;
-
-        currentHour =
-            (dayStartHour +
-             elapsedDayFraction * 24f +
-             individualScheduleOffset + 24f) % 24f;
+        if (PokemonScheduleCalculator.TryCalculateCurrentHour(
+            Time.time,
+            secondsPerDay,
+            dayStartHour,
+            individualScheduleOffset,
+            out calculatedHour
+        ))
+        {
+            currentHour = calculatedHour;
+        }
     }
 
     private bool IsActivePeriod()
     {
-        if (activityPattern == ActivityPattern.Diurnal)
-        {
-            return IsWithinHours(
-                currentHour,
-                dayStartHour,
-                nightStartHour
-            );
-        }
-
-        return IsWithinHours(
+        return PokemonScheduleCalculator.IsActivePeriod(
+            activityPattern,
             currentHour,
-            nightStartHour,
-            dayStartHour
+            dayStartHour,
+            nightStartHour
         );
-    }
-
-    private bool IsWithinHours(
-        float hour,
-        float startHour,
-        float endHour
-    )
-    {
-        if (startHour < endHour)
-        {
-            return hour >= startHour &&
-                   hour < endHour;
-        }
-
-        return hour >= startHour ||
-               hour < endHour;
     }
 
     // --------------------------------------------------
