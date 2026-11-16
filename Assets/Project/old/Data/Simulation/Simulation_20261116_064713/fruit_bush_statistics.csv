@@ -1,0 +1,15 @@
+SimulationTime,FruitType,BushCount,AvailableFruit,TotalCapacity,ConsumedFruit,RegeneratedFruit,AvailabilityPercent
+0.0200,"Blueberry",20,60,60,0,0,100.0000
+0.0200,"Redberry",20,60,60,0,0,100.0000
+10.0160,"Blueberry",20,60,60,0,0,100.0000
+10.0160,"Redberry",20,60,60,0,0,100.0000
+20.0075,"Blueberry",20,60,60,0,0,100.0000
+20.0075,"Redberry",20,60,60,0,0,100.0000
+30.0032,"Blueberry",20,60,60,0,0,100.0000
+30.0032,"Redberry",20,60,60,0,0,100.0000
+40.0166,"Blueberry",20,60,60,0,0,100.0000
+40.0166,"Redberry",20,60,60,0,0,100.0000
+50.0011,"Blueberry",20,60,60,0,0,100.0000
+50.0011,"Redberry",20,60,60,0,0,100.0000
+60.0441,"Blueberry",20,60,60,0,0,100.0000
+60.0441,"Redberry",20,60,60,0,0,100.0000

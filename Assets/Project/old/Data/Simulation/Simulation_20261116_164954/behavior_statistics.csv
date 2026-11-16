@@ -1,0 +1,3 @@
+SimulationTime,Species,WanderingCount,SeekingFoodCount,EatingCount,SleepingCount,FoodSearchAttempts,SuccessfulFoodSearches,FailedFoodSearches,EatingSessions,TotalFoodConsumed,TotalDistanceTravelled,TimeSearching,TimeEating,TimeSleeping
+0.0200,"Chenipotte",4,0,0,6,0,0,0,0,0.0000,0.0000,0.0000,0.0000,0.0000
+0.0200,"Mystherbe",3,0,0,7,0,0,0,0,0.0000,0.0000,0.0000,0.0000,0.0000
