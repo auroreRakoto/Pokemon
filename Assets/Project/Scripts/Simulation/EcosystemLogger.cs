@@ -72,7 +72,8 @@ public class EcosystemLogger : MonoBehaviour
             return;
         }
 
-        CreateSession();
+        if (!CreateSession())
+            return;
 
         sessionStartTime = Time.time;
 
@@ -122,106 +123,131 @@ public class EcosystemLogger : MonoBehaviour
     // SESSION CREATION
     // --------------------------------------------------
 
-    private void CreateSession()
+    private bool CreateSession()
     {
         string timestamp =
             DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
         sessionDirectory = Path.Combine(
-            Application.persistentDataPath,
-            "SimulationLogs",
+            Application.dataPath,
+            "Project",
+            "Data",
+            "Simulation",
             $"Simulation_{timestamp}"
         );
 
-        Directory.CreateDirectory(sessionDirectory);
+        try
+        {
+            Directory.CreateDirectory(sessionDirectory);
 
-        worldFile = Path.Combine(
-            sessionDirectory,
-            "world_statistics.csv"
-        );
+            worldFile = Path.Combine(
+                sessionDirectory,
+                "world_statistics.csv"
+            );
 
-        populationFile = Path.Combine(
-            sessionDirectory,
-            "population_statistics.csv"
-        );
+            populationFile = Path.Combine(
+                sessionDirectory,
+                "population_statistics.csv"
+            );
 
-        resourceFile = Path.Combine(
-            sessionDirectory,
-            "resource_statistics.csv"
-        );
+            resourceFile = Path.Combine(
+                sessionDirectory,
+                "resource_statistics.csv"
+            );
 
-        fruitBushFile = Path.Combine(
-            sessionDirectory,
-            "fruit_bush_statistics.csv"
-        );
+            fruitBushFile = Path.Combine(
+                sessionDirectory,
+                "fruit_bush_statistics.csv"
+            );
 
-        behaviorFile = Path.Combine(
-            sessionDirectory,
-            "behavior_statistics.csv"
-        );
+            behaviorFile = Path.Combine(
+                sessionDirectory,
+                "behavior_statistics.csv"
+            );
 
-        individualFile = Path.Combine(
-            sessionDirectory,
-            "individual_statistics.csv"
-        );
+            individualFile = Path.Combine(
+                sessionDirectory,
+                "individual_statistics.csv"
+            );
 
-        eventsFile = Path.Combine(
-            sessionDirectory,
-            "ecosystem_events.csv"
-        );
+            eventsFile = Path.Combine(
+                sessionDirectory,
+                "ecosystem_events.csv"
+            );
 
-        File.WriteAllText(
-            worldFile,
-            "SimulationTime,TotalPopulation,AverageSatiety\n"
-        );
+            File.WriteAllText(
+                worldFile,
+                "SimulationTime,TotalPopulation,AverageSatiety\n"
+            );
 
-        File.WriteAllText(
-            populationFile,
-            "SimulationTime,Species,Population," +
-            "AverageSatiety,MinSatiety,MaxSatiety," +
-            "StarvingCount\n"
-        );
+            File.WriteAllText(
+                populationFile,
+                "SimulationTime,Species,Population," +
+                "AverageSatiety,MinSatiety,MaxSatiety," +
+                "StarvingCount\n"
+            );
 
-        File.WriteAllText(
-            resourceFile,
-            "SimulationTime,AvailableFruit,TotalCapacity," +
-            "ConsumedFruit,RegeneratedFruit," +
-            "FoodAvailabilityPercent\n"
-        );
+            File.WriteAllText(
+                resourceFile,
+                "SimulationTime,AvailableFruit,TotalCapacity," +
+                "ConsumedFruit,RegeneratedFruit," +
+                "FoodAvailabilityPercent\n"
+            );
 
-        File.WriteAllText(
-            fruitBushFile,
-            "SimulationTime,FruitType,BushCount," +
-            "AvailableFruit,TotalCapacity," +
-            "ConsumedFruit,RegeneratedFruit," +
-            "AvailabilityPercent\n"
-        );
+            File.WriteAllText(
+                fruitBushFile,
+                "SimulationTime,FruitType,BushCount," +
+                "AvailableFruit,TotalCapacity," +
+                "ConsumedFruit,RegeneratedFruit," +
+                "AvailabilityPercent\n"
+            );
 
-        File.WriteAllText(
-            behaviorFile,
-            "SimulationTime,Species,WanderingCount," +
-            "SeekingFoodCount,EatingCount,SleepingCount," +
-            "FoodSearchAttempts,SuccessfulFoodSearches," +
-            "FailedFoodSearches,EatingSessions," +
-            "TotalFoodConsumed,TotalDistanceTravelled," +
-            "TimeSearching,TimeEating,TimeSleeping\n"
-        );
+            File.WriteAllText(
+                behaviorFile,
+                "SimulationTime,Species,WanderingCount," +
+                "SeekingFoodCount,EatingCount,SleepingCount," +
+                "FoodSearchAttempts,SuccessfulFoodSearches," +
+                "FailedFoodSearches,EatingSessions," +
+                "TotalFoodConsumed,TotalDistanceTravelled," +
+                "TimeSearching,TimeEating,TimeSleeping\n"
+            );
 
-        File.WriteAllText(
-            individualFile,
-            "SimulationTime,IndividualID,Species," +
-            "PositionX,PositionZ,Satiety,State," +
-            "TotalFoodConsumed,TotalDistanceTravelled\n"
-        );
+            File.WriteAllText(
+                individualFile,
+                "SimulationTime,IndividualID,Species," +
+                "PositionX,PositionZ,Satiety,State," +
+                "TotalFoodConsumed,TotalDistanceTravelled\n"
+            );
 
-        File.WriteAllText(
-            eventsFile,
-            "SimulationTime,IndividualID,Species,Event\n"
-        );
+            File.WriteAllText(
+                eventsFile,
+                "SimulationTime,IndividualID,Species,Event\n"
+            );
+        }
+        catch (IOException exception)
+        {
+            Debug.LogError(
+                $"EcosystemLogger: unable to create simulation files in " +
+                $"{sessionDirectory}. {exception.Message}"
+            );
+
+            return false;
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            Debug.LogError(
+                $"EcosystemLogger: access denied while creating simulation " +
+                $"files in {sessionDirectory}. {exception.Message}"
+            );
+
+            return false;
+        }
 
         Debug.Log(
             $"Ecosystem logging session created: {sessionDirectory}"
         );
+
+        return true;
     }
 
     // --------------------------------------------------
