@@ -10,7 +10,7 @@ namespace Pokemon.Project.Editor.DataPipeline
     {
         private const string GeneratedFolderName = "PokemonData";
 
-        [MenuItem("Tools/Pokemon Data/Sync Data to StreamingAssets")]
+        [MenuItem("Pokemon/Tools/Data Pipeline/Sync Data to StreamingAssets")]
         public static void SyncDataToStreamingAssets()
         {
             string projectRoot = Directory.GetParent(Application.dataPath)?.FullName;

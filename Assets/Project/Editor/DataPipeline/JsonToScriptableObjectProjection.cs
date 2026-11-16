@@ -15,7 +15,7 @@ namespace Pokemon.Project.Editor.DataPipeline
     {
         private const string OutputRoot = "Assets/Project/Generated/Data";
 
-        [MenuItem("Tools/Pokemon Data/Generate ScriptableObject Projections")]
+        [MenuItem("Pokemon/Tools/Data Pipeline/Generate ScriptableObject Projections")]
         public static void GenerateAll()
         {
             string projectRoot = Directory.GetParent(Application.dataPath)?.FullName;

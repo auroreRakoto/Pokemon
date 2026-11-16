@@ -39,6 +39,7 @@
 - `ROADMAP_AND_VERTICAL_SLICE.md`
 
 ## Audit
+- `../../CLEANUP_EXECUTOR_001_FINAL_REPORT.md` — cleanup execution report for the supplied repository snapshot.
 - `../06_AUDIT/REPOSITORY_AUDIT_REPORT.md` — static audit of the supplied Unity repository snapshot.
 - `../06_AUDIT/REPOSITORY_ACTION_REGISTER.md` — prioritized findings and recommended follow-up work.
 
