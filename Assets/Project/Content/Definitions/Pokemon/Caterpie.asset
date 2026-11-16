@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccee5c23889c69447ac2211be341a23e, type: 3}
   m_Name: Caterpie
   m_EditorClassIdentifier: Assembly-CSharp::PokemonDefinition
-  pokemonName: 
-  pokemonPrefab: {fileID: 0}
+  pokemonName: Chenipotte
+  pokemonPrefab: {fileID: 5135588731594242178, guid: 132bce162b88d844f81c71206b121f5e, type: 3}
   spawnCount: 10
   maxPopulation: 100
   minForestWeight: 0
