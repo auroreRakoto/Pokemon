@@ -13,27 +13,27 @@ MonoBehaviour:
   m_Name: meadow
   m_EditorClassIdentifier: Assembly-CSharp:Pokemon.Project.Data:BiomeDefinitionAsset
   data:
-    schemaVersion: 1
-    id: meadow
-    displayName: Prairie
-    priority: 10
+    schemaVersion: 0
+    id: 
+    displayName: 
+    priority: 0
     conditions:
       humidity:
-        min: 0.2
-        max: 0.75
-        weight: 1
+        min: 0
+        max: 0
+        weight: 0
       temperature:
-        min: 0.35
-        max: 0.9
-        weight: 1
+        min: 0
+        max: 0
+        weight: 0
       vegetationDensity:
-        min: 0.1
-        max: 0.75
-        weight: 0.8
+        min: 0
+        max: 0
+        weight: 0
       height:
         min: 0
-        max: 0.85
-        weight: 0.4
+        max: 0
+        weight: 0
     presentation:
-      paletteId: palette_meadow_lowpoly
-      placementProfileId: placement_meadow
+      paletteId: 
+      placementProfileId: 

@@ -13,22 +13,18 @@ MonoBehaviour:
   m_Name: chenipotte
   m_EditorClassIdentifier: Assembly-CSharp:Pokemon.Project.Data:PokemonSpeciesDefinitionAsset
   data:
-    schemaVersion: 1
-    id: chenipotte
-    displayName: Chenipotte
-    types:
-    - bug
+    schemaVersion: 0
+    id: 
+    displayName: 
+    types: []
     habitatPreferences:
-      preferredBiomeIds:
-      - forest
-      - meadow
+      preferredBiomeIds: []
       humidity:
-        min: 0.45
-        max: 1
+        min: 0
+        max: 0
       vegetationDensity:
-        min: 0.45
-        max: 1
+        min: 0
+        max: 0
     presentation:
-      assetId: pokemon_chenipotte_base
-    notes: "Profil de d\xE9monstration uniquement ; pr\xE9f\xE9rences \xE0 valider
-      par POK/ECO. Aucun \xE9tat individuel mutable ici."
+      assetId: 
+    notes: 

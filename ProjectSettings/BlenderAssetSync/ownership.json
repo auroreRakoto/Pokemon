@@ -1,0 +1,81 @@
+{
+    "entries": [
+        {
+            "asset_id": "environment.fallen_log",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/fallen_log/SM_Fallen_Log.fbx",
+            "source_fbx": "Blender/exports/environment/fallen_log/SM_Fallen_Log.fbx",
+            "imported_sha256": "538affe1e44540d1ed98999e897a1a57d7c0587bad96140a1a9b6d9e9cf1f074",
+            "unity_guid": "f7016af00be362a4792f29615352268e"
+        },
+        {
+            "asset_id": "environment.grass_short",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/grass_short/SM_Grass_Short.fbx",
+            "source_fbx": "Blender/exports/environment/grass_short/SM_Grass_Short.fbx",
+            "imported_sha256": "6c67db675644fad95f31b754d14597e6cee1c983d59ba3ff5620ebe944f6e1b8",
+            "unity_guid": "9feee5615adc10f4fbc62cf3fdfc8e67"
+        },
+        {
+            "asset_id": "environment.vegetation.grass_short_test",
+            "asset_path": "Assets/Project/Content/Models/Environment/Vegetation/_ART_TEST/Grass_Short_Test/SM_Grass_Short_Test.fbx",
+            "source_fbx": "Blender/exports/environment/grass_short_test/SM_Grass_Short_Test.fbx",
+            "imported_sha256": "3668e8660a3c8ecf4fe5d0eb7cbbb9b7ea6ac1859c93b24d30a59e918aa0b934",
+            "unity_guid": "d7a5a4199b6b38747aa780dae1d4b4ad"
+        },
+        {
+            "asset_id": "environment.grass_tall",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/grass_tall/SM_Grass_Tall.fbx",
+            "source_fbx": "Blender/exports/environment/grass_tall/SM_Grass_Tall.fbx",
+            "imported_sha256": "80fa280216126648f5021ff025c43e8edcad71557c3999f1dce20b8ca1f82d85",
+            "unity_guid": "da97cfa7ee971c14192f47fb8b83ad9d"
+        },
+        {
+            "asset_id": "environment.leaf_litter",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/leaf_litter/SM_Leaf_Litter.fbx",
+            "source_fbx": "Blender/exports/environment/leaf_litter/SM_Leaf_Litter.fbx",
+            "imported_sha256": "f8bb22d24c9091b5f55b4236338f75a59a1c287973041244346b2f0121ee7c02",
+            "unity_guid": "d5a32cea0c4b13b449fbf86cae8a3187"
+        },
+        {
+            "asset_id": "environment.mushroom_red",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/mushroom_red/SM_Mushroom_Red.fbx",
+            "source_fbx": "Blender/exports/environment/mushroom_red/SM_Mushroom_Red.fbx",
+            "imported_sha256": "8b270996e8d631485daa2f76b0c84e5cafba6d5439cdefedcd735318550a0d8c",
+            "unity_guid": "f410231b21fb25d4b954352dc73ae518"
+        },
+        {
+            "asset_id": "environment.reed_clump",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/reed_clump/SM_Reed_Clump.fbx",
+            "source_fbx": "Blender/exports/environment/reed_clump/SM_Reed_Clump.fbx",
+            "imported_sha256": "545f3f30dcefc715a52d089984602bf97275022324409701da2a8efa1fe020b2",
+            "unity_guid": "a3288fea1c607a1429035e5fb9900ca3"
+        },
+        {
+            "asset_id": "environment.stone_cluster_large",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/stone_cluster_large/SM_Stone_Cluster_Large.fbx",
+            "source_fbx": "Blender/exports/environment/stone_cluster_large/SM_Stone_Cluster_Large.fbx",
+            "imported_sha256": "cc76b554d459e62e0a24d5bdaec7ed42bd2b79e8a3b319631ceee0b3163708c5",
+            "unity_guid": "a390baf690e477945a25994ff83b349e"
+        },
+        {
+            "asset_id": "environment.stone_cluster_small",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/stone_cluster_small/SM_Stone_Cluster_Small.fbx",
+            "source_fbx": "Blender/exports/environment/stone_cluster_small/SM_Stone_Cluster_Small.fbx",
+            "imported_sha256": "9ad78f0e35dbd65980cf1fa6e90d19ccccd973be76df7d23dc497399f1f5d960",
+            "unity_guid": "a06b7907ebada18449b98b41ca5ae1ff"
+        },
+        {
+            "asset_id": "environment.tree_stump",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/tree_stump/SM_Tree_Stump.fbx",
+            "source_fbx": "Blender/exports/environment/tree_stump/SM_Tree_Stump.fbx",
+            "imported_sha256": "5b569e827ae9f241c3a9e0ee066f88c8afa9d4af599bc35f0f9c44c48b5a5877",
+            "unity_guid": "6a80dc6fce05fe14d94f678dcf8a8573"
+        },
+        {
+            "asset_id": "environment.wild_grass",
+            "asset_path": "Assets/Project/Content/Models/Environment/_ART_TEST/wild_grass/SM_Grass_Wild.fbx",
+            "source_fbx": "Blender/exports/environment/wild_grass/SM_Grass_Wild.fbx",
+            "imported_sha256": "c59baf76d82f8fdc9d0631674e460273a300d3f64c1b33a9a4340f9ce62d17aa",
+            "unity_guid": "42627d5527e81f540a84cc0be52c526b"
+        }
+    ]
+}
