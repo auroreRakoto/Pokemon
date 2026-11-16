@@ -1,0 +1,62 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Unity generated project files
+*.csproj
+*.sln
+*.slnx
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# IDE and OS files
+.vs/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.tmp
+*.bak
+*.swp
+Thumbs.db
+.DS_Store
+
+# Build artifacts and crash reports
+*.apk
+*.aab
+*.app
+*.unitypackage
+*.log
+sysinfo.txt
+
+# External Blender generation tools not used by the Unity project
+Assets/Blender/
+Assets/Blender.meta
+
+# Unity tutorial sample content not used by the project
+Assets/TutorialInfo/
+Assets/TutorialInfo.meta
+
+# Unused gameplay scripts and their Unity metadata
+Assets/Project/Scripts/Simulation/EcosystemSimulator.cs
+Assets/Project/Scripts/Simulation/EcosystemSimulator.cs.meta
+Assets/Project/Scripts/Simulation/EcosystemStatistics.cs
+Assets/Project/Scripts/Simulation/EcosystemStatistics.cs.meta
+Assets/Project/Scripts/Pokemon/Data/PokemonHabitat.cs
+Assets/Project/Scripts/Pokemon/Data/PokemonHabitat.cs.meta
+Assets/Project/Scripts/Pokemon/AI/PokemonMovement.cs
+Assets/Project/Scripts/Pokemon/AI/PokemonMovement.cs.meta
+Assets/Project/Scripts/Pokemon/Spawning/PokemonSpawnPoint.cs
+Assets/Project/Scripts/Pokemon/Spawning/PokemonSpawnPoint.cs.meta
