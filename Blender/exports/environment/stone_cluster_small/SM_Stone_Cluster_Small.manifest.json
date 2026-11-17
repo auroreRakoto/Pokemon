@@ -1,5 +1,7 @@
 {
   "animations": [],
+  "asset_category": "Rocks",
+  "asset_domain": "Environment",
   "asset_id": "environment.stone_cluster_small",
   "asset_type": "static_mesh",
   "dependencies": [],
@@ -13,7 +15,7 @@
     "authoring": "Blender procedural mesh",
     "generator_version": "0.2.0",
     "seed": 1,
-    "test_only": true
+    "test_only": false
   },
   "geometry": {
     "edge_count": 150,
@@ -29,7 +31,7 @@
     "path": "Blender/source/environment/stone_cluster_small/"
   },
   "unity": {
-    "destination": "Assets/Project/Content/Models/Environment/_ART_TEST/stone_cluster_small/SM_Stone_Cluster_Small.fbx"
+    "destination": "Assets/Project/Content/Models/Environment/Rocks/Stone_Cluster_Small/SM_Stone_Cluster_Small.fbx"
   },
   "validation": {
     "errors": [],

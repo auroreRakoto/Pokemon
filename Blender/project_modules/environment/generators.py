@@ -188,3 +188,70 @@ def generate_asset(asset_key, asset_id, object_name, unity_destination, builder,
     print("[ART]",asset_key,result.to_dict())
     if not result.success: raise RuntimeError(result.message)
     return result
+
+
+def resolve_batch_policy(
+    *,
+    asset_key,
+    object_name,
+    declared_unity_destination,
+    declared_test_only,
+    declared_asset_category,
+    batch_policy=None,
+):
+    """Resolve an asset's Unity destination under an optional batch policy.
+
+    Standalone generators keep their declared values. When called by
+    generate_all.py, PRODUCTION and TEST modes override destination/status;
+    CUSTOM preserves the generator declaration while validating consistency.
+    """
+    mode = (batch_policy or {}).get("mode", "CUSTOM").upper()
+    models_root = (batch_policy or {}).get(
+        "models_root", "Assets/Project/Content/Models"
+    ).replace("\\", "/").rstrip("/")
+
+    if mode == "PRODUCTION":
+        production_assets = (batch_policy or {}).get("production_assets", {})
+        entry = production_assets.get(asset_key)
+        if not entry:
+            raise ValueError(
+                f"No canonical production route is registered for '{asset_key}'. "
+                "Add it to generate_all.py before running the production batch."
+            )
+        category = entry["category"]
+        relative = entry["destination"].replace("\\", "/").lstrip("/")
+        destination = f"{models_root}/{relative}"
+        test_only = False
+    elif mode == "TEST":
+        category = declared_asset_category
+        destination = (
+            f"{models_root}/Environment/{category}/_ART_TEST/{asset_key}/{object_name}.fbx"
+        )
+        test_only = True
+    elif mode == "CUSTOM":
+        category = declared_asset_category
+        destination = declared_unity_destination
+        test_only = bool(declared_test_only)
+    else:
+        raise ValueError(
+            f"Unsupported batch mode '{mode}'. Use PRODUCTION, TEST or CUSTOM."
+        )
+
+    normalized = str(destination).replace("\\", "/")
+    if not normalized.lower().endswith(".fbx"):
+        raise ValueError(f"Unity destination must end in .fbx: {normalized}")
+    if not normalized.startswith(models_root + "/"):
+        raise ValueError(
+            f"Unity destination must be inside '{models_root}/': {normalized}"
+        )
+    if any(part in {"", ".", ".."} for part in normalized.split("/")):
+        raise ValueError(f"Unsafe Unity destination: {normalized}")
+
+    is_test_path = "/_ART_TEST/" in normalized.upper()
+    if bool(test_only) != is_test_path:
+        raise ValueError(
+            f"Contradictory test policy for '{asset_key}': "
+            f"test_only={test_only}, destination='{normalized}'."
+        )
+
+    return normalized, bool(test_only), category

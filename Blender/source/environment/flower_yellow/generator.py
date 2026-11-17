@@ -57,7 +57,7 @@ if str(BLENDER_ROOT) not in sys.path:
 
 import _core
 from _core.paths import ProjectPaths
-from project_modules.environment.generators import generate_asset, build_flower
+from project_modules.environment.generators import generate_asset, resolve_batch_policy, build_flower
 
 ASSET_KEY = 'flower_yellow'
 ASSET_ID = 'environment.flower_yellow'
@@ -65,16 +65,24 @@ OBJECT_NAME = 'SM_Flower_Yellow'
 UNITY_DESTINATION = "Assets/Project/Content/Models/Environment/Vegetation/Flower_Yellow/SM_Flower_Yellow.fbx"
 
 def generate():
+    unity_destination, test_only, asset_category = resolve_batch_policy(
+        asset_key=ASSET_KEY,
+        object_name=OBJECT_NAME,
+        declared_unity_destination=UNITY_DESTINATION,
+        declared_test_only=False,
+        declared_asset_category="Vegetation",
+        batch_policy=globals().get("ART_BATCH_POLICY"),
+    )
     return generate_asset(
         asset_key=ASSET_KEY,
         asset_id=ASSET_ID,
         object_name=OBJECT_NAME,
-        unity_destination=UNITY_DESTINATION,
+        unity_destination=unity_destination,
         builder=build_flower,
         kwargs={'petals': 6, 'height': 0.28, 'seed': 21},
         source_path=f"Blender/source/environment/{ASSET_KEY}/",
-        test_only=False,
-        asset_category="Vegetation",
+        test_only=test_only,
+        asset_category=asset_category,
     )
 
 try:

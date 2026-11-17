@@ -57,7 +57,7 @@ if str(BLENDER_ROOT) not in sys.path:
 
 import _core
 from _core.paths import ProjectPaths
-from project_modules.environment.generators import generate_asset, build_rock_cluster
+from project_modules.environment.generators import generate_asset, resolve_batch_policy, build_rock_cluster
 
 ASSET_KEY = 'stone_cluster_large'
 ASSET_ID = 'environment.stone_cluster_large'
@@ -65,16 +65,24 @@ OBJECT_NAME = 'SM_Stone_Cluster_Large'
 UNITY_DESTINATION = "Assets/Project/Content/Models/Environment/Rocks/Stone_Cluster_Large/SM_Stone_Cluster_Large.fbx"
 
 def generate():
+    unity_destination, test_only, asset_category = resolve_batch_policy(
+        asset_key=ASSET_KEY,
+        object_name=OBJECT_NAME,
+        declared_unity_destination=UNITY_DESTINATION,
+        declared_test_only=False,
+        declared_asset_category="Rocks",
+        batch_policy=globals().get("ART_BATCH_POLICY"),
+    )
     return generate_asset(
         asset_key=ASSET_KEY,
         asset_id=ASSET_ID,
         object_name=OBJECT_NAME,
-        unity_destination=UNITY_DESTINATION,
+        unity_destination=unity_destination,
         builder=build_rock_cluster,
         kwargs={'count': 7, 'radius': 0.34, 'seed': 32},
         source_path=f"Blender/source/environment/{ASSET_KEY}/",
-        test_only=False,
-        asset_category="Rocks",
+        test_only=test_only,
+        asset_category=asset_category,
     )
 
 try:

@@ -381,10 +381,13 @@ internal static class BlenderFbxSync
 
         // Import FBX materials and preserve material slots.
         // Unity shader authoring remains a separate responsibility.
-        importer.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
-        importer.materialLocation = ModelImporterMaterialLocation.InPrefab;
-        importer.materialName = ModelImporterMaterialName.BasedOnMaterialName;
-        importer.materialSearch = ModelImporterMaterialSearch.Local;
+        // importer.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
+        // importer.materialLocation = ModelImporterMaterialLocation.InPrefab;
+        // importer.materialName = ModelImporterMaterialName.BasedOnMaterialName;
+        // importer.materialSearch = ModelImporterMaterialSearch.Local;
+        
+        // Preserve material slots without extracting or creating Unity materials.
+        importer.materialImportMode = ModelImporterMaterialImportMode.None;
 
         importer.importCameras = false;
         importer.importLights = false;

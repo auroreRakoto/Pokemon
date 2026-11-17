@@ -1,5 +1,7 @@
 {
   "animations": [],
+  "asset_category": "Vegetation",
+  "asset_domain": "Environment",
   "asset_id": "environment.grass_short",
   "asset_type": "static_mesh",
   "dependencies": [],
@@ -13,7 +15,7 @@
     "authoring": "Blender procedural mesh",
     "generator_version": "0.2.0",
     "seed": 1,
-    "test_only": true
+    "test_only": false
   },
   "geometry": {
     "edge_count": 308,
@@ -29,7 +31,7 @@
     "path": "Blender/source/environment/grass_short/"
   },
   "unity": {
-    "destination": "Assets/Project/Content/Models/Environment/_ART_TEST/grass_short/SM_Grass_Short.fbx"
+    "destination": "Assets/Project/Content/Models/Environment/Vegetation/Grass_Short/SM_Grass_Short.fbx"
   },
   "validation": {
     "errors": [],

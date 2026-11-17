@@ -57,9 +57,9 @@
     }
   },
   "round_trip": {
-    "status": "PENDING",
-    "unity_version": "6000.4.11f1",
-    "validated_profile": null
+      "status": "VALIDATED",
+      "unity_version": "6000.4.11f1",
+      "validated_profile": "static_mesh"
   },
   "note": "Les axes FBX sont des valeurs candidates, non validées. Suivre la procédure de round-trip dans Documentation/02_DOMAINS/ART_AND_ASSET_PIPELINE.md avant de les déclarer définitives."
 }

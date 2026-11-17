@@ -26,8 +26,8 @@ When modifying or creating `Blender/source/environment/generate_all.py`:
 - Treat it as the canonical batch entry point for environment generators.
 - Discover `Blender/` from the saved active Text Editor script path and locate `_core/__init__.py` before importing `_core`; never hardcode a workstation path or rely on the current working directory.
 - Preserve all required imports, including `traceback` for per-generator exception reporting.
-- Support `GENERATE_ALL`, `ASSET_FILTER`, and `INCLUDE_TEST_ASSETS` as documented in `ART_AND_ASSET_PIPELINE.md`.
-- Exclude test generators by default using the documented folder naming convention; never silently include `*_test` generators in a production batch.
+- Support `MODE` (`PRODUCTION`, `TEST`, `CUSTOM`), `GENERATE_ALL`, `ASSET_FILTER`, and `INCLUDE_TEST_ASSETS` as documented in `ART_AND_ASSET_PIPELINE.md`.
+- Exclude test-named generators in `PRODUCTION` mode regardless of `INCLUDE_TEST_ASSETS`; in `TEST`/`CUSTOM`, include them only when explicitly enabled.
 - Execute each generator in an isolated namespace, continue after individual failures, and print a final report with discovered, selected, executed, succeeded, failed, and skipped counts plus asset names.
 - Keep generation/export in Blender. Do not copy FBXs into Unity or modify `.meta` files from the batch launcher.
 - Keep the user procedure and report definitions synchronized with `ART_AND_ASSET_PIPELINE.md`.
@@ -35,9 +35,12 @@ When modifying or creating `Blender/source/environment/generate_all.py`:
 ## Test and production destination rules
 
 - `_ART_TEST` is only for temporary fixtures/prototypes; never leave a production generator targeting `_ART_TEST`.
-- The batch launcher selects generators only. It must never rewrite an asset's destination or infer production status from `GENERATE_ALL`, `ASSET_FILTER` or `INCLUDE_TEST_ASSETS`.
-- A test generator must declare an explicit `_ART_TEST` destination and `extra.test_only: true`. A production generator must declare its canonical production destination and must not set `extra.test_only: true`.
-- When promoting an asset, update its generator's explicit `unity.destination` and test metadata together, following the promotion workflow in `ART_AND_ASSET_PIPELINE.md`. Do not delete old test imports automatically.
+- The batch launcher injects `ART_BATCH_POLICY` into each isolated generator namespace. Individual generators must pass it to `resolve_batch_policy(...)` from `project_modules.environment.generators`.
+- `PRODUCTION` must override individual destinations/status using the central `PRODUCTION_ASSETS` table and force `test_only=False`; unknown assets must fail before export.
+- `TEST` must force an `Environment/<asset_category>/_ART_TEST/<asset_key>/<object_name>.fbx` destination and `test_only=True`.
+- `CUSTOM` preserves declared generator values but validates destination safety and consistency between `_ART_TEST` and `test_only`.
+- Standalone generator execution has no batch context and uses its declared fallback values. Do not mutate generator source files or globals to apply batch policy.
+- Do not delete old test imports automatically.
 - Choose the production category from the documented routing table (for example, grass/reeds/wild grass -> `Environment/Vegetation`; logs/stumps -> `Environment/NaturalFeatures`; rocks -> `Environment/Rocks`; trees -> `Environment/Trees`).
 
 
@@ -47,4 +50,4 @@ When modifying or creating `Blender/source/environment/generate_all.py`:
 - Production calls to `generate_asset(...)` must pass `test_only=False` and the explicit `asset_category`. The shared helper defaults `test_only` to `False`; test fixtures must opt in with `test_only=True`.
 - Every environment FBX manifest must include `asset_domain: "Environment"` and the canonical first-level `asset_category` matching its destination.
 - Keep dedicated test generators (for example `grass_short_test`) under `_ART_TEST` with `test_only=True`; do not include them in normal batch runs.
-- Do not infer or rewrite destinations in `generate_all.py`; it selects scripts only.
+- Keep the central production route table in `generate_all.py` synchronized with the canonical routing table in `ART_AND_ASSET_PIPELINE.md`.

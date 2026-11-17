@@ -1,5 +1,7 @@
 {
   "animations": [],
+  "asset_category": "NaturalFeatures",
+  "asset_domain": "Environment",
   "asset_id": "environment.fallen_log",
   "asset_type": "static_mesh",
   "dependencies": [],
@@ -13,7 +15,7 @@
     "authoring": "Blender procedural mesh",
     "generator_version": "0.2.0",
     "seed": 1,
-    "test_only": true
+    "test_only": false
   },
   "geometry": {
     "edge_count": 30,
@@ -29,7 +31,7 @@
     "path": "Blender/source/environment/fallen_log/"
   },
   "unity": {
-    "destination": "Assets/Project/Content/Models/Environment/_ART_TEST/fallen_log/SM_Fallen_Log.fbx"
+    "destination": "Assets/Project/Content/Models/Environment/NaturalFeatures/Fallen_Log/SM_Fallen_Log.fbx"
   },
   "validation": {
     "errors": [],

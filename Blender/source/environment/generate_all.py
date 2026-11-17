@@ -15,8 +15,13 @@ import bpy
 # CONFIGURATION
 # -----------------------------------------------------------------------------
 
-# True: run every discovered production generator.
-# False: run only the names listed in ASSET_FILTER.
+# Batch policy takes precedence over values declared in individual generators.
+# PRODUCTION: enforce canonical production destinations and test_only=False.
+# TEST: force selected generators into Environment/_ART_TEST and test_only=True.
+# CUSTOM: preserve each generator's declared destination and test_only value.
+MODE = "PRODUCTION"
+
+# True: run every discovered generator. False: use ASSET_FILTER.
 GENERATE_ALL = True
 
 # Used only when GENERATE_ALL is False. Names are source subfolder names.
@@ -35,9 +40,28 @@ ASSET_FILTER = [
     "tree_stump",
 ]
 
-# Test generators (for example grass_short_test) are excluded by default.
-# Set True only when you explicitly want to run test generators as well.
+# Test-named generator folders are excluded by default.
+# Set True to include them in TEST or CUSTOM mode.
 INCLUDE_TEST_ASSETS = False
+
+MODELS_ROOT = "Assets/Project/Content/Models"
+
+# Canonical production routes, relative to MODELS_ROOT.
+# This table is authoritative in PRODUCTION mode.
+PRODUCTION_ASSETS = {
+    "fallen_log": {"category": "NaturalFeatures", "destination": "Environment/NaturalFeatures/Fallen_Log/SM_Fallen_Log.fbx"},
+    "flower_blue": {"category": "Vegetation", "destination": "Environment/Vegetation/Flower_Blue/SM_Flower_Blue.fbx"},
+    "flower_yellow": {"category": "Vegetation", "destination": "Environment/Vegetation/Flower_Yellow/SM_Flower_Yellow.fbx"},
+    "grass_short": {"category": "Vegetation", "destination": "Environment/Vegetation/Grass_Short/SM_Grass_Short.fbx"},
+    "grass_tall": {"category": "Vegetation", "destination": "Environment/Vegetation/Grass_Tall/SM_Grass_Tall.fbx"},
+    "leaf_litter": {"category": "Ground", "destination": "Environment/Ground/Leaf_Litter/SM_Leaf_Litter.fbx"},
+    "mushroom_red": {"category": "NaturalFeatures", "destination": "Environment/NaturalFeatures/Mushroom_Red/SM_Mushroom_Red.fbx"},
+    "reed_clump": {"category": "Vegetation", "destination": "Environment/Vegetation/Reed_Clump/SM_Reed_Clump.fbx"},
+    "stone_cluster_large": {"category": "Rocks", "destination": "Environment/Rocks/Stone_Cluster_Large/SM_Stone_Cluster_Large.fbx"},
+    "stone_cluster_small": {"category": "Rocks", "destination": "Environment/Rocks/Stone_Cluster_Small/SM_Stone_Cluster_Small.fbx"},
+    "tree_stump": {"category": "NaturalFeatures", "destination": "Environment/NaturalFeatures/Tree_Stump/SM_Tree_Stump.fbx"},
+    "wild_grass": {"category": "Vegetation", "destination": "Environment/Vegetation/Wild_Grass/SM_Grass_Wild.fbx"},
+}
 
 # -----------------------------------------------------------------------------
 # BLENDER PROJECT DISCOVERY (must happen before importing _core)
@@ -146,7 +170,11 @@ def _discover_generators():
 
     skipped_by_filter = len(discovered) - len(selected)
 
-    if not INCLUDE_TEST_ASSETS:
+    if MODE.upper() == "PRODUCTION":
+        production_selected = [path for path in selected if not _is_test_generator(path)]
+        skipped_tests = len(selected) - len(production_selected)
+        selected = production_selected
+    elif not INCLUDE_TEST_ASSETS:
         production_selected = [path for path in selected if not _is_test_generator(path)]
         skipped_tests = len(selected) - len(production_selected)
         selected = production_selected
@@ -163,10 +191,16 @@ def _discover_generators():
 
 def _run_generator(script_path: Path):
     """Execute one generator in an isolated namespace and propagate failures."""
+    policy = {
+        "mode": MODE.upper(),
+        "models_root": MODELS_ROOT,
+        "production_assets": PRODUCTION_ASSETS,
+    }
     namespace = {
         "__name__": "__main__",
         "__file__": str(script_path.resolve()),
         "__package__": None,
+        "ART_BATCH_POLICY": policy,
     }
     source = script_path.read_text(encoding="utf-8-sig")
     compiled = compile(source, str(script_path), "exec")
@@ -181,8 +215,16 @@ def main():
     print(f"[BATCH] Blender root      : {BLENDER_ROOT}")
     print(f"[BATCH] Source root       : {SOURCE_ROOT}")
     print(f"[BATCH] _core version     : {_core.__version__}")
-    print(f"[BATCH] Mode              : {'ALL PRODUCTION' if GENERATE_ALL else 'FILTERED'}")
-    print(f"[BATCH] Include test      : {INCLUDE_TEST_ASSETS}")
+    mode = MODE.upper()
+    if mode not in {"PRODUCTION", "TEST", "CUSTOM"}:
+        raise ValueError("MODE must be PRODUCTION, TEST or CUSTOM")
+    print(f"[BATCH] Selection mode   : {'ALL' if GENERATE_ALL else 'FILTERED'}")
+    print(f"[BATCH] Policy mode      : {mode}")
+    print(f"[BATCH] Include tests    : {INCLUDE_TEST_ASSETS}")
+    if mode == "PRODUCTION" and INCLUDE_TEST_ASSETS:
+        print("[BATCH][INFO] PRODUCTION mode always excludes test-named generator folders.")
+    if mode == "TEST" and not INCLUDE_TEST_ASSETS:
+        print("[BATCH][INFO] Test-named generator folders remain excluded; set INCLUDE_TEST_ASSETS=True to include them.")
 
     discovered, selected, skipped_by_filter, skipped_tests = _discover_generators()
 

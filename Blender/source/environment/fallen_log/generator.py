@@ -57,7 +57,7 @@ if str(BLENDER_ROOT) not in sys.path:
 
 import _core
 from _core.paths import ProjectPaths
-from project_modules.environment.generators import generate_asset, build_log
+from project_modules.environment.generators import generate_asset, resolve_batch_policy, build_log
 
 ASSET_KEY = 'fallen_log'
 ASSET_ID = 'environment.fallen_log'
@@ -65,16 +65,24 @@ OBJECT_NAME = 'SM_Fallen_Log'
 UNITY_DESTINATION = "Assets/Project/Content/Models/Environment/NaturalFeatures/Fallen_Log/SM_Fallen_Log.fbx"
 
 def generate():
+    unity_destination, test_only, asset_category = resolve_batch_policy(
+        asset_key=ASSET_KEY,
+        object_name=OBJECT_NAME,
+        declared_unity_destination=UNITY_DESTINATION,
+        declared_test_only=False,
+        declared_asset_category="NaturalFeatures",
+        batch_policy=globals().get("ART_BATCH_POLICY"),
+    )
     return generate_asset(
         asset_key=ASSET_KEY,
         asset_id=ASSET_ID,
         object_name=OBJECT_NAME,
-        unity_destination=UNITY_DESTINATION,
+        unity_destination=unity_destination,
         builder=build_log,
         kwargs={'length': 0.8, 'radius': 0.11},
         source_path=f"Blender/source/environment/{ASSET_KEY}/",
-        test_only=False,
-        asset_category="NaturalFeatures",
+        test_only=test_only,
+        asset_category=asset_category,
     )
 
 try:

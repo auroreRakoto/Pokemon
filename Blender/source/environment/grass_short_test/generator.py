@@ -62,7 +62,9 @@ from _core.paths import ProjectPaths
 from _core.collections import get_or_create_collection, move_objects_to_collection
 from _core.materials import get_or_create_material, assign_material
 from _core.export import ExportProfile, export_fbx
+from project_modules.environment.generators import resolve_batch_policy
 
+ASSET_KEY = "grass_short_test"
 ASSET_ID = "environment.vegetation.grass_short_test"
 COLLECTION_NAME = "ART_TEST_GrassShort"
 OBJECT_NAME = "SM_Grass_Short_Test"
@@ -185,7 +187,16 @@ def generate():
     obj.scale = (1.0, 1.0, 1.0)
     bpy.context.view_layer.update()
 
-    export_dir = paths.export_asset("environment", "grass_short_test")
+    unity_destination, test_only, asset_category = resolve_batch_policy(
+        asset_key=ASSET_KEY,
+        object_name=OBJECT_NAME,
+        declared_unity_destination=UNITY_TEST_DESTINATION,
+        declared_test_only=True,
+        declared_asset_category="Vegetation",
+        batch_policy=globals().get("ART_BATCH_POLICY"),
+    )
+
+    export_dir = paths.export_asset("environment", ASSET_KEY)
     destination = export_dir / FBX_NAME
     result = export_fbx(
         objects=[obj],
@@ -193,18 +204,18 @@ def generate():
         asset_id=ASSET_ID,
         domain="environment",
         asset_type="static_mesh",
-        unity_destination=UNITY_TEST_DESTINATION,
+        unity_destination=unity_destination,
         profile=ExportProfile.static_mesh(),
         source_path="Blender/source/environment/grass_short_test/",
         allowed_export_root=paths.exports,
         require_materials=True,
         require_uvs=False,
         asset_domain="Environment",
-        asset_category="Vegetation",
+        asset_category=asset_category,
         extra_manifest={
             "purpose": "ART-001 first integration proof",
             "test_asset": True,
-            "test_only": True,
+            "test_only": test_only,
             "dimensions_target_m": "approx. 0.25 x 0.25 x 0.43",
             "unity_import_note": "Temporary test destination only; do not sync automatically.",
         },

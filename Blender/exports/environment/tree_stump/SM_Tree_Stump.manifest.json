@@ -1,5 +1,7 @@
 {
   "animations": [],
+  "asset_category": "NaturalFeatures",
+  "asset_domain": "Environment",
   "asset_id": "environment.tree_stump",
   "asset_type": "static_mesh",
   "dependencies": [],
@@ -13,7 +15,7 @@
     "authoring": "Blender procedural mesh",
     "generator_version": "0.2.0",
     "seed": 1,
-    "test_only": true
+    "test_only": false
   },
   "geometry": {
     "edge_count": 30,
@@ -29,7 +31,7 @@
     "path": "Blender/source/environment/tree_stump/"
   },
   "unity": {
-    "destination": "Assets/Project/Content/Models/Environment/_ART_TEST/tree_stump/SM_Tree_Stump.fbx"
+    "destination": "Assets/Project/Content/Models/Environment/NaturalFeatures/Tree_Stump/SM_Tree_Stump.fbx"
   },
   "validation": {
     "errors": [],
