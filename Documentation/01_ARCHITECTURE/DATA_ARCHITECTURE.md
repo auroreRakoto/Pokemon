@@ -55,3 +55,7 @@ Avoid serializing Unity object references as the only durable identity. Prefer s
 ScriptableObjects are suitable for Unity-authored definitions and tuning. JSON is useful for external generation, interchange, bulk data and tools. Runtime instances should use explicit runtime models, not treat ScriptableObjects as mutable per-individual storage.
 
 Do not choose one serialization format for every purpose. Select per use case and document it.
+
+## 7. Population configuration versus species definition
+
+Initial spawn count and per-species population cap are scenario/population configuration, not biological species facts. They live in `PokemonPopulationProfile` assets under `Assets/Project/Content/Population/Profiles` and reference a `PokemonDefinition`. The population service consumes these profiles; `PokemonDefinition` remains the species profile. These Unity-authored scenario settings are intentionally not generated from species JSON unless a future canonical population-scenario schema is approved.

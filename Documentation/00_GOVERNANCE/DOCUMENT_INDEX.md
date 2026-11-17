@@ -39,9 +39,10 @@
 - `ROADMAP_AND_VERTICAL_SLICE.md`
 
 ## Audit
-- `../../CLEANUP_EXECUTOR_001_FINAL_REPORT.md` — cleanup execution report for the supplied repository snapshot.
 - `../06_AUDIT/REPOSITORY_AUDIT_REPORT.md` — static audit of the supplied Unity repository snapshot.
 - `../06_AUDIT/REPOSITORY_ACTION_REGISTER.md` — prioritized findings and recommended follow-up work.
+- `../06_AUDIT/CODE_FUNCTION_OWNERSHIP_INVENTORY.md` — inventory of all 59 C# files and 196 declared methods after the refactor.
+- `../../CODE_ARCHITECTURE_COMPLIANCE_REPORT.md` — implementation results, static checks and remaining Unity validation gaps.
 
 ## AI instructions
 - `.github/copilot-instructions.md`

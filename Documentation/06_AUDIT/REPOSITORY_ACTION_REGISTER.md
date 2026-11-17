@@ -20,3 +20,20 @@
 | P3 | ACT-013 | AUD-012 | COMBAT / NET / POK | Create separate scoped specifications for combat, persistence/session lifecycle and API AI when their roadmap milestones are reached. | Each requires its own plan milestone and owner approval. |
 
 No action in this table authorizes immediate code changes. Each substantial action must follow `00_GOVERNANCE/GIT_WORKFLOW.md` and the relevant change-proposal process.
+
+
+## 2026-11-17 — Implementation status update
+
+| Action ID | Updated status | Evidence / remaining work |
+|---|---|---|
+| ACT-001 | SOURCE FIXED; UNITY VERIFY OPEN | Missing `EntityId`/`GetEntityId()` reference replaced by `PokemonIndividualId`; Unity compile still required. |
+| ACT-002 | PARTIALLY RESOLVED | Continuous vegetation biomass and discrete fruit bushes documented as separate resource models. Vegetation consumption by Pokemon remains future work. |
+| ACT-003 | PARTIALLY IMPLEMENTED | Runtime stable individual ID added. Full age/life-stage/sex/size/persistence schema remains open. |
+| ACT-004 | OPEN | No automated C# test assembly added; Unity compilation is prerequisite. Data validation script passes. |
+| ACT-005 | OPEN | Networking/server authority remains unimplemented. |
+| ACT-006 | IMPLEMENTED AT SOURCE LEVEL | `PokemonAgent` decomposed into cohesive individual systems and action behaviours; Unity compile/Play Mode verification remains open. |
+| ACT-007 | PARTIALLY IMPLEMENTED | World generation, initial spawn placement, fruit-bush placement and grass selection are seed-driven; runtime wandering/schedule randomness is not replay-deterministic. |
+| ACT-008 | OPEN | Meadow scene references repaired; Build Settings still selects SampleScene. Owner must confirm intended startup scene. |
+| ACT-010 | SOURCE FIXED; UNITY VERIFY OPEN | `WorldDefinition.cs` naming corrected and GUID retained. |
+
+The original proposal table remains historical. This update records implementation evidence and does not claim Unity verification.

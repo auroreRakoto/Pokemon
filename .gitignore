@@ -49,7 +49,14 @@ Assets/Blender.meta
 Assets/TutorialInfo/
 Assets/TutorialInfo.meta
 
-
-# Python generated files
-__pycache__/
-*.py[cod]
+# Unused gameplay scripts and their Unity metadata
+Assets/Project/Scripts/Simulation/EcosystemSimulator.cs
+Assets/Project/Scripts/Simulation/EcosystemSimulator.cs.meta
+Assets/Project/Scripts/Simulation/EcosystemStatistics.cs
+Assets/Project/Scripts/Simulation/EcosystemStatistics.cs.meta
+Assets/Project/Scripts/Pokemon/Data/PokemonHabitat.cs
+Assets/Project/Scripts/Pokemon/Data/PokemonHabitat.cs.meta
+Assets/Project/Scripts/Pokemon/AI/PokemonMovement.cs
+Assets/Project/Scripts/Pokemon/AI/PokemonMovement.cs.meta
+Assets/Project/Scripts/Pokemon/Spawning/PokemonSpawnPoint.cs
+Assets/Project/Scripts/Pokemon/Spawning/PokemonSpawnPoint.cs.meta

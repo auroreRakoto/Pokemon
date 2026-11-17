@@ -1,33 +1,40 @@
 # NEXT HANDOFF
 
 ## 1. Rapport produit
-Nom : `CLEANUP_EXECUTOR_001_FINAL_REPORT.md`
+Nom : `CODE_ARCHITECTURE_COMPLIANCE_REPORT.md`
 
 ## 2. Agent suivant
 Agent : `QA`
 
 ## 3. Documents à lui transmettre
-- `CLEANUP_EXECUTOR_001_FINAL_REPORT.md`
-- `Documentation/00_GOVERNANCE/DECISION_REGISTER.md`
+- `CODE_ARCHITECTURE_COMPLIANCE_REPORT.md`
+- `Documentation/06_AUDIT/CODE_FUNCTION_OWNERSHIP_INVENTORY.md`
 - `Documentation/01_ARCHITECTURE/MODULE_BOUNDARIES.md`
+- `Documentation/01_ARCHITECTURE/INTERFACE_CONTRACTS.md`
 - `Documentation/01_ARCHITECTURE/UNITY_ARCHITECTURE.md`
-- Le projet nettoyé `Pokemon-main_CLEANUP.zip`
+- `Documentation/02_DOMAINS/POKEMON_SIMULATION.md`
+- `Documentation/02_DOMAINS/ECOLOGY_SIMULATION.md`
+- Le projet Unity complet fourni dans `Pokemon-main_ARCHITECTURE_COMPLIANT.zip`
 
 ## 4. Travail attendu du prochain agent
-- Vérifier le diff de nettoyage et l'absence de pertes de données.
-- Ouvrir le projet dans Unity 6000.4.11f1 et compiler.
-- Vérifier que le renommage de `WorldDefinition.cs` conserve la référence ScriptableObject.
-- Vérifier les menus `Pokémon > Tools` et les outils de synchronisation.
-- Exécuter les générateurs Blender et effectuer un round-trip FBX vers Unity.
-- Signaler PASS / FAIL / BLOCKED avec preuves ; ne pas fermer le work package sans validation.
+- Ouvrir le projet avec Unity `6000.4.11f1` ou la version exacte déclarée dans `ProjectSettings/ProjectVersion.txt`.
+- Laisser Unity réimporter les scripts, `.meta`, prefabs, ScriptableObjects et la scène Meadow.
+- Compiler et relever toutes les erreurs/avertissements pertinents; corriger les erreurs sans réintroduire de dépendances contraires au Holy Grail.
+- Vérifier les références Inspector du `PokemonSpawnManager`, `EcosystemLogger`, `EcosystemDataCollector`, `FruitBushManager`, `ResourceManager`, `WorldBiomeGenerator` et `GrassVegetationSpawner`.
+- Tester la génération du monde, le placement des ressources, le spawn des Caterpie/Oddish, le déplacement, le foraging, le cycle jour/nuit, la mortalité et la reproduction.
+- Vérifier la création des visuels de fruits et la mise à jour des statistiques/CSV.
+- Vérifier les prefabs Caterpie/Oddish/Pidgey et les nouveaux `PokemonPopulationProfile`.
+- Vérifier le choix de scène dans Build Settings; `SampleScene.unity` est encore la scène configurée, Meadow n'a pas été promue automatiquement.
+- Produire `QA_CODE_COMPLIANCE_REVIEW.md` avec PASS / FAIL / BLOCKED, versions, étapes, preuves et limitations. Ne jamais déclarer un test exécuté sans preuve Unity.
 
 ## 5. Livrable attendu
-Nom : `CLEANUP_EXECUTOR_001_QA_REVIEW.md`
+Nom : `QA_CODE_COMPLIANCE_REVIEW.md`
 
 ## 6. Instructions au propriétaire
-1. Télécharger et extraire `Pokemon-main_CLEANUP.zip` dans une copie de travail ou appliquer son diff au checkout Git existant.
-2. Vérifier le diff avant de remplacer la copie de travail.
-3. Pousser les commits requis selon `Documentation/00_GOVERNANCE/GIT_WORKFLOW.md` ; aucun commit/push n'a été possible depuis l'archive ZIP.
-4. Ouvrir le chat QA et joindre le projet nettoyé ainsi que le rapport d'exécution.
-5. Demander la validation indépendante Unity / Blender / références.
-6. Récupérer `CLEANUP_EXECUTOR_001_QA_REVIEW.md` avant approbation finale.
+1. Télécharger `Pokemon-main_ARCHITECTURE_COMPLIANT.zip`.
+2. Faire une sauvegarde/branche du projet actuel avant remplacement.
+3. Décompresser et ouvrir le dossier `Pokemon-main` dans Unity.
+4. Attendre la fin de l'import et de la compilation.
+5. Ouvrir `Assets/Project/Content/Scenes/Worlds/Meadow.unity` et lancer les tests demandés.
+6. Transmettre le projet, le rapport de conformité et l'inventaire des fonctions à l'agent QA.
+7. Récupérer `QA_CODE_COMPLIANCE_REVIEW.md`; ne considérer la conformité finale comme validée qu'après les PASS Unity et Play Mode.

@@ -1,9 +1,0 @@
-SimulationTime,Species,WanderingCount,SeekingFoodCount,EatingCount,SleepingCount,FoodSearchAttempts,SuccessfulFoodSearches,FailedFoodSearches,EatingSessions,TotalFoodConsumed,TotalDistanceTravelled,TimeSearching,TimeEating,TimeSleeping
-0.0200,"Chenipotte",3,0,0,7,0,0,0,0,0.0000,0.0000,0.0000,0.0000,0.0000
-0.0200,"Mystherbe",4,0,0,6,0,0,0,0,0.0000,0.0000,0.0000,0.0000,0.0000
-10.0132,"Chenipotte",8,0,0,2,0,0,0,0,0.0000,34.7256,0.0000,0.0000,54.5468
-10.0132,"Mystherbe",9,0,0,1,0,0,0,0,0.0000,117.2831,0.0000,0.0000,39.3122
-20.0196,"Chenipotte",10,0,0,0,0,0,0,0,0.0000,112.9029,0.0000,0.0000,58.8214
-20.0196,"Mystherbe",10,0,0,0,0,0,0,0,0.0000,317.3251,0.0000,0.0000,41.2873
-30.0243,"Chenipotte",10,0,0,0,0,0,0,0,0.0000,192.9278,0.0000,0.0000,58.8214
-30.0243,"Mystherbe",10,0,0,0,0,0,0,0,0.0000,517.3872,0.0000,0.0000,41.2873

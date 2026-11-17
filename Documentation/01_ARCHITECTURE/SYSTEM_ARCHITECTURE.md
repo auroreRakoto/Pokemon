@@ -91,3 +91,8 @@ The following are intentionally OPEN and must be decided before their implementa
 - A biome definition is not a generated biome instance.
 - A Blender source file is not a Unity runtime asset.
 - A Unity Editor tool is not a runtime service.
+
+
+## Runtime composition layer
+
+Unity scene entry points that wire multiple domains live in `Assets/Project/Runtime/Composition`. The current `WorldBiomeGenerator` composes World biome topology with Ecology field generation and Presentation rendering; `PokemonSpawnManager` wires world generation, ecological resource initialization, vegetation placement, population creation and telemetry read models. Domain services remain in their owning modules and receive narrow interfaces rather than scene coordinator references.

@@ -77,3 +77,12 @@ Day/night, weather, seasons, temperature, humidity, rainfall and decomposition c
 ## Visual traces
 
 Footprints, eaten leaves, broken branches, silk, droppings, flattened grass, abandoned nests and similar traces can communicate simulation history. Most should be lightweight, temporary or aggregated rather than individually simulated forever.
+
+
+## Current Unity resource implementations
+
+- `FruitBush` is an authoritative resource instance: fruit quantity, production timer and consumption counters only.
+- `FruitBushManager` owns fruit-bush population/query/consumption coordination and implements the Pokemon food-service contract. Initial bush placement is derived from the world generation seed.
+- `FruitBushVisuals` is a Presentation projection that observes resource-state events and creates/toggles fruit meshes. It does not decide availability or consumption.
+- `EcologySpawnLocationProvider` evaluates habitat requirements against the composed world ecology grid and implements the World-owned spawn-location query contract.
+- `ResourceManager` owns a separate continuous vegetation-biomass grid and regeneration model, currently visualized by `ResourceMinimap`. It is not interchangeable with discrete fruit-bush instances and is not yet connected to Pokemon feeding.

@@ -117,3 +117,58 @@ The project charter and architecture express intended design. The source snapsho
 ## 7. Audit conclusion
 
 **Overall status: PARTIAL / EARLY PROTOTYPE.** The snapshot demonstrates a meaningful local ecology/world prototype, but it does not yet demonstrate conformance to the full intended architecture. The highest-priority issue is the unresolved individual ID reference and the absence of compile/test evidence. Several architectural foundations (server authority, persistence, combat, AI API and full terrain) remain future implementation work or unknown, not verified features.
+
+
+## 5. Follow-up implementation addendum — CLEANUP code ownership reorganization
+
+- **Date:** 2026-11-17
+- **Input:** `Pokemon-main (5).zip`
+- **Scope:** Unity C# file placement and canonical architecture documentation.
+- **Result:** 34 of 36 C# scripts were moved into ownership-oriented folders; two scripts already occupied appropriate locations and remained in place.
+- Every moved script's paired `.meta` file was moved with it. All 34 moved scripts retained their original GUID metadata.
+- Runtime presentation controls/views were separated from simulation/domain folders.
+- Cross-domain telemetry was placed under Infrastructure.
+- Editor authoring/import tools remain isolated under `Assets/Project/Editor`.
+- No gameplay method bodies, serialized field names, or ScriptableObject data were intentionally modified.
+- `WorldDefinition` filename spelling was corrected while preserving the existing script `.meta` GUID.
+
+### Remaining validation and known issues
+
+- Unity Editor compilation and asset import were not available in this execution; no Unity build or Play Mode test is claimed.
+- Scene/prefab references should resolve through preserved GUIDs, but must be confirmed by opening the project in Unity.
+- The historical audit finding about `EntityId` / `GetEntityId()` remains unresolved in the source snapshot and may still block compilation.
+- `PokemonAgent` still combines behaviour, needs updates, reproduction and mortality orchestration. Its functional decomposition remains a separate POK/ARCH responsibility and was not disguised as a folder-only fix.
+- Ecology resource ownership between grid vegetation and fruit bushes remains unresolved; both are grouped under Ecology Resources without asserting that they are one resource model.
+- No `.asmdef` files were added; module assemblies remain deferred until dependencies stabilize.
+
+
+## 8. Follow-up deep code compliance implementation — 2026-11-17
+
+This section supersedes prior status statements where they conflict with the implementation below. The earlier audit remains a historical record of the original snapshot.
+
+- **Input:** `Pokemon-main (5).zip`; implementation output is the refactored project archive accompanying this report.
+- **Review scope:** 59 C# files (55 Runtime, 4 Editor), with 196 method declarations inventoried in `CODE_FUNCTION_OWNERSHIP_INVENTORY.md`.
+- `PokemonAgent` was decomposed into individual needs, daily routine, foraging/wandering behaviour, mortality, reproduction and identity/event responsibilities.
+- Movement, food, reproduction, spawn-location and telemetry communication now use explicit interfaces/read models. Transform mutation is confined to the World movement adapter.
+- Population tuning moved from `PokemonDefinition` to `PokemonPopulationProfile` assets. World biome topology and Ecology field composition were separated. FruitBush state and fruit visual projection were separated.
+- The active Meadow scene's missing custom script GUIDs and the PokemonAgent prefab script GUIDs were repaired. The Meadow scene now wires the population profiles and telemetry collector through the Composition root.
+- Stable runtime individual identity is now implemented through `PokemonIndividualId`; the previous missing `EntityId`/`GetEntityId()` reference is no longer present. Persistence-stable identity is not yet implemented.
+- Static checks: all C# files have `.meta`; no duplicate GUIDs; no UnityEditor imports or scene-wide searches in Runtime; no static gameplay events; Transform writes confined to World movement; no unresolved active Assembly-CSharp script refs; no stale EntityId/static-event references.
+- `python3 Tools/validate_data.py` passes.
+
+### Revised status of prior findings
+
+| Prior finding | Updated status |
+|---|---|
+| AUD-001 — missing EntityId/GetEntityId compile reference | Source reference removed and replaced with `PokemonIndividualId`; Unity compile remains unverified. |
+| AUD-002 — missing automated tests | Still open. No C# test assembly was available/added. |
+| AUD-006 — vegetation grid vs fruit bushes | Clarified as two distinct Ecology resource models. Pokemon feeding currently uses fruit bushes only; vegetation biomass integration remains open. |
+| AUD-007 — procedural determinism | World biome fields, initial spawn locations, fruit-bush placement and grass selection are seed-driven. Individual schedule/wander randomness is not replay-deterministic. |
+| AUD-008 — startup scene/build settings | Meadow scene references were repaired; Build Settings still points to `SampleScene.unity`. Owner confirmation remains needed. |
+| AUD-011 — individual identity | Stable runtime identity is implemented. Age/life stage/sex/size/body condition and persisted identity remain open. |
+| AUD-013 — WorldDefinition filename | `WorldDefinition.cs` is correctly named with its original GUID preserved; Unity import still needs verification. |
+| ACT-006 — PokemonAgent responsibility split | Implemented at source level. Unity compilation and Play Mode verification remain open. |
+
+### Verification limitation
+
+No Unity Editor executable was available, so this report does not claim a successful Unity compilation, asset import, build, Play Mode run or automated C# test run. See the root `CODE_ARCHITECTURE_COMPLIANCE_REPORT.md` for the detailed ownership map and exact remaining gaps.

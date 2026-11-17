@@ -43,3 +43,13 @@ Before adding a package:
 - check Unity version/platform compatibility;
 - consider licensing, security, maintenance and build size;
 - record the choice in the decision register if it is architectural.
+
+
+## Domain decomposition and Unity adapters
+
+- A `MonoBehaviour` that coordinates an individual must not become the owner of needs, lifecycle, every behaviour and movement implementation at once.
+- Put each independently changing rule/process in a cohesive domain class (needs, schedule, mortality, reproduction, action behaviour).
+- Cross-domain communication uses narrow interfaces/events/queries. A composition root wires concrete implementations.
+- Domain behaviour sends movement intent through a contract; only the World movement adapter mutates the Transform.
+- Resource instances own authoritative quantities and lifecycle. Presentation components observe state/events and own visual instantiation.
+- Do not use static global gameplay event buses. Publish instance/domain events through an explicit owner/coordinator.

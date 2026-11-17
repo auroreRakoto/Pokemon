@@ -97,3 +97,17 @@ The simulation is individual-based, but this does not imply every subsystem must
 ## Dependencies
 
 Consumes environment context and resource candidates from World/Ecology. Sends movement/interaction requests. Receives resource-consumed, damage, status and lifecycle events. Server owns authoritative state.
+
+
+## Current Unity implementation ownership
+
+- `PokemonAgent` is a thin Unity composition adapter and update coordinator, not the owner of all behaviour rules. It depends on the Ecology-owned food service abstraction, not `FruitBushManager` directly.
+- `PokemonNeeds` owns satiety state; `PokemonDailyRoutine`, `PokemonMortalitySystem` and `PokemonReproductionSystem` own their respective individual processes.
+- `PokemonForagingBehaviour` owns the seek/eat action flow; `PokemonWanderBehaviour` owns exploration destination selection.
+- `PokemonIndividualId` provides a stable per-instance identifier. `PokemonSimulationEvent` carries completed facts to consumers.
+- Movement is expressed through `IWorldMovement`; the World `PokemonMovementController` is the only adapter that writes the Transform.
+- Population rules belong to `PokemonPopulationService`; prefab instantiation and movement-component wiring are delegated through `IPokemonFactory` to `PokemonUnityFactory` in Composition. Scene setup and concrete dependency wiring also belong to Composition.
+
+The current vertical slice implements wandering, fruit foraging, day/night rest, starvation mortality and a simple reproduction request. Species food configuration is explicitly fruit-based (`eatsFruit` plus `preferredFood`); continuous vegetation biomass is not yet consumed by Pokémon. Other behaviours in the catalogue remain planned and must not be inferred as implemented.
+
+Population tuning is held by `PokemonPopulationProfile` assets, separate from `PokemonDefinition`: initial population and maximum population are scenario settings, not species biology.

@@ -1,9 +1,0 @@
-SimulationTime,Species,Population,AverageSatiety,MinSatiety,MaxSatiety,StarvingCount
-0.0200,"Chenipotte",10,100.0000,100.0000,100.0000,0
-0.0200,"Mystherbe",10,100.0000,100.0000,100.0000,0
-10.0132,"Chenipotte",10,96.4660,95.1023,97.5512,0
-10.0132,"Mystherbe",10,96.0851,95.1023,97.5512,0
-20.0196,"Chenipotte",10,91.4730,90.0024,93.4167,0
-20.0196,"Mystherbe",10,91.0346,90.0024,92.9451,0
-30.0243,"Chenipotte",10,86.4714,85.0008,88.4152,0
-30.0243,"Mystherbe",10,86.0330,85.0008,87.9435,0

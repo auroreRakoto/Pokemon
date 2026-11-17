@@ -107,3 +107,21 @@ Definition describes parameters and allowed content. Instance describes a genera
 ## Contract review requirement
 
 Any change to IDs, units, ownership, event meaning, validation, serialization, authority or lifecycle requires review by all producer/consumer domains and a documentation update.
+
+
+## Implemented runtime contracts
+
+The current Unity slice implements the following narrow boundaries:
+
+| Contract | Owner | Consumer | Responsibility |
+|---|---|---|---|
+| `IEcologyFoodService` / `IEcologyFoodSource` | Ecology contract; fruit resource adapter | Pokemon foraging | Query a nearby compatible food source and request validated consumption |
+| `IPokemonReproductionService` | Pokemon contract; Pokemon population service | Individual reproduction system | Request population creation without depending on the scene coordinator |
+| `IPokemonFactory` | Pokemon contract; Composition Unity factory | Pokemon population service | Instantiate, configure and destroy Unity-backed individuals without embedding prefab operations in population rules |
+| `IWorldSpawnLocationQuery` | World contract; Ecology habitat adapter | Pokemon population service | Find habitat-compatible positions and constrain offspring placement |
+| `IWorldMovement` | World contract; World adapter | Pokemon action behaviours | Express movement intent without allowing behaviour code to mutate a Transform |
+| `PokemonSimulationEvent` | Pokemon domain | Composition / Infrastructure telemetry | Publish immutable facts with stable individual identity |
+| `IPokemonPopulationReadModel` | Pokemon contract; Composition adapter | Infrastructure telemetry | Expose active individuals and the instance event stream without a scene lookup |
+| `IEcologyResourceReadModel` / `IEcologyResourceInstance` | Ecology contract; FruitBushManager | Infrastructure telemetry | Expose read-only resource quantities and regeneration statistics |
+
+The Unity composition root wires concrete adapters. World-owned spatial contracts are `IWorldSpawnLocationQuery` and `IWorldMovement`; they do not create a reverse World-to-Pokemon implementation dependency. Pokemon behaviour does not reference `FruitBushManager`, `PokemonSpawnManager`, `WorldBiomeGenerator`, or `Transform` mutation directly. The current food adapter is fruit-bush based; continuous vegetation biomass is a separate Ecology resource model and is not yet a consumable Pokémon source.
