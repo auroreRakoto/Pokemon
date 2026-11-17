@@ -4,6 +4,34 @@
 
 Owns spatial world generation, terrain representation, biome placement, environment objects, navigation-relevant spatial queries and world-side interaction locations.
 
+
+## Confirmed initial world content and presentation scope
+
+### Initial biome scope
+
+The initial biome set is:
+- **Plains**
+- **Forest**
+- **Desert**
+
+A **village is a settlement, not a biome**. It is a generated/placed built environment located within a suitable biome/region. In the initial implementation, a village must at least be identifiable by one house/building marker; the complete village layout and building catalogue can be developed separately. Settlement suitability remains a separate field from biome classification.
+
+The world also includes ponds and rivers. Environment and vegetation placement are intended to be procedural. Village generation may use a hybrid approach: procedural site selection/layout with selected authored or generated building assets. The exact division is OPEN. Both natural trails and constructed roads are in scope; the current generation stage identifies their locations/classes, while final surface styling and construction details can follow.
+
+### Traversal and habitat suitability
+
+Traversal must be capability-aware rather than a single universal walkability mask. Different Pokémon have different movement capabilities: for example, a small ground Pokémon such as Chenipotte should not be able to climb an otherwise impassable mountain, while a flying Pokémon such as Roucoups can fly over terrain that blocks ground traversal. The final movement-capability taxonomy, slope/height thresholds, flight restrictions, stamina/energy costs and pathfinding interface are OPEN and must be coordinated with the Pokémon simulation/behaviour domain.
+
+Pokémon must be able to identify and use suitable shelters/habitats. The world domain provides spatially queryable shelter/rest/nest/cover locations and suitability metadata; Pokémon behaviour decides which locations an individual chooses. Do not encode species-specific behavioural decisions inside terrain rendering.
+
+### Dynamic world conditions
+
+A day/night cycle and seasonal changes are required. Seasons must create genuine world-state variation, not only a cosmetic colour shift. They may affect biome appearance, vegetation, resource availability and ecological conditions once the relevant rules are specified. Their duration, calendar, transition model, weather coupling and per-biome effects remain OPEN. Keep time/season state as explicit world/session data rather than hard-coding it into terrain materials.
+
+### Ecosystem scale
+
+The initial design target is to support an ecosystem of approximately **2,000 Pokémon**. This is a planning target, not a proven performance result or a requirement that every individual use full-rate simulation continuously. Simulation scheduling, levels of detail, off-screen update rates, persistence and PC hardware baseline must be profiled and specified before the target is treated as validated. Pokémon are intended to continue living independently of the player's immediate presence in the exploration/living-world mode.
+
 ## Visual layers
 
 1. Terrain base: grass, dirt, rock, sand, mud, snow, leaf litter and similar.
@@ -16,7 +44,7 @@ Do not confuse terrain texture painting with placement of actual 3D objects.
 
 ## Scene generation requirement
 
-World generation must produce a real terrain surface in the Unity scene, not only procedural maps or an Editor-window preview. The Editor workflow must expose a `Generate & Apply to Scene` action (or an equivalent explicit Generate-then-Apply workflow) that creates or updates generator-owned terrain GameObject(s) in the active scene. The terrain surface is built from the generated height map and receives the relevant biome/material presentation; it must use the configured world dimensions and cell spacing and have an appropriate collider for gameplay. Re-generation updates/replaces the prior generated output rather than leaving duplicate terrain. The same application capability must be available in Play Mode through runtime-safe code. Keep this scene-instantiation step separate from the shared data-generation core and from the choice of Unity Terrain versus custom mesh. The initial target world size is 2,000 m × 2,000 m, with dimensions configurable.
+World generation must produce a real terrain surface in the Unity scene, not only procedural maps or an Editor-window preview. The Editor workflow must expose a `Generate & Apply to Scene` action (or an equivalent explicit Generate-then-Apply workflow) that creates or updates generator-owned terrain GameObject(s) in the active scene. The terrain surface is built from the generated height map and receives the relevant biome/material presentation; it must use the configured world dimensions and cell spacing and have an appropriate collider for gameplay. Re-generation updates/replaces the prior generated output rather than leaving duplicate terrain. The same application capability must be available in Play Mode through runtime-safe code. Keep this scene-instantiation step separate from the shared data-generation core and from the choice of Unity Terrain versus custom mesh. The current 2,000 m × 2,000 m size is a test configuration only. The long-term target is a finite, globe-like, fully explorable world without artificial invisible boundary walls; topology is OPEN and must be resolved before large-scale world architecture is locked.
 
 ## Terrain rendering
 

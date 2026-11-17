@@ -4,6 +4,31 @@
 
 The world is session-based. A session contains a world instance or a selected/generated world configuration, players, Pokémon, resources, environmental conditions and runtime state.
 
+
+## World scope and player modes
+
+The current 2,000 m × 2,000 m generation dimensions are for testing only. The long-term target is a finite, globe-like world that is fully explorable, without invisible boundary walls or artificial mountain walls at the map edge. Whether this means a true spherical surface, a wrapped continuous world or another topology remains OPEN and requires an architecture proposal before implementation.
+
+The game targets PC initially. Multiplayer is not a near-term priority, but this does not by itself supersede the current dedicated-server/server-authority architecture decisions.
+
+Two gameplay modes are intended:
+- **Exploration / living-world mode:** the player is part of an autonomous ecosystem; Pokémon and world systems continue to evolve independently of the player's immediate actions/presence.
+- **Classic Pokémon mode:** a more traditional Pokémon experience, with toggles controlling selected autonomous simulation/world aspects.
+
+Classic-mode toggles may disable or alter autonomous ecosystem simulation, ageing and other lifecycle systems, not only autonomous movement. The exact toggle list, dependencies, simulation progression, persistence and pause/offline behaviour remain OPEN. Prefer configuration/policy switches at system boundaries over scattered mode-specific conditionals.
+
+## Initial biome and settlement scope
+
+Initial biomes: plains, forest and desert. Villages are settlements, not biomes. An initial village may be represented by at least one house/building marker; the broader settlement layout can be expanded later. Village generation may combine procedural placement/layout with authored assets. Both natural trails and constructed roads are intended. Ponds and rivers are in scope. Seasonal changes and a day/night cycle are required. Seasons must cause genuine world-state variation, not merely a cosmetic colour swap; the exact calendar, duration, transitions, weather coupling and per-biome ecological/resource effects remain OPEN. Initial terrain relief includes hills and mountains.
+
+## Traversal capabilities and habitats
+
+World navigation must support different movement capabilities. A ground Pokémon may be blocked by slopes/cliffs/mountains that a flying Pokémon can cross. The world domain supplies terrain/barrier and habitat queries; the Pokémon movement/behaviour domain owns the interpretation of a species' movement capabilities and decisions. Pokémon must be able to query suitable shelters, resting places, nests and cover. The shared capability taxonomy and numerical traversal rules remain OPEN and require coordination between WORLD and POK.
+
+## Population and platform target
+
+Plan for an initial ecosystem target of approximately 2,000 Pokémon on PC. This is an unvalidated design target. Simulation frequency/LOD, off-screen updates, persistence and hardware performance budgets must be profiled before claiming the target is achieved.
+
 ## World layers
 
 1. **World definition:** overall configuration, seed, dimensions, session rules.
@@ -13,6 +38,14 @@ The world is session-based. A session contains a world instance or a selected/ge
 5. **Ecological resources:** berries, seeds, nectar, insects or other resources with lifecycle and quantity.
 6. **Dynamic conditions:** time, weather, temperature, humidity and season where implemented.
 7. **Simulation state:** resource depletion, traces, population, habitat occupancy and other changes.
+
+## Spherical world technical direction
+
+The approved product requirement is a true, fully explorable sphere whose curvature is subtle from ordinary ground-level play and perceptible from high flying viewpoints. The recommended technical candidate is documented in `SPHERICAL_WORLD_ARCHITECTURE_PROPOSAL.md`: Cube-Sphere topology, deterministic seam-safe spherical fields, hierarchical adaptive terrain tiles, local tangent frames and radial gravity. This is a proposed architecture, not yet an implementation approval.
+
+The current `WorldGenerator`/`WorldTerrainBuilder` path is a planar X/Z test implementation. Do not attempt to make it spherical by simply bending its final mesh. A new spherical coordinate/address contract and a spherical terrain presentation path must be validated first. Existing ecological field concepts and generation rules should be reused only where their planar distance/neighbour assumptions have been adapted.
+
+The planet radius is intentionally not fixed yet. A scripted curvature test must compare ground-level, low-flight, high-flight and aerial views. At ground level the play area should read as a broad, nearly planar Pokémon landscape; at high altitude the curved horizon should become progressively apparent.
 
 ## Terrain generation model
 
@@ -62,7 +95,7 @@ The world generator must be callable explicitly in both Unity Editor and Play Mo
 
 Generation stage order: validate request → generate base noise fields → height/slope → water/hydrology → exact two-pass Euclidean distance transform → derived moisture → vegetation → biome classification → settlement suitability and site selection → sparse settlement graph → traversal-cost/barrier field → A*/Dijkstra route generation → visual output → validation/publication.
 
-The generator may skip unrequested presentation stages, but may not skip data dependencies. A road preview must still generate/obtain the selected settlement sites, graph, traversal costs and routes. Scene application is a presentation stage that consumes the generated result; it must not change the underlying maps or rerun their algorithms. The initial target world size is 2,000 m × 2,000 m (2 × 2 km), while dimensions remain configurable in the generation request.
+The generator may skip unrequested presentation stages, but may not skip data dependencies. A road preview must still generate/obtain the selected settlement sites, graph, traversal costs and routes. Scene application is a presentation stage that consumes the generated result; it must not change the underlying maps or rerun their algorithms. The current 2,000 m × 2,000 m world size is a test configuration only. The long-term target is a finite, fully explorable globe-like world; its topology remains OPEN.
 
 ## Visualisation and export contract
 
@@ -79,7 +112,7 @@ Every map is independently exportable at native resolution. Preserve continuous 
 
 ## Terrain representation
 
-Unity Terrain generated by scripts is a reasonable initial candidate, but not yet a final decision. A custom mesh/chunk system may be more suitable depending on world shape, streaming, runtime edits, networking and target scale. Regardless of the backend selected, the Editor workflow must instantiate the generated terrain into the active Unity scene; a map preview or exported heightmap alone is insufficient. The first scene-application implementation may use a single terrain object for the initial 2 × 2 km world, provided the backend and scene adapter remain replaceable.
+Unity Terrain generated by scripts is a reasonable initial candidate, but not yet a final decision. A custom mesh/chunk system may be more suitable depending on world shape, streaming, runtime edits, networking and target scale. Regardless of the backend selected, the Editor workflow must instantiate the generated terrain into the active Unity scene; a map preview or exported heightmap alone is insufficient. The current 2 × 2 km scene-application setup is a test configuration only. Keep the backend and scene adapter replaceable so the eventual finite globe-like world can be supported after its topology is selected.
 
 The multi-map Perlin Noise specification is independent of the terrain renderer. Do not couple biome rules or field generation to a specific terrain representation. Biome data should describe ecological and visual properties; a terrain adapter translates these into Unity Terrain layers or mesh materials.
 
@@ -121,3 +154,13 @@ The authoritative world-generation JSON configuration is stored at:
 `Assets/Project/Data/WorldGeneration/world_generation.json`
 
 This is the single project-level `Data` directory. Runtime code that loads and validates the JSON belongs under `Assets/Project/Runtime/DataServices/Loading`; do not add a second `Runtime/Data` folder. The world-generation core receives a validated settings model and must not read files directly or depend on `UnityEditor`. The selected loading mechanism must support both Editor generation and player builds.
+
+## Confirmed player and world direction
+
+The player camera follows a Pokémon-style third-person presentation, with a distant follow view and adjustable viewing angle. Exact camera controls and parameters remain open and must be validated against the spherical curvature presentation test.
+
+The long-term world target is a large planet with extensive regions and long-distance travel. The final radius and playable surface area remain open; the existing 2 km × 2 km configuration is only a test setup.
+
+The player can both observe the autonomous ecosystem and participate as a Pokémon trainer. The first spherical-world prototype is narrower: validate spherical topology, terrain, ground-to-flight curvature presentation and player movement before implementing the full ecosystem or trainer gameplay.
+
+Performance should be profiled on the project owner's own PC. A universal minimum hardware specification is not a project requirement at this stage.

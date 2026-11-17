@@ -7,6 +7,52 @@
 - Keep biome logic separate from rendering implementation.
 - Automate material, texture and terrain setup where possible.
 
+
+## Approved visual direction
+
+The target is a **stylized 3D world inspired primarily by modern Pokémon environments, with a manga influence**. It should read as Pokémon first, rather than as an abstract low-poly game. The intended finish is stylized, not photorealistic.
+
+- Use a distinct, coherent colour palette for each biome; do not force one global green palette across the world.
+- The terrain must have strong, readable landforms. Relief is a major visual and gameplay feature, not a minor surface variation.
+- The world should remain visually compelling both close to the player and across distant vistas. The desired ambition is comparable to the sense of landscape scale and exploration in *Breath of the Wild*, while retaining the project's Pokémon-inspired stylization. This is a quality target, not a requirement to reproduce that game's technology or exact art direction.
+- Use biome-aware materials, natural transitions, layered vegetation and environmental dressing to avoid a single flat colour plane.
+- Water features include ponds and rivers in the initial world scope.
+- Seasonal changes and a day/night cycle are required. Seasonal changes must represent genuine world-state variation, not merely cosmetic colour changes; visual, ecological and resource effects, calendar and transitions remain to be specified. Initial relief scope includes hills and mountains.
+- Terrain and environment production must be script-driven. The selected tool/backend is secondary to reproducibility and integration into the game; normal production must not require manual terrain painting or manual placement.
+- Use a Pokémon-like player camera presentation; exact follow distance, perspective/FOV, rotation and framing are still OPEN.
+- Provide a repeatable Unity demonstration scene for visual validation.
+
+Reference images and a detailed art bible are still desirable. No specific external game screenshot or exact palette has been approved as a direct reference.
+
+## World shape and exploration target
+
+The 2,000 m × 2,000 m dimensions currently used by generation are a **test configuration**, not the intended final world boundary. The long-term direction is a finite, globe-like world that can be explored throughout, without invisible boundary walls or mountains used as artificial map-edge barriers.
+
+The approved product direction is a **true spherical globe/planet**, fully explorable with continuous travel and no invisible boundary walls. Its curvature must be **subtle from normal ground-level gameplay**: the local landscape should read as broad and almost planar, without an obviously curved ground or horizon. Curvature should become progressively perceptible when the player gains substantial altitude with a flying Pokémon, especially in distant aerial views. There must be no abrupt visual switch between ground and flight. This is a presentation requirement; the underlying world remains spherical at all times.
+
+The recommended technical candidate is Cube-Sphere topology with seam-safe spherical world fields and hierarchical adaptive terrain tiles; see `../01_ARCHITECTURE/SPHERICAL_WORLD_ARCHITECTURE_PROPOSAL.md`. The proposal is not production-approved until fixed-resolution topology, camera/curvature and adaptive tile seam prototypes pass validation. Do not silently approximate the globe with a bounded planar map or simply bend the existing planar mesh. The planet radius is OPEN and must be selected through a scripted visual test comparing ground, low-flight, high-flight and aerial viewpoints. Natural mountains and cliffs may be genuine terrain obstacles; they must not be used as fake perimeter walls.
+
+## Seasonal world variation
+
+Seasons are a world-state feature, not just a material colour preset. The system should support meaningful seasonal changes in the world presentation and, as rules are defined by WORLD/ECO, ecological conditions and resource availability. Keep season state explicit and data-driven. Do not hard-code season changes into terrain shaders alone. The calendar, season durations, transitions, weather coupling and biome-specific effects remain OPEN.
+
+## Terrain interaction and editability
+
+The world is intended to be modifiable during play, but this does not imply arbitrary voxel terrain deformation. The current direction is to make selected, explicitly identified environmental objects or terrain features interactable/destructible (for example, particular rocks or ice blocks). The object catalogue, persistence, regeneration rules, collision updates and multiplayer replication requirements are OPEN. Keep these interactions separate from the base terrain representation until a concrete use case requires terrain deformation.
+
+## Visual quality and acceptance direction
+
+At minimum, a terrain presentation change should be assessed for:
+- readable and attractive large-scale silhouettes from a distance;
+- nearly planar visual impression from normal ground-level viewpoints, with curvature becoming perceptible gradually at high flying altitude;
+- satisfying relief and transitions when viewed near the player;
+- distinct biome palettes and clear biome boundaries/blending;
+- no unexplained cracks, streaks, repetitive noise artefacts or large uniform colour patches;
+- coherent rivers, ponds, shorelines and slopes;
+- visual consistency between terrain materials, vegetation, rocks, water and settlements;
+- acceptable frame time and memory use at the target PC configuration (numeric budgets remain to be defined);
+- deterministic reproduction from the same seed and configuration.
+
 ## Terrain generation
 
 The world terrain must be generated procedurally from multiple coordinated Perlin Noise base maps and derived spatial fields. A single noise map is not sufficient. Terrain shape, climate, water, vegetation, settlement suitability and route planning must be represented by distinct fields or derived products and combined through explicit rules.
@@ -257,7 +303,7 @@ The Editor generator must do more than calculate maps or display a 2D preview: i
 
 - Create or update a generator-owned root GameObject (for example, `GeneratedWorld`) and its terrain GameObject(s).
 - Build the visible terrain surface from the generated height data using the selected backend: Unity Terrain or a custom mesh. Keep this backend decision independent of the procedural map-generation algorithms.
-- Apply the generated world dimensions and X/Z cell spacing correctly; the initial target size is 2,000 m × 2,000 m, configurable through generation settings.
+- Apply the generated world dimensions and X/Z cell spacing correctly; the current test size is 2,000 m × 2,000 m, configurable through generation settings; this is not the final world extent.
 - Apply the generated terrain visual data (biome/material or vertex-colour representation) without modifying the source maps.
 - Add the appropriate terrain collision representation for gameplay (TerrainCollider or MeshCollider, depending on the backend).
 - Re-generation must update or replace the previous generator-owned scene output instead of creating duplicate terrain roots. Editor-created changes must support Unity Undo.

@@ -14,7 +14,7 @@ The project is not merely a battle simulator or a static collection game. Ecolog
 | World/session model | Session-based world | CONFIRMED |
 | Simulation | Individual Pokémon simulation | CONFIRMED |
 | Ambition | Playable game | CONFIRMED |
-| Visuals | Stylized 3D | CONFIRMED |
+| Visuals | Stylized 3D, Pokémon-inspired with manga influence; closer to Pokémon than to a strongly abstract low-poly style | CONFIRMED |
 | Combat | Real-time | CONFIRMED |
 | Hosting | Dedicated server | CONFIRMED |
 | AI | API-based integration | CONFIRMED at high level; exact use OPEN |
@@ -22,6 +22,12 @@ The project is not merely a battle simulator or a static collection game. Ecolog
 | Asset creation | Blender + scripts, imported into Unity | CONFIRMED workflow direction |
 | Size variation | Runtime scaling of a base visual mesh | CONFIRMED design direction |
 | Unity authoring | Prefer script-driven workflows; Inspector only for limited exceptions | CONFIRMED preference |
+| Target platform | PC initially | CONFIRMED |
+| Multiplayer priority | Not a priority for the initial development focus; do not remove the dedicated-server decision without a separate review | CONFIRMED direction |
+| World scale target | Current 2 km × 2 km map is a test scale; long-term target is a finite, fully explorable globe/world without invisible boundary walls | CONFIRMED vision; technical representation OPEN |
+| Initial biome scope | Plains, forest and desert; villages are settlements, not biomes | CONFIRMED initial scope |
+| Population target | Design and profile the ecosystem around up to approximately 2,000 Pokémon as an initial target | CONFIRMED target; performance validation required |
+| Game modes | Two modes: autonomous ecosystem exploration and a more classic Pokémon mode; selected simulation aspects are controlled by toggles | CONFIRMED direction; exact toggle list OPEN |
 
 ## 3. Design principles
 
@@ -35,6 +41,8 @@ The project is not merely a battle simulator or a static collection game. Ecolog
 8. **Incremental scope:** build a small vertical slice before expanding content.
 9. **Observable simulation:** provide debug views, logs, metrics, and reproducible tests.
 10. **Documented evolution:** new systems must update contracts and relevant documentation.
+11. **Script-driven world authoring:** terrain, biome presentation, environment placement and scene setup must be reproducible through scripts; do not depend on manual scene painting or hand placement for normal world production.
+12. **Integrated feature quality:** a feature is considered complete only when it is ready to integrate into the game, has a reproducible visual/demo scene where applicable, and has explicit acceptance criteria.
 
 ## 4. Non-goals and constraints
 
@@ -72,3 +80,24 @@ The first meaningful vertical slice should demonstrate a small world containing 
 - debug tooling and tests.
 
 Exact scope and acceptance thresholds remain OPEN until planned in the roadmap.
+
+## 7. Modes and ecosystem simulation direction
+
+The game is intended to support two modes:
+- **Exploration / living-world mode:** the player is part of a world whose ecosystem continues to evolve independently of the player. Pokémon live their lives and the world simulation continues according to the selected rules.
+- **Classic Pokémon mode:** a more traditional Pokémon experience, using toggles to disable or alter selected autonomous-world and simulation aspects.
+
+The classic mode is expected to disable or alter more than autonomous movement: toggles may also disable ageing and other ecosystem/lifecycle systems. The exact toggle catalogue, dependencies between toggles, ownership of simulation time while paused/offline, and persistence behaviour remain OPEN and must be specified before implementing mode-specific branching throughout systems. The target is PC initially. Multiplayer is not a near-term priority; existing server-authority decisions must not be silently removed or contradicted.
+
+## 8. Development completion standard
+
+Features should be delivered at integration quality, not as isolated throwaway prototypes. Each substantial visual/system feature should have a reproducible demonstration scene or equivalent test harness, documented configuration, and measurable acceptance criteria. Normal authoring and generation workflows must be script-driven; manual authoring should be limited to explicitly approved exceptions.
+
+
+## 9. Globe and seasonal world direction
+
+The long-term world target is a **true spherical globe/planet** that the player can explore continuously and completely, returning to previously visited locations without invisible boundary walls. This supersedes the earlier ambiguity between a sphere and a wrapped planar world as the approved product direction; the technical implementation and topology details still require an architecture proposal. The current 2 km × 2 km world remains a test configuration.
+
+The initial relief scope includes hills and mountains. More complex features such as snow-capped peaks, deep ravines and cave networks are not required for the first terrain pass unless separately approved.
+
+Season changes must be real world-state variation, not only a cosmetic colour shift. They should be capable of affecting visual presentation and, once specified by the relevant domains, ecological conditions and resources. Exact season lengths, transition rules, weather coupling and per-biome effects remain OPEN.

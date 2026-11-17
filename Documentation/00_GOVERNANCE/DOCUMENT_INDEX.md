@@ -17,6 +17,7 @@
 - `DATA_ARCHITECTURE.md` — species, individual, world and resource data.
 - `NETWORK_ARCHITECTURE.md` — authority and replication principles.
 - `WORLD_ARCHITECTURE.md` — world/session/terrain/biome design.
+- `SPHERICAL_WORLD_ARCHITECTURE_PROPOSAL.md` — proposed Cube-Sphere topology, subtle-curvature requirement, adaptive terrain tiles, spherical fields, gravity and validation phases.
 - `UNITY_ARCHITECTURE.md` — Unity project and runtime/editor split.
 
 ## Domains
@@ -47,3 +48,7 @@
 ## AI instructions
 - `.github/copilot-instructions.md`
 - `.github/instructions/*.instructions.md`
+
+## Work packages
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-001_SPHERICAL_WORLD_FOUNDATION.md` — first spherical-world foundation prototype plan and implementation progress.
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-001_IMPLEMENTATION_REPORT.md` — initial code slice, validation evidence and remaining Unity checks.
