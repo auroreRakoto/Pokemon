@@ -67,7 +67,7 @@ namespace Pokemon.Project.World.Spherical.Presentation
                     float radius = settings.planetRadiusMeters + elevation;
 
                     vertices[vertexIndex] = direction * radius;
-                    normals[vertexIndex] = direction;
+                    normals[vertexIndex] = CalculateSurfaceNormal(direction, settings, 1f / resolution);
                     uvs[vertexIndex] = new Vector2((float)x / resolution, (float)y / resolution);
                     vertexIndex++;
                 }
@@ -105,6 +105,28 @@ namespace Pokemon.Project.World.Spherical.Presentation
             mesh.triangles = triangles;
             mesh.RecalculateBounds();
             return mesh;
+        }
+
+
+        private static Vector3 CalculateSurfaceNormal(Vector3 direction, SphericalWorldSettings settings, float angularStep)
+        {
+            SphericalSurfaceQuery.GetTangentFrame(direction, out Vector3 north, out Vector3 east);
+            Vector3 northPositive = GetSurfacePosition(direction + north * angularStep, settings);
+            Vector3 northNegative = GetSurfacePosition(direction - north * angularStep, settings);
+            Vector3 eastPositive = GetSurfacePosition(direction + east * angularStep, settings);
+            Vector3 eastNegative = GetSurfacePosition(direction - east * angularStep, settings);
+
+            Vector3 northDerivative = northPositive - northNegative;
+            Vector3 eastDerivative = eastPositive - eastNegative;
+            Vector3 normal = Vector3.Cross(northDerivative, eastDerivative).normalized;
+            return Vector3.Dot(normal, direction) >= 0f ? normal : -normal;
+        }
+
+        private static Vector3 GetSurfacePosition(Vector3 direction, SphericalWorldSettings settings)
+        {
+            Vector3 unitDirection = direction.normalized;
+            float elevation = SphericalHeightField.SampleHeightValidated(unitDirection, settings);
+            return unitDirection * (settings.planetRadiusMeters + elevation);
         }
 
         private static void DestroyMesh(Mesh mesh)

@@ -136,3 +136,23 @@ The initial mesh generator assigns radial placeholder normals to keep face-edge 
 ## 13. Approval boundary
 
 This proposal recommends Cube-Sphere + seam-safe spherical world fields + hierarchical adaptive terrain tiles + radial gravity. The user's product requirements (true globe, full exploration, subtle ground-level curvature and visible high-altitude curvature) are confirmed. The technical architecture remains a proposal until the topology, curvature/camera and tile-seam prototypes pass their acceptance criteria. No production scripts or configuration should be migrated before this review.
+
+## 14. Layered planet-generation studio and dual inspection views
+
+The first spherical-world prototype is to be developed as an iterative generation studio. It must start from a perfectly smooth base sphere and allow terrain to be applied in three independently inspectable, non-destructive stages:
+
+1. **Macro relief:** large-scale plains, plateaus, basins, valleys and mountain masses.
+2. **Regional relief:** hills, ridges, secondary valleys and regional variation.
+3. **Fine details:** small-scale variation limited by sampling resolution and anti-aliasing constraints.
+
+Each layer retains its own settings and deterministic seed derivation when disabled. The user can preview the base sphere, any intermediate stage or the final composition, then return to an earlier stage without losing later-layer settings. The final height is composed from enabled layer contributions using explicit combination rules. A layer visibility toggle must not delete its source data.
+
+The studio also exposes independent thematic fields (including altitude, temperature, derived moisture, slope, water, biomes and settlement suitability) through a map selector. Displaying a map changes only presentation/colourisation; it must not change geometry or source values. Maps remain individually inspectable and retain legends, ranges, seed and generator metadata. Moisture continues to follow the derived model in `TERRAIN_AND_RENDERING.md`.
+
+Two views are required over the same generated data:
+- **Spherical view:** interactive 3D globe.
+- **Planisphere view:** 2D projected view of the same spherical coordinates and fields.
+
+Switching views must not regenerate the planet or create an independent planar world. The projection must define stable forward/inverse coordinate mapping, wrap/seam behaviour and known distortion. Equirectangular is a practical first prototype candidate, not a locked final decision; validate it before adoption as the long-term map projection.
+
+The detailed scope, UI controls, data boundaries, exclusions and acceptance criteria are specified in `WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md`. This is an approved product-workflow direction, while exact layer algorithms, map projection and implementation details remain subject to prototype validation.

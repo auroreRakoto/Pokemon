@@ -117,6 +117,12 @@ WORLD-001 is ready for QA when:
 8. Runtime resource ownership/cleanup is verified.
 9. Development checks and QA report are recorded separately. QA must independently report PASS / FAIL / BLOCKED; the work package remains open until project-owner approval.
 
+## Implementation progress — visible runtime demo
+
+The first runtime presentation batch is recorded in `WORLD-001_IMPLEMENTATION_PROGRESS_01.md`. It adds the six-face presenter, surface query, temporary radial/tangent movement controller, Pokémon-style debug camera, runtime demo bootstrap, and an Editor menu command that creates a dedicated demo scene. The scene is generated at runtime from a single bootstrap object; it is not committed as a pre-authored scene asset.
+
+The current demo defaults (50,000 m radius, resolution 256, seed 481516, 350 m maximum elevation) are prototype-only tuning values. They do not establish the production radius. The mesh remains fixed-resolution and does not provide close-range production terrain detail. Unity compilation, EditMode tests, PlayMode behaviour, collider cooking, visual curvature checks and PC profiling remain unverified until run in the owner's Unity Editor.
+
 ## Exclusions
 
 - Adaptive quadtree LOD, streaming and asynchronous chunk scheduling.
@@ -174,3 +180,13 @@ Implemented in the working project snapshot:
 The current projection is the normalized-cube mapping (`normalize(faceNormal + u * axisU + v * axisV)`). It is an initial prototype choice, not yet a final production topology decision. Mesh normals are currently radial placeholders; slope-aware, seam-consistent normals remain part of mesh validation/refinement.
 
 Validation status: a separate Python geometry check confirmed all six face bases have outward orientation and sampled edge directions map consistently across at least two incident faces. Unity compilation and EditMode tests have **not** been run in this environment and remain pending in the Unity Editor. No PlayMode scene, player movement or camera rig is included in this initial code slice.
+
+## Approved-scope history and proposed extension
+
+The original WORLD-001 foundation plan and its approval/push history remain preserved above. The project owner has since requested a broader first-prototype workflow: a smooth base sphere, three independently inspectable non-destructive terrain layers, independent thematic maps, and spherical plus planisphere views.
+
+This is a material scope expansion, so it is specified separately in `WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md`. The amendment must be approved and pushed as an updated plan milestone on the same working branch before implementation of that expanded scope begins. Do not silently treat the original plan approval as approval of this extension.
+
+## Approved scope amendment
+
+The approved layered-generation and dual-view studio scope is defined in `WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md`. That amendment extends the original foundation milestone without rewriting its history.

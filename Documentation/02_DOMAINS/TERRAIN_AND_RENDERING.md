@@ -357,3 +357,20 @@ Editor tooling creates reusable assets (materials, TerrainLayers, configuration 
 ## Dynamic ground
 
 Potential effects: wetness, mud, snow, footprints, flattened grass, leaf litter, resource traces. Prefer decals, overlays, instanced details or material parameters over modifying huge terrain textures for every small event. Choose implementation based on persistence, multiplayer visibility and performance.
+
+## Layered spherical terrain authoring and dual-view inspection
+
+For the first spherical-world prototype, terrain generation must be incremental and non-destructive:
+
+- **Base sphere:** perfectly smooth reference sphere with no elevation displacement.
+- **Layer 1 — macro relief:** large-scale landforms (plains, plateaus, basins, valleys and mountain masses).
+- **Layer 2 — regional relief:** hills, ridges and secondary valleys.
+- **Layer 3 — fine details:** small-scale variations constrained by actual mesh/map sampling resolution and anti-aliasing limits.
+
+Each layer has independent settings, deterministic seed derivation, a separately inspectable contribution and an enable/disable state. Disabling a layer or selecting an earlier preview stage must not erase settings or mutate source data. Composition rules must be explicit and deterministic. Regenerating a layer must invalidate only that layer and its dependent composed outputs, not unrelated fields.
+
+The generation studio must offer both a **spherical 3D view** and a **2D planisphere view** over the same spherical data. The planisphere is not a separate planar generation path. Its projection, inverse mapping, seam/wrap behaviour and distortion must be documented. Equirectangular may be used as the first prototype candidate, but is not locked as the final projection. Switching views is presentation-only and must not trigger regeneration.
+
+A thematic-map selector must allow inspection of independent fields such as altitude, temperature, derived moisture, slope, water, biome and settlement suitability. The selected map changes only the visualisation (colour ramp/overlay); it must not change terrain geometry or map values. Raw and derived fields must be distinguishable, with range/legend and generation metadata. Do not display a map as available until its underlying generation stage exists.
+
+The complete studio scope and measurable acceptance criteria are defined in `03_ENGINEERING/WORK_PACKAGES/WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md`.

@@ -164,3 +164,11 @@ The long-term world target is a large planet with extensive regions and long-dis
 The player can both observe the autonomous ecosystem and participate as a Pokémon trainer. The first spherical-world prototype is narrower: validate spherical topology, terrain, ground-to-flight curvature presentation and player movement before implementing the full ecosystem or trainer gameplay.
 
 Performance should be profiled on the project owner's own PC. A universal minimum hardware specification is not a project requirement at this stage.
+
+## Layered planet authoring and dual-view inspection
+
+The first spherical-world prototype is an inspectable generation workspace, not a one-shot terrain generator. It starts with a smooth base sphere and composes three non-destructive terrain layers in order: macro relief, regional relief and fine details. Each layer has independent settings, deterministic seed derivation, visibility/enable state and inspectable contribution. Users can return to any earlier stage without losing later-layer settings.
+
+The same generated data must be available in two presentation views: a 3D spherical globe and a 2D planisphere. These are views of one spherical dataset, not separate world generators. Switching views must not alter or regenerate source fields. The planisphere projection and its distortion/wrap behaviour must be explicit and tested; equirectangular is only the initial candidate.
+
+Independent thematic maps (altitude, temperature, derived moisture, slope, water, biomes, settlement suitability, etc.) are selected for inspection without modifying terrain geometry or source values. See `WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md` for the detailed prototype workflow and acceptance criteria.

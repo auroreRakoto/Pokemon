@@ -62,3 +62,21 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Made actual terrain creation in the active Unity scene a required outcome, not merely a 2D/3D Editor preview or exported map.
 - Added the `Generate & Apply to Scene` workflow, generator-owned scene root/update behaviour, backend-specific terrain collider requirement and Undo support.
 - Recorded the initial configurable world target as 2,000 m × 2,000 m; kept Unity Terrain versus custom mesh as an open renderer decision (DEC-019).
+
+## 2026-11-17 — WORLD-001 layered planet studio and dual views
+
+- Recorded DEC-040: the first spherical prototype is a non-destructive, inspectable stack consisting of a smooth base sphere plus macro, regional and fine-detail terrain layers.
+- Recorded DEC-041: the same generated spherical data must be inspectable in both a 3D spherical view and a 2D planisphere view.
+- Added a dedicated WORLD-001 scope amendment defining independent thematic maps, presentation-only map visualisation, layer controls, projection behaviour, exclusions and acceptance criteria.
+- Preserved the original WORLD-001 plan and approval history; the expanded scope requires its own approved and pushed plan milestone before implementation.
+
+
+## 2026-11-17 — WORLD-001 Planet Studio first implementation slice
+
+- Recorded project-owner approval and pushed-plan status for the layered Planet Studio amendment.
+- Added a runtime-safe shared generation core and ScriptableObject settings for a smooth base sphere plus independently enabled macro, regional and fine-detail relief layers.
+- Added a Unity Editor Planet Generation Studio window to configure seed, radius, sampling resolutions, layer amplitudes/frequencies, cumulative preview stage, view and map selection.
+- Added spherical Cube-Sphere preview and an equirectangular planisphere preview sampling the same direction-based field functions.
+- Implemented terrain, altitude and temperature visualisation. Moisture, water, biome, village and slope maps remain explicitly unavailable until their generation stages exist.
+- Added EditMode tests for smooth base-sphere radius, deterministic non-destructive layer recomposition, planisphere coordinate round trips and bounded temperature values.
+- Unity Editor compilation and actual visual QA remain pending; the current implementation slice is not marked accepted.

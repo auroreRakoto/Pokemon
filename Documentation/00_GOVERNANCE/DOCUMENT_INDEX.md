@@ -52,3 +52,8 @@
 ## Work packages
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-001_SPHERICAL_WORLD_FOUNDATION.md` — first spherical-world foundation prototype plan and implementation progress.
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-001_IMPLEMENTATION_REPORT.md` — initial code slice, validation evidence and remaining Unity checks.
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-001_IMPLEMENTATION_PROGRESS_01.md` — visible runtime demo, camera and temporary surface movement implementation progress.
+
+## WORLD-001 amendments
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-001_LAYERED_PLANET_STUDIO_PROGRESS_01.md` — first implementation slice of the layered generation studio and dual-view preview.
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md` — approved scope amendment for the non-destructive base-sphere + three-layer generation workflow, independent thematic maps, and spherical/planisphere inspection views.
