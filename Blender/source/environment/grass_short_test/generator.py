@@ -4,17 +4,64 @@ Run from Blender's Text Editor after adding <repo>/Blender to sys.path.
 Exports only to Blender/exports; never writes to Unity Assets or .meta files.
 """
 from pathlib import Path
+import sys
 import math
 import traceback
 
 import bpy
 import bmesh
+
+
+def _find_blender_root():
+    """Locate this repository's Blender directory without machine-specific paths."""
+    candidates = []
+
+    # The active Text Editor path is the most reliable source for Run Script.
+    try:
+        active_text = getattr(bpy.context.space_data, "text", None)
+        if active_text and active_text.filepath:
+            candidates.append(Path(bpy.path.abspath(active_text.filepath)))
+    except (AttributeError, TypeError, RuntimeError):
+        pass
+
+    # Batch execution supplies an absolute __file__; standalone execution may not.
+    try:
+        script_path = Path(__file__)
+        if script_path.is_absolute() and script_path.exists():
+            candidates.append(script_path)
+    except (NameError, OSError, TypeError):
+        pass
+
+    # Fallback: a saved .blend file inside the repository.
+    if bpy.data.filepath:
+        candidates.append(Path(bpy.path.abspath(bpy.data.filepath)))
+
+    for candidate in candidates:
+        candidate = candidate.resolve()
+        if candidate.is_file():
+            candidate = candidate.parent
+        for directory in (candidate, *candidate.parents):
+            if (directory / "_core" / "__init__.py").is_file():
+                return directory
+            blender_dir = directory / "Blender"
+            if (blender_dir / "_core" / "__init__.py").is_file():
+                return blender_dir
+
+    raise RuntimeError(
+        "Cannot locate Blender/_core. Open the saved generator from this repository "
+        "with Text > Open, or save the .blend file inside the repository."
+    )
+
+
+BLENDER_ROOT = _find_blender_root()
+if str(BLENDER_ROOT) not in sys.path:
+    sys.path.insert(0, str(BLENDER_ROOT))
+
 import _core
 from _core.paths import ProjectPaths
 from _core.collections import get_or_create_collection, move_objects_to_collection
 from _core.materials import get_or_create_material, assign_material
 from _core.export import ExportProfile, export_fbx
-from _core.config import load_project_config
 
 ASSET_ID = "environment.vegetation.grass_short_test"
 COLLECTION_NAME = "ART_TEST_GrassShort"
@@ -138,7 +185,6 @@ def generate():
     obj.scale = (1.0, 1.0, 1.0)
     bpy.context.view_layer.update()
 
-    config = load_project_config(paths)
     export_dir = paths.export_asset("environment", "grass_short_test")
     destination = export_dir / FBX_NAME
     result = export_fbx(
@@ -148,14 +194,17 @@ def generate():
         domain="environment",
         asset_type="static_mesh",
         unity_destination=UNITY_TEST_DESTINATION,
-        profile=ExportProfile.static_mesh(config),
+        profile=ExportProfile.static_mesh(),
         source_path="Blender/source/environment/grass_short_test/",
         allowed_export_root=paths.exports,
         require_materials=True,
         require_uvs=False,
+        asset_domain="Environment",
+        asset_category="Vegetation",
         extra_manifest={
             "purpose": "ART-001 first integration proof",
             "test_asset": True,
+            "test_only": True,
             "dimensions_target_m": "approx. 0.25 x 0.25 x 0.43",
             "unity_import_note": "Temporary test destination only; do not sync automatically.",
         },

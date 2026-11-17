@@ -4,6 +4,7 @@ applyTo: "**/*.py"
 # Blender Python Instructions
 
 - Reuse the shared Blender `_core` and package modules.
+- For standalone generators run from Blender's Text Editor, give the user the exact procedure: keep the script in `Blender/source/<domain>/<asset>/`, use **Text > Open** to open that saved file, save it, then click **Run Script**. Discover the active Text datablock's saved `filepath`, walk upward until `Blender/_core/__init__.py` is found, add that `Blender/` directory to `sys.path`, and only then import `_core`. Do not rely on `__file__`, the current working directory, or the `.blend` file location alone; never hardcode a machine-specific absolute path. Preserve all generator imports such as `math` and `traceback`. If the saved script path or `_core` cannot be found, fail clearly rather than using another checkout.
 - `project_modules` contains package/folder names and reusable modules, not asset-specific root scripts.
 - Keep asset-specific generators under `source/<domain>/<asset>/`.
 - Keep source and export paths separate.
@@ -17,3 +18,33 @@ applyTo: "**/*.py"
 - Treat FBX axis values as unvalidated until the documented Blender → FBX → Unity round-trip passes for that profile.
 - Do not implement FBX copying/import or `.meta` handling before the round-trip and handoff contract are approved.
 - Do not commit Python cache artifacts (`__pycache__/`, `*.py[cod]`).
+
+## Environment batch launcher requirements
+
+When modifying or creating `Blender/source/environment/generate_all.py`:
+
+- Treat it as the canonical batch entry point for environment generators.
+- Discover `Blender/` from the saved active Text Editor script path and locate `_core/__init__.py` before importing `_core`; never hardcode a workstation path or rely on the current working directory.
+- Preserve all required imports, including `traceback` for per-generator exception reporting.
+- Support `GENERATE_ALL`, `ASSET_FILTER`, and `INCLUDE_TEST_ASSETS` as documented in `ART_AND_ASSET_PIPELINE.md`.
+- Exclude test generators by default using the documented folder naming convention; never silently include `*_test` generators in a production batch.
+- Execute each generator in an isolated namespace, continue after individual failures, and print a final report with discovered, selected, executed, succeeded, failed, and skipped counts plus asset names.
+- Keep generation/export in Blender. Do not copy FBXs into Unity or modify `.meta` files from the batch launcher.
+- Keep the user procedure and report definitions synchronized with `ART_AND_ASSET_PIPELINE.md`.
+
+## Test and production destination rules
+
+- `_ART_TEST` is only for temporary fixtures/prototypes; never leave a production generator targeting `_ART_TEST`.
+- The batch launcher selects generators only. It must never rewrite an asset's destination or infer production status from `GENERATE_ALL`, `ASSET_FILTER` or `INCLUDE_TEST_ASSETS`.
+- A test generator must declare an explicit `_ART_TEST` destination and `extra.test_only: true`. A production generator must declare its canonical production destination and must not set `extra.test_only: true`.
+- When promoting an asset, update its generator's explicit `unity.destination` and test metadata together, following the promotion workflow in `ART_AND_ASSET_PIPELINE.md`. Do not delete old test imports automatically.
+- Choose the production category from the documented routing table (for example, grass/reeds/wild grass -> `Environment/Vegetation`; logs/stumps -> `Environment/NaturalFeatures`; rocks -> `Environment/Rocks`; trees -> `Environment/Trees`).
+
+
+## Production and test destination rules
+
+- Production environment generators must use an explicit canonical `unity.destination` under `Assets/Project/Content/Models/Environment/<CategoryId>/...`; never retain `_ART_TEST` after promotion.
+- Production calls to `generate_asset(...)` must pass `test_only=False` and the explicit `asset_category`. The shared helper defaults `test_only` to `False`; test fixtures must opt in with `test_only=True`.
+- Every environment FBX manifest must include `asset_domain: "Environment"` and the canonical first-level `asset_category` matching its destination.
+- Keep dedicated test generators (for example `grass_short_test`) under `_ART_TEST` with `test_only=True`; do not include them in normal batch runs.
+- Do not infer or rewrite destinations in `generate_all.py`; it selects scripts only.

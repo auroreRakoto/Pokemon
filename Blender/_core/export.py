@@ -18,44 +18,30 @@ class ExportProfile:
     apply_unit_scale: bool = True
     axis_forward: str = "-Z"
     axis_up: str = "Y"
-    apply_scale_options: str = "FBX_SCALE_UNITS"
-    mesh_smooth_type: str = "OFF"
-    use_mesh_modifiers: bool = True
     bake_animation: bool = False
     use_nla_strips: bool = False
     use_all_actions: bool = False
     add_leaf_bones: bool = False
+    mesh_smooth_type: str = "OFF"
 
     @classmethod
-    def from_config(cls, config, name):
-        fbx = config.get("fbx", {})
-        values = dict(fbx.get("profiles", {}).get(name, {}))
-        if not values:
-            raise ValueError(f"Profil FBX inconnu ou absent de project.json : {name}")
-        values["object_types"] = tuple(values.get("object_types", ("MESH", "ARMATURE", "EMPTY")))
-        values.setdefault("apply_unit_scale", fbx.get("apply_unit_scale", True))
-        values.setdefault("apply_scale_options", fbx.get("apply_scale_options", "FBX_SCALE_UNITS"))
-        values.setdefault("mesh_smooth_type", fbx.get("mesh_smooth_type", "OFF"))
-        values.setdefault("use_mesh_modifiers", fbx.get("use_mesh_modifiers", True))
-        return cls(name=name, **values)
+    def static_mesh(cls):
+        return cls(name="static_mesh", object_types=("MESH", "EMPTY"))
 
     @classmethod
-    def static_mesh(cls, config=None):
-        return cls.from_config(config, "static_mesh") if config else cls(name="static_mesh", object_types=("MESH", "EMPTY"))
+    def skinned_mesh(cls):
+        return cls(name="skinned_mesh", bake_animation=False)
 
     @classmethod
-    def skinned_mesh(cls, config=None):
-        return cls.from_config(config, "skinned_mesh") if config else cls(name="skinned_mesh", bake_animation=False)
-
-    @classmethod
-    def animated_mesh(cls, config=None):
-        return cls.from_config(config, "animated_mesh") if config else cls(name="animated_mesh", bake_animation=True, use_nla_strips=True)
+    def animated_mesh(cls):
+        return cls(name="animated_mesh", bake_animation=True, use_nla_strips=True)
 
 
 def export_fbx(objects, destination, asset_id, domain, asset_type,
                unity_destination, profile=None, source_path="",
                allowed_export_root=None, require_materials=True,
-               require_uvs=False, dependencies=None, extra_manifest=None):
+               require_uvs=False, dependencies=None, extra_manifest=None,
+               asset_domain=None, asset_category=None):
     """Export a validated object set to FBX and emit its manifest.
 
     This function does not copy files into Unity and never creates/modifies .meta.
@@ -98,11 +84,11 @@ def export_fbx(objects, destination, asset_id, domain, asset_type,
             use_selection=True,
             object_types=set(profile.object_types),
             apply_unit_scale=profile.apply_unit_scale,
-            apply_scale_options=profile.apply_scale_options,
+            apply_scale_options="FBX_SCALE_UNITS",
             axis_forward=profile.axis_forward,
             axis_up=profile.axis_up,
             mesh_smooth_type=profile.mesh_smooth_type,
-            use_mesh_modifiers=profile.use_mesh_modifiers,
+            use_mesh_modifiers=True,
             add_leaf_bones=profile.add_leaf_bones,
             bake_anim=profile.bake_animation,
             bake_anim_use_nla_strips=profile.use_nla_strips,
@@ -127,6 +113,8 @@ def export_fbx(objects, destination, asset_id, domain, asset_type,
             validation=report,
             dependencies=dependencies,
             extra=extra_manifest,
+            asset_domain=asset_domain,
+            asset_category=asset_category,
         )
         manifest_path = destination.with_suffix(".manifest.json")
         write_manifest(manifest_path, manifest_data)

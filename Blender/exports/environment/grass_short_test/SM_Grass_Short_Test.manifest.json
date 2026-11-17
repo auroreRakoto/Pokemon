@@ -13,6 +13,7 @@
     "dimensions_target_m": "approx. 0.25 x 0.25 x 0.43",
     "purpose": "ART-001 first integration proof",
     "test_asset": true,
+    "test_only": true,
     "unity_import_note": "Temporary test destination only; do not sync automatically."
   },
   "geometry": {

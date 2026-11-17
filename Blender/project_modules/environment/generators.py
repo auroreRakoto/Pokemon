@@ -13,7 +13,6 @@ from _core.materials import get_or_create_material, assign_material
 from _core.collections import get_or_create_collection, move_objects_to_collection
 from _core.paths import ProjectPaths
 from _core.export import ExportProfile, export_fbx
-from _core.config import load_project_config
 
 PALETTE = {
     "leaf_dark": (0.075, 0.22, 0.045, 1),
@@ -162,7 +161,7 @@ BUILDERS = {
 }
 
 def generate_asset(asset_key, asset_id, object_name, unity_destination, builder, kwargs=None,
-                   source_path=None, seed=1, test_only=True):
+                   source_path=None, seed=1, test_only=False, asset_category=None):
     """Idempotent per-owned-collection generation and export through _core."""
     from pathlib import Path
     kwargs=dict(kwargs or {})
@@ -177,13 +176,13 @@ def generate_asset(asset_key, asset_id, object_name, unity_destination, builder,
     obj.location=(0,0,0); obj.rotation_euler=(0,0,0); obj.scale=(1,1,1)
     bpy.context.view_layer.update()
     paths=ProjectPaths.discover(start=Path(__file__))
-    config=load_project_config(paths)
     out=paths.export_asset("environment",asset_key)
     result=export_fbx(objects=[obj],destination=out/(object_name+".fbx"),
         asset_id=asset_id,domain="environment",asset_type="static_mesh",
-        unity_destination=unity_destination,profile=ExportProfile.static_mesh(config),
+        unity_destination=unity_destination,profile=ExportProfile.static_mesh(),
         source_path=source_path or f"Blender/source/environment/{asset_key}/",
         allowed_export_root=paths.exports,require_materials=True,require_uvs=False,
+        asset_domain="Environment", asset_category=asset_category,
         extra_manifest={"generator_version":GENERATOR_VERSION,"seed":seed,
                         "test_only":bool(test_only),"authoring":"Blender procedural mesh"})
     print("[ART]",asset_key,result.to_dict())

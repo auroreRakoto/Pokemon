@@ -39,6 +39,127 @@ Blender/
 
 `project_modules` contains package directories/modules, not unrelated root-level asset scripts. Individual asset generators belong under `source/<domain>/<asset>/`.
 
+
+## Blender generator bootstrap and `_core` discovery
+
+Standalone Blender generators must run on any workstation after the repository is cloned or moved. They must not depend on a machine-specific absolute path, a manually configured Blender Python path, or the current working directory.
+
+### Required user procedure (Blender Text Editor)
+
+1. Keep the generator in its canonical repository location, for example `Blender/source/environment/grass_short_test/generator.py`. Do not run a copied version from `C:\`, Downloads, or a temporary folder.
+2. In Blender, switch to the **Scripting** workspace.
+3. In the Text Editor, choose **Text > Open**, then select the `generator.py` from the repository's `Blender/source/<domain>/<asset>/` folder. This is important: opening the file from disk gives Blender's Text datablock a real `filepath`.
+4. If you have edited the script, use **Text > Save** (or `Alt+S`) before running it. Confirm that the text is saved to the canonical source folder, not an internal unsaved Text datablock.
+5. Click **Run Script**. The bootstrap reads the saved Text Editor file path, walks upward through its parent directories, and locates the `Blender/` directory by checking for `_core/__init__.py`.
+6. The bootstrap adds that discovered `Blender/` directory to `sys.path`, then and only then imports `_core`.
+7. The generator can now call `ProjectPaths.discover(start=BLENDER_ROOT)` and load `Blender/config/project.json` as usual.
+
+Do not run an unsaved internal Text block for a standalone generator. Do not rely on the `.blend` file location as the repository location: a `.blend` file may be stored outside the repository. Do not hardcode a path such as `C:/Users/...`, `C:/Downloads/Inputs`, or `/home/...`.
+
+### Bootstrap implementation
+
+Keep the generator's normal standard-library and Blender imports. In particular, imports used by the generator such as `math` and `traceback` must not be removed when adding the bootstrap. The following is a complete bootstrap pattern for a saved script opened in Blender's Text Editor; place it before every `_core` import:
+
+```python
+from pathlib import Path
+import sys
+import math
+import traceback
+
+import bpy
+import bmesh
+
+
+def _current_text_file_path() -> Path:
+    """Return the saved path of the active Blender Text Editor script."""
+    # Prefer the Text datablock shown in the active Text Editor.
+    try:
+        space = bpy.context.space_data
+        text_block = getattr(space, "text", None)
+        if text_block and text_block.filepath:
+            path = Path(bpy.path.abspath(text_block.filepath))
+            if path.is_file():
+                return path
+    except (AttributeError, TypeError, RuntimeError):
+        pass
+
+    # Fallback: search loaded external Text datablocks for a saved generator.
+    candidates = []
+    for text_block in bpy.data.texts:
+        if not text_block.filepath:
+            continue
+        path = Path(bpy.path.abspath(text_block.filepath))
+        if path.is_file() and path.name.lower() == "generator.py":
+            candidates.append(path)
+
+    # Do not guess if multiple generator.py files are open.
+    unique_candidates = list(dict.fromkeys(path.resolve() for path in candidates))
+    if len(unique_candidates) == 1:
+        return unique_candidates[0]
+    if len(unique_candidates) > 1:
+        raise RuntimeError(
+            "Several saved generator.py files are open. Activate the intended "
+            "generator in the Text Editor and run it from there."
+        )
+
+    raise RuntimeError(
+        "The active Blender Text block has no valid saved file path. "
+        "Use Text > Open to open the generator from the repository, then save it."
+    )
+
+
+def find_blender_root(generator_path: Path) -> Path:
+    """Walk upward from the saved generator until Blender/_core is found."""
+    current = generator_path.resolve().parent
+    for directory in (current, *current.parents):
+        if (directory / "_core" / "__init__.py").is_file():
+            return directory
+        blender_dir = directory / "Blender"
+        if (blender_dir / "_core" / "__init__.py").is_file():
+            return blender_dir
+
+    raise RuntimeError(
+        "Cannot locate the project's Blender/_core directory. "
+        f"Generator path checked: {generator_path}"
+    )
+
+
+GENERATOR_PATH = _current_text_file_path()
+BLENDER_ROOT = find_blender_root(GENERATOR_PATH)
+if str(BLENDER_ROOT) not in sys.path:
+    sys.path.insert(0, str(BLENDER_ROOT))
+
+# Shared project imports are deliberately after path discovery.
+import _core
+from _core.paths import ProjectPaths
+from _core.collections import get_or_create_collection, move_objects_to_collection
+from _core.materials import get_or_create_material, assign_material
+from _core.export import ExportProfile, export_fbx
+from _core.config import load_project_config
+```
+
+For an asset generator, retain all imports actually used by that file. For example, the `grass_short_test` generator uses `math` for geometry and `traceback` in its top-level exception handler. The bootstrap is not a replacement for the generator's imports; it only discovers the repository and prepares `sys.path`.
+
+### Diagnostic procedure when discovery fails
+
+If the bootstrap reports that it cannot locate `_core`:
+
+1. In Blender's Text Editor, inspect the opened text and confirm it is the repository's saved `generator.py`.
+2. Save it, then verify that the file is physically under `.../Blender/source/<domain>/<asset>/generator.py`.
+3. Confirm that the same repository contains `Blender/_core/__init__.py`.
+4. Close duplicate or stale `generator.py` Text datablocks, reopen the intended file with **Text > Open**, and run it again.
+5. Do not fix the issue by adding a user-specific path. If the expected `_core/__init__.py` is absent, the repository checkout is incomplete or the wrong folder was opened.
+
+### Rules for new and existing generators
+
+- Put the bootstrap before **all** `_core` imports.
+- Preserve all standard-library and Blender imports required by the generator (`math`, `traceback`, `bpy`, `bmesh`, etc.).
+- Use the same discovery helper in every standalone generator, or use a shared launcher that establishes `sys.path` before loading generators.
+- Never use the `.blend` file directory as the sole discovery source.
+- Do not add the repository root or a user-specific folder permanently to Blender's global Python configuration.
+- If `_core` cannot be found, stop with a clear error; do not silently fall back to another checkout.
+- Keep `project_modules/` package imports separate: the bootstrap makes `Blender/` importable, after which package imports can use the documented package structure.
+
 ## Pokémon asset requirements
 
 For each species, define as relevant:
@@ -270,7 +391,7 @@ TOOLS validates all of the following before copying:
 - no other manifest claims the same destination with a different `asset_id`;
 - the destination is not already claimed by a different asset identity in the synchronization registry.
 
-For Pokémon, the manifest should also carry the canonical `species_id`; TOOLS checks that the destination's species segment matches it. For other domains, the manifest should carry `asset_domain` and `asset_category`; TOOLS checks that they match the path. These fields describe and validate the explicit destination; they do not replace it.
+For Pokémon, the manifest should also carry the canonical `species_id`; TOOLS checks that the destination's species segment matches it. For non-Pokémon domains, the manifest must carry `asset_domain` and `asset_category`; for environment assets these are `Environment` and the canonical first-level category (`Vegetation`, `Ground`, `Rocks`, `Trees`, `Water`, `Structures`, or `NaturalFeatures`). TOOLS checks that they match the path. These fields describe and validate the explicit destination; they do not replace it.
 
 Non-model content has its own owner and import workflow. Materials belong in `Materials/`, texture files in `Textures/`, animation controllers/clips in `Animations/`, composed Unity objects in `Prefabs/`, and VFX/audio in their corresponding roots. The FBX synchronizer must not create or move these assets as a side effect of importing a model. ModelImporter material extraction/creation must remain disabled unless a separately approved material workflow explicitly requires it.
 
@@ -310,7 +431,23 @@ FBX material import does not recreate Unity shader graphs. The default policy sh
 
 Every candidate must end in a clear result logged to the Unity Console, including asset ID, source FBX, destination and outcome. Use `Debug.Log` for success, `Debug.LogWarning` for recoverable issues and `Debug.LogError` for failed transfers/imports. Include the exception or actionable reason; do not silently skip assets.
 
-A failure must not delete the source export or destroy a previously valid destination. A failed import is reported separately from a successful file copy. The tool must be able to retry on the next scan or explicit rescan without duplicating assets. A concise summary should report scanned, imported/updated, skipped-unchanged and failed counts.
+A failure must not delete the source export or destroy a previously valid destination. A failed import is reported separately from a successful file copy. The tool must be able to retry on the next scan or explicit rescan without duplicating assets.
+
+At the end of **every completed scan**, TOOLS writes exactly one concise summary line to the Unity Console, including when zero assets are found. The report distinguishes:
+
+- `manifests found`: number of `*.manifest.json` files discovered in the export tree;
+- `assets scanned`: number of manifests successfully parsed and validated into FBX candidates (each candidate identifies one asset to inspect/process);
+- `invalid manifests`: discovered manifests rejected during parsing or validation;
+- `imported/updated`: assets copied and imported during this scan;
+- `unchanged`: assets already synchronized at the current source version;
+- `waiting`: assets whose FBX/manifest have not yet been stable for two scans, or whose profile is awaiting validation;
+- `failed`: candidates that failed due to duplicate destinations, copy errors or import errors.
+
+Use a stable, searchable prefix such as `[Blender Sync] Scan report:`. Example:
+
+`[Blender Sync] Scan report: 4 manifest(s) found, 3 asset(s) scanned, 1 invalid manifest(s), 1 imported/updated, 1 unchanged, 1 waiting, 0 failed.`
+
+The report is a scan-level diagnostic, not a success claim for every discovered file. Invalid manifests are counted separately and are not included in `assets scanned`. A scan that cannot access the configured export directory or load its configuration must emit a clear warning/error explaining why no scan report could be completed.
 
 #### TOOLS ownership boundary
 
@@ -342,23 +479,85 @@ TOOLS does not own:
 - import settings are deterministic across first import and reimport;
 - the tool is Editor-only and does not affect player builds.
 
+## Environment batch generation (`generate_all.py`)
 
-### Implemented Editor synchronizer (initial version)
+The canonical batch launcher is `Blender/source/environment/generate_all.py`. It is the supported entry point for generating multiple environment assets from Blender's Text Editor.
 
-The first implementation lives at `Assets/Project/Editor/Tools/Blender/BlenderFbxSync.cs`. It is Editor-only and uses Unity's `EditorApplication.update` loop to scan the configured export directory every three seconds while the Editor is idle. A candidate must have an unchanged FBX and manifest file stamp over consecutive scans before it can be copied. This avoids importing a file while Blender is still writing it.
+### User procedure
 
-The synchronizer reads `Blender/config/project.json` (`paths.exports_root` and `paths.unity_models_root`) and the adjacent manifest. It uses `unity.destination` as the sole destination authority. For compatibility with existing test generators, it accepts either a path relative to Models or the full `Assets/Project/Content/Models/...` path; it normalizes both to a Models-relative path before validation. It never infers a production destination from the FBX filename.
+1. Open Blender and switch to the **Scripting** workspace.
+2. In the Text Editor, use **Text > Open** and select `Blender/source/environment/generate_all.py` from the current repository checkout.
+3. Save the file if you changed its configuration. Do not run an unsaved copy or a copy from Downloads/a temporary directory.
+4. Review the configuration block at the top of the script:
+   - `GENERATE_ALL = True` runs every discovered production generator.
+   - `GENERATE_ALL = False` runs only the asset folder names listed in `ASSET_FILTER`.
+   - `INCLUDE_TEST_ASSETS = False` excludes test generators by default. Set it to `True` only when deliberately running test assets such as `grass_short_test`.
+5. Click **Run Script**. The launcher discovers its own saved Text Editor path, walks upward to find `Blender/_core/__init__.py`, adds the discovered `Blender/` directory to `sys.path`, and imports `_core` only after discovery.
+6. Read the per-asset output and the final batch report in Blender's **System Console** (Windows: **Window > Toggle System Console**). A failed asset is reported, but does not prevent later generators from running.
+7. Review the final counts and failure list before using the generated FBXs in Unity. The Unity synchronizer remains responsible for transferring/importing the FBXs; `generate_all.py` only generates them in `Blender/exports/`.
 
-Manifests marked `extra.test_only=true` may target a path containing `_ART_TEST`. Production destinations must follow the documented domain/category structure. Unknown production categories are rejected and logged; update this architecture before adding a new category. Duplicate destinations are rejected for every conflicting manifest.
+### Test assets versus production assets (promotion workflow)
 
-The service replaces existing FBX files using a temporary sibling file and a backup/rollback strategy. It never transfers or edits `.meta` files. Unity creates and maintains `.meta` files; replacing the FBX at the same path is intended to preserve the existing GUID. The service then imports only the changed asset and applies the centralized `ModelImporter` profile. Unchanged exports are skipped using a signature stored in `EditorPrefs`.
+`_ART_TEST` is reserved for temporary validation fixtures and prototypes. It is not a general destination for assets generated by a batch, and it must never become the default destination for production content. The batch launcher selects which generators to execute; it does **not** rewrite their destinations or promote test assets automatically. Each generator remains responsible for declaring its explicit `unity.destination` in its export call/manifest.
 
-The initial import policy imports standard FBX material data into the model prefab, preserves material slots and basic diffuse colours, disables camera/light import, imports normals, calculates MikkTSpace tangents, enables blend shapes, disables mesh compression and Read/Write, and enables mesh optimization. Static meshes do not import animation; skinned meshes use a Generic rig without clips; animated meshes use a Generic rig with animation import. These defaults must be checked against the project's actual assets. FBX import does not create reusable Unity `.mat` assets or recreate URP Shader Graphs.
+Use this workflow when an asset has completed its initial validation and is ready to become game content:
 
-The synchronizer logs success, unchanged, waiting and failure outcomes to the Unity Console. It exposes `Tools > Blender Sync > Rescan Now`, `Pause` and `Resume`. It does not run in player builds.
+1. Keep a dedicated test generator (for example, `grass_short_test`) and its manifest destination under `Environment/_ART_TEST/...` only when the asset is still a test fixture. Set `extra.test_only: true`.
+2. For the production asset generator (for example, `grass_short`), set `extra.test_only: false` or omit the flag (the production default), and change `unity.destination` to the canonical production category path. Do not copy the `_ART_TEST` path into a production generator.
+3. Use the category mapping in the canonical model routing table. For example, short/tall grass, reeds and wild grass belong under `Environment/Vegetation/`; logs and stumps belong under `Environment/NaturalFeatures/`; rocks belong under `Environment/Rocks/`; trees belong under `Environment/Trees/`.
 
-**Safety gate:** `extra.test_only=true` assets can be synchronized into `_ART_TEST` while the material round-trip is being debugged. Production exports remain blocked until `round_trip.status` is `VALIDATED` and `round_trip.validated_profile` matches the profile being imported. Set and validate profiles independently.
+For the current procedural environment generator set, use these explicit production destinations (the asset-specific folder and FBX filename are part of the destination):
 
-### Material colour troubleshooting
+| Generator folder | `asset_category` | Production destination relative to `Models/` |
+|---|---|---|
+| `fallen_log` | `NaturalFeatures` | `Environment/NaturalFeatures/Fallen_Log/SM_Fallen_Log.fbx` |
+| `flower_blue` | `Vegetation` | `Environment/Vegetation/Flower_Blue/SM_Flower_Blue.fbx` |
+| `flower_yellow` | `Vegetation` | `Environment/Vegetation/Flower_Yellow/SM_Flower_Yellow.fbx` |
+| `grass_short` | `Vegetation` | `Environment/Vegetation/Grass_Short/SM_Grass_Short.fbx` |
+| `grass_tall` | `Vegetation` | `Environment/Vegetation/Grass_Tall/SM_Grass_Tall.fbx` |
+| `leaf_litter` | `Ground` | `Environment/Ground/Leaf_Litter/SM_Leaf_Litter.fbx` |
+| `mushroom_red` | `NaturalFeatures` | `Environment/NaturalFeatures/Mushroom_Red/SM_Mushroom_Red.fbx` |
+| `reed_clump` | `Vegetation` | `Environment/Vegetation/Reed_Clump/SM_Reed_Clump.fbx` |
+| `stone_cluster_large` | `Rocks` | `Environment/Rocks/Stone_Cluster_Large/SM_Stone_Cluster_Large.fbx` |
+| `stone_cluster_small` | `Rocks` | `Environment/Rocks/Stone_Cluster_Small/SM_Stone_Cluster_Small.fbx` |
+| `tree_stump` | `NaturalFeatures` | `Environment/NaturalFeatures/Tree_Stump/SM_Tree_Stump.fbx` |
+| `wild_grass` | `Vegetation` | `Environment/Vegetation/Wild_Grass/SM_Grass_Wild.fbx` |
 
-The shared Blender material helper must set both `Material.diffuse_color` and the Principled BSDF `Base Color`. Setting only the viewport diffuse colour is not sufficient evidence that the FBX contains the intended material colour. After updating the helper, regenerate a test asset, confirm its FBX imports with the expected basic diffuse colour, and only then mark the static material round-trip as passed. Unity's final URP material/shader authoring remains a separate content task.
+The `Flowers`, `Mushrooms`, and asset-specific folders above are organizational subfolders beneath the documented canonical category; they do not introduce new top-level category IDs. `asset_domain` must be `Environment`. `asset_category` must match the first category folder immediately below `Environment` (for example, `Vegetation`, `Ground`, `Rocks`, or `NaturalFeatures`).
+4. Keep the destination explicit in the generator/manifest, including the asset-specific folder and `.fbx` filename. Example: `Environment/Vegetation/Grass_Short/SM_Grass_Short.fbx`. The path is relative to `Assets/Project/Content/Models/`.
+5. Run the production generator or select it in `generate_all.py`. `GENERATE_ALL`, `ASSET_FILTER` and `INCLUDE_TEST_ASSETS` control generator selection only; they do not change `test_only` or the destination. `INCLUDE_TEST_ASSETS = False` excludes test-named generator folders, but does not detect or repair a production generator whose manifest still points to `_ART_TEST`.
+6. Inspect the generated manifest before synchronization. A production manifest must not contain `_ART_TEST` in `unity.destination` and must not set `extra.test_only` to `true`. A test manifest must use an `_ART_TEST` destination and set `extra.test_only: true`. These two conditions must agree.
+7. Run the Unity synchronizer and confirm the asset appears under its production category. Existing test copies are not automatically moved or deleted; clean them up manually only after confirming that no scene, prefab or other asset references them.
+
+**Important:** enabling a generator in the production batch does not make its output a production asset. Production status comes from the generator's manifest metadata and canonical destination. TOOLS must reject contradictory combinations (for example, `_ART_TEST` with `test_only: false`, or a production path with `test_only: true`) rather than silently rerouting the file.
+
+### Selection and test-asset convention
+
+- Each generator is discovered from `Blender/source/environment/<asset_folder>/generator.py`.
+- A folder is considered a test generator when its name ends in `_test`, starts with `test_`, or is one of `test`, `tests`, `_test`, `_tests`.
+- Test generators are excluded unless `INCLUDE_TEST_ASSETS = True`.
+- `ASSET_FILTER` entries are exact source folder names, not FBX names or asset IDs.
+- If a requested filter entry has no matching generator, the launcher prints a warning rather than silently pretending it ran.
+- Keep the test naming convention consistent; do not place production generators in folders marked as tests.
+
+### Required batch report
+
+Every run prints one final report, including when no generator was selected or all selected generators failed:
+
+- `Discovered`: all `generator.py` files found under `source/environment/`.
+- `Selected`: generators remaining after the all/filter selection and test exclusion.
+- `Executed`: generators actually started.
+- `Succeeded`: generators whose script completed without raising an exception.
+- `Failed`: generators that raised an exception, with their names and error summaries.
+- `Skipped`: discovered generators not executed, split into filter exclusions and test exclusions.
+
+The launcher also prints the success and failure asset names. It must continue after an individual failure and must never report a failed generator as successful. A successful batch report means the Python generator scripts completed; it does not by itself prove that the FBX round-trip or Unity import is valid.
+
+### Launcher responsibilities and limits
+
+- `generate_all.py` owns discovery, selection, isolated script execution, and batch reporting.
+- Individual `source/environment/<asset>/generator.py` files own their asset parameters, geometry/material generation, validation request, and FBX export.
+- `_core` owns shared path/config/export/manifest behavior.
+- Unity TOOLS owns the subsequent FBX transfer and Unity import.
+- The launcher must not copy files into `Assets/`, create/edit `.meta` files, or bypass manifest validation.
+- The launcher must use the same saved-Text-Editor-path bootstrap convention as standalone generators and must preserve required imports such as `traceback`.

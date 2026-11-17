@@ -1,12 +1,60 @@
 """ART environment asset generator: mushroom_red.
 
-Run from Blender Text Editor. Outputs only to Blender/exports.
-The Unity destination in the manifest is a proposed test mapping; TOOLS must
-approve the import/sync contract before any Unity copy is performed.
+Production environment asset generator.
+Run from the saved Blender Text Editor script or through generate_all.py.
+Exports only to Blender/exports; Unity transfer is handled by TOOLS.
 """
 from pathlib import Path
-import sys, traceback
+import sys
+import traceback
 import bpy
+
+
+def _find_blender_root():
+    """Locate this repository's Blender directory without machine-specific paths."""
+    candidates = []
+
+    # The active Text Editor path is the most reliable source for Run Script.
+    try:
+        active_text = getattr(bpy.context.space_data, "text", None)
+        if active_text and active_text.filepath:
+            candidates.append(Path(bpy.path.abspath(active_text.filepath)))
+    except (AttributeError, TypeError, RuntimeError):
+        pass
+
+    # Batch execution supplies an absolute __file__; standalone execution may not.
+    try:
+        script_path = Path(__file__)
+        if script_path.is_absolute() and script_path.exists():
+            candidates.append(script_path)
+    except (NameError, OSError, TypeError):
+        pass
+
+    # Fallback: a saved .blend file inside the repository.
+    if bpy.data.filepath:
+        candidates.append(Path(bpy.path.abspath(bpy.data.filepath)))
+
+    for candidate in candidates:
+        candidate = candidate.resolve()
+        if candidate.is_file():
+            candidate = candidate.parent
+        for directory in (candidate, *candidate.parents):
+            if (directory / "_core" / "__init__.py").is_file():
+                return directory
+            blender_dir = directory / "Blender"
+            if (blender_dir / "_core" / "__init__.py").is_file():
+                return blender_dir
+
+    raise RuntimeError(
+        "Cannot locate Blender/_core. Open the saved generator from this repository "
+        "with Text > Open, or save the .blend file inside the repository."
+    )
+
+
+BLENDER_ROOT = _find_blender_root()
+if str(BLENDER_ROOT) not in sys.path:
+    sys.path.insert(0, str(BLENDER_ROOT))
+
 import _core
 from _core.paths import ProjectPaths
 from project_modules.environment.generators import generate_asset, build_mushroom
@@ -14,18 +62,19 @@ from project_modules.environment.generators import generate_asset, build_mushroo
 ASSET_KEY = 'mushroom_red'
 ASSET_ID = 'environment.mushroom_red'
 OBJECT_NAME = 'SM_Mushroom_Red'
-UNITY_TEST_DESTINATION = 'Assets/Project/Content/Models/Environment/_ART_TEST/mushroom_red/SM_Mushroom_Red.fbx'
+UNITY_DESTINATION = "Assets/Project/Content/Models/Environment/NaturalFeatures/Mushroom_Red/SM_Mushroom_Red.fbx"
 
 def generate():
     return generate_asset(
         asset_key=ASSET_KEY,
         asset_id=ASSET_ID,
         object_name=OBJECT_NAME,
-        unity_destination=UNITY_TEST_DESTINATION,
+        unity_destination=UNITY_DESTINATION,
         builder=build_mushroom,
         kwargs={'cap_color': 'cap'},
         source_path=f"Blender/source/environment/{ASSET_KEY}/",
-        test_only=True,
+        test_only=False,
+        asset_category="NaturalFeatures",
     )
 
 try:

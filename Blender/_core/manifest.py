@@ -10,13 +10,16 @@ from .animation import actions_for_objects, action_metadata
 
 def build_manifest(asset_id, domain, asset_type, source_path, export_path,
                    unity_destination, objects, export_profile,
-                   validation, dependencies=None, extra=None):
+                   validation, dependencies=None, extra=None,
+                   asset_domain=None, asset_category=None):
     objects = list(objects)
     actions = actions_for_objects(objects)
     manifest = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "asset_id": asset_id,
         "domain": domain,
+        "asset_domain": asset_domain or domain.title(),
+        "asset_category": asset_category,
         "asset_type": asset_type,
         "source": {"path": str(source_path).replace("\\", "/")},
         "pipeline": {"core_version": __version__},
