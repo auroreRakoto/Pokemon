@@ -21,8 +21,13 @@ import bpy
 # CUSTOM: preserve each generator's declared destination and test_only value.
 MODE = "PRODUCTION"
 
+# Safety switch: the batch is paused by default.
+# Set RUN_BATCH = True only when you explicitly intend to generate/export assets.
+RUN_BATCH = False
+
 # True: run every discovered generator. False: use ASSET_FILTER.
-GENERATE_ALL = True
+# Keep this False by default to avoid selecting every discovered generator.
+GENERATE_ALL = False
 
 # Used only when GENERATE_ALL is False. Names are source subfolder names.
 ASSET_FILTER = [
@@ -288,4 +293,19 @@ def main():
     }
 
 
-BATCH_RESULT = main()
+if RUN_BATCH:
+    BATCH_RESULT = main()
+else:
+    print("\n[BATCH][PAUSED] Blender environment batch is disabled by default.")
+    print("[BATCH][PAUSED] Set RUN_BATCH = True in generate_all.py to run it explicitly.\n")
+    BATCH_RESULT = {
+        "paused": True,
+        "discovered": 0,
+        "selected": 0,
+        "executed": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "skipped": 0,
+        "success_assets": [],
+        "failed_assets": [],
+    }

@@ -172,3 +172,10 @@ The first spherical-world prototype is an inspectable generation workspace, not 
 The same generated data must be available in two presentation views: a 3D spherical globe and a 2D planisphere. These are views of one spherical dataset, not separate world generators. Switching views must not alter or regenerate source fields. The planisphere projection and its distortion/wrap behaviour must be explicit and tested; equirectangular is only the initial candidate.
 
 Independent thematic maps (altitude, temperature, derived moisture, slope, water, biomes, settlement suitability, etc.) are selected for inspection without modifying terrain geometry or source values. See `WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md` for the detailed prototype workflow and acceptance criteria.
+
+
+## Spherical geographic-field pipeline (WORLD-002 plan)
+
+The next planned spherical-world work package is `WORLD-002_SPHERICAL_GEOGRAPHIC_FIELDS.md`. It extends the WORLD-001 Planet Studio with shared, deterministic fields for temperature, water/hydrology, slope, spherical distance-to-water, derived moisture, vegetation suitability, biome classification and settlement suitability. These are separate outputs with explicit dependencies; downstream presentation and simulation must consume the same fields rather than regenerating contradictory local versions.
+
+The confirmed vegetation presentation is hybrid: biome-aware ground materials/textures plus deterministic 3D vegetation instances driven by vegetation suitability and environmental exclusion masks (DEC-042). The planisphere remains a presentation projection of the same spherical dataset. The planar EDT specified in the terrain domain must not be applied naïvely to the globe; WORLD-002 contains a mandatory spherical distance/hydrology design gate. The work package is currently a proposed plan and must not be treated as implemented or approved until the project-owner milestone gate is satisfied.

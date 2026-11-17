@@ -2,6 +2,7 @@
 using System;
 using Pokemon.Project.World.Spherical;
 using Pokemon.Project.World.Spherical.Studio;
+using Pokemon.Project.World.Spherical.Geography;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -55,7 +56,7 @@ namespace Pokemon.Project.Editor.World.Spherical
                 Repaint();
             }
             EditorGUILayout.Space(8);
-            EditorGUILayout.HelpBox("Available maps in this first implementation: Terrain, Altitude and Temperature. Moisture, Water, Biomes, Villages and Slope remain unavailable until their data-generation stages are implemented.", MessageType.Warning);
+            EditorGUILayout.HelpBox("Geographic field maps use one shared generated field set. Altitude, Temperature and Slope are available; hydrology, moisture, biomes and settlements are still pending.", MessageType.Info);
             EditorGUILayout.EndScrollView();
         }
 
@@ -106,8 +107,12 @@ namespace Pokemon.Project.Editor.World.Spherical
             {
                 settings.map = (SphericalPlanetStudioMap)EditorGUILayout.EnumPopup("Map", settings.map);
             }
-            if (settings.map == SphericalPlanetStudioMap.Moisture || settings.map == SphericalPlanetStudioMap.Water || settings.map == SphericalPlanetStudioMap.Biomes || settings.map == SphericalPlanetStudioMap.Villages || settings.map == SphericalPlanetStudioMap.Slope)
-                EditorGUILayout.HelpBox("This map is not generated yet. Choose Terrain, Altitude or Temperature for an implemented preview.", MessageType.Warning);
+            if (settings.map == SphericalPlanetStudioMap.Moisture || settings.map == SphericalPlanetStudioMap.Water ||
+                settings.map == SphericalPlanetStudioMap.Biomes || settings.map == SphericalPlanetStudioMap.Villages)
+                EditorGUILayout.HelpBox("This map is not generated yet. Choose Terrain, Altitude, Temperature or Slope.", MessageType.Warning);
+            else if (settings.map == SphericalPlanetStudioMap.Altitude || settings.map == SphericalPlanetStudioMap.Temperature ||
+                     settings.map == SphericalPlanetStudioMap.Slope)
+                EditorGUILayout.HelpBox("Geographic field preview: the same six-face field data is sampled for the globe and planisphere.", MessageType.Info);
         }
 
         private void EnsureSettings()
@@ -139,31 +144,50 @@ namespace Pokemon.Project.Editor.World.Spherical
                 EditorUtility.DisplayDialog("Planet Studio", "Stop Play Mode before generating an Editor preview.", "OK");
                 return;
             }
-            if (settings.map != SphericalPlanetStudioMap.Terrain && settings.map != SphericalPlanetStudioMap.Altitude && settings.map != SphericalPlanetStudioMap.Temperature)
+            bool geographicMap = settings.map == SphericalPlanetStudioMap.Altitude ||
+                settings.map == SphericalPlanetStudioMap.Temperature || settings.map == SphericalPlanetStudioMap.Slope;
+            if (!geographicMap && settings.map != SphericalPlanetStudioMap.Terrain)
             {
                 EditorUtility.DisplayDialog("Planet Studio", "This thematic map is not implemented yet. No preview was generated.", "OK");
                 return;
             }
             settings.Validate();
             EditorUtility.SetDirty(settings);
+            SphericalGeographicFieldSet fields = geographicMap
+                ? SphericalGeographicFieldGenerator.Generate(settings) : null;
             ClearPreview();
             GameObject root = new GameObject(PreviewRootName);
             Undo.RegisterCreatedObjectUndo(root, "Generate Planet Studio Preview");
             Material material = CreatePreviewMaterial();
             if (settings.view == SphericalPlanetStudioView.Spherical)
             {
-                Mesh[] meshes = SphericalPlanetStudioGenerator.GenerateGlobeFaces(settings);
+                Mesh[] meshes = geographicMap
+                    ? SphericalPlanetStudioGenerator.GenerateGeographicGlobeFaces(settings, fields, ToFieldType(settings.map))
+                    : SphericalPlanetStudioGenerator.GenerateGlobeFaces(settings);
                 for (int i = 0; i < meshes.Length; i++) CreateMeshObject(root.transform, ((CubeSphereFace)i).ToString(), meshes[i], material);
             }
             else
             {
-                Mesh mesh = SphericalPlanetStudioGenerator.GeneratePlanisphere(settings);
+                Mesh mesh = geographicMap
+                    ? SphericalPlanetStudioGenerator.GenerateGeographicPlanisphere(settings, fields, ToFieldType(settings.map))
+                    : SphericalPlanetStudioGenerator.GeneratePlanisphere(settings);
                 CreateMeshObject(root.transform, "Planisphere_Equirectangular", mesh, material);
             }
             Selection.activeGameObject = root;
             EditorSceneManager.MarkSceneDirty(root.scene);
             SceneView.RepaintAll();
             Debug.Log($"Planet Studio preview generated. View={settings.view}, Map={settings.map}, Seed={settings.seed}, Stage={settings.previewStage}, Layers=[{settings.layer1Enabled},{settings.layer2Enabled},{settings.layer3Enabled}].", root);
+        }
+
+        private static SphericalGeographicFieldType ToFieldType(SphericalPlanetStudioMap map)
+        {
+            switch (map)
+            {
+                case SphericalPlanetStudioMap.Altitude: return SphericalGeographicFieldType.AltitudeMeters;
+                case SphericalPlanetStudioMap.Temperature: return SphericalGeographicFieldType.TemperatureNormalized;
+                case SphericalPlanetStudioMap.Slope: return SphericalGeographicFieldType.SlopeDegrees;
+                default: throw new ArgumentOutOfRangeException(nameof(map), map, "Map is not a generated geographic field.");
+            }
         }
 
         private static Material CreatePreviewMaterial()

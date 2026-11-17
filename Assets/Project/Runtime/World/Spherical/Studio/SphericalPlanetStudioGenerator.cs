@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Pokemon.Project.World.Spherical.Geography;
 
 namespace Pokemon.Project.World.Spherical.Studio
 {
@@ -64,6 +65,135 @@ namespace Pokemon.Project.World.Spherical.Studio
             float normalized = latitudeFactor * settings.temperatureLatitudeInfluence + noise * settings.temperatureNoiseInfluence;
             float altitudeCooling = Mathf.Max(0f, SamplePreviewHeight(d, settings, settings.previewStage)) / 8000f;
             return Mathf.Clamp01(normalized - altitudeCooling);
+        }
+
+        /// <summary>Deterministic direction-based climate variation shared by geographic fields.</summary>
+        public static float SampleClimateNoise(Vector3 direction, int seed)
+        {
+            if (direction.sqrMagnitude < 1e-12f)
+                throw new ArgumentException("Direction must be non-zero.", nameof(direction));
+            return SampleSeamContinuousPerlin(direction.normalized * 3.1f, seed);
+        }
+
+        public static Mesh[] GenerateGeographicGlobeFaces(
+            SphericalPlanetStudioSettings settings, SphericalGeographicFieldSet fields,
+            SphericalGeographicFieldType field)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
+            Mesh[] meshes = new Mesh[6];
+            try
+            {
+                for (int f = 0; f < 6; f++)
+                    meshes[f] = GenerateGeographicCubeFace((CubeSphereFace)f, settings, fields, field);
+                return meshes;
+            }
+            catch
+            {
+                foreach (Mesh mesh in meshes) if (mesh != null) DestroyMesh(mesh);
+                throw;
+            }
+        }
+
+        public static Mesh GenerateGeographicPlanisphere(
+            SphericalPlanetStudioSettings settings, SphericalGeographicFieldSet fields,
+            SphericalGeographicFieldType field)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
+            int width = settings.planisphereWidth;
+            int height = settings.planisphereHeight;
+            int count = (width + 1) * (height + 1);
+            Vector3[] vertices = new Vector3[count];
+            Vector3[] normals = new Vector3[count];
+            Vector2[] uv = new Vector2[count];
+            Color[] colors = new Color[count];
+            int[] triangles = new int[width * height * 6];
+            int index = 0;
+            for (int y = 0; y <= height; y++)
+            for (int x = 0; x <= width; x++)
+            {
+                float u = (float)x / width;
+                float v = (float)y / height;
+                Vector3 direction = PlanisphereCoordinatesToDirection(u, v);
+                vertices[index] = new Vector3((u - 0.5f) * Mathf.PI * 2f * settings.radiusMeters,
+                    (v - 0.5f) * Mathf.PI * settings.radiusMeters, 0f);
+                normals[index] = Vector3.forward;
+                uv[index] = new Vector2(u, v);
+                colors[index] = GetGeographicFieldColor(fields.Sample(field, direction), field);
+                index++;
+            }
+            int t = 0;
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                int a = y * (width + 1) + x, b = a + 1, c = a + width + 1, d = c + 1;
+                triangles[t++] = a; triangles[t++] = b; triangles[t++] = c;
+                triangles[t++] = b; triangles[t++] = d; triangles[t++] = c;
+            }
+            Mesh mesh = new Mesh { name = "Planet_Planisphere_GeographicField",
+                indexFormat = count > 65535 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
+            mesh.vertices = vertices; mesh.normals = normals; mesh.uv = uv; mesh.colors = colors;
+            mesh.triangles = triangles; mesh.RecalculateBounds();
+            return mesh;
+        }
+
+        private static Mesh GenerateGeographicCubeFace(
+            CubeSphereFace face, SphericalPlanetStudioSettings settings,
+            SphericalGeographicFieldSet fields, SphericalGeographicFieldType field)
+        {
+            int resolution = settings.faceResolution;
+            int side = resolution + 1;
+            int count = side * side;
+            Vector3[] vertices = new Vector3[count];
+            Vector3[] normals = new Vector3[count];
+            Vector2[] uv = new Vector2[count];
+            Color[] colors = new Color[count];
+            int[] triangles = new int[resolution * resolution * 6];
+            int index = 0;
+            for (int y = 0; y <= resolution; y++)
+            for (int x = 0; x <= resolution; x++)
+            {
+                Vector3 direction = CubeSphereTopology.GetDirection(face,
+                    -1f + 2f * x / resolution, -1f + 2f * y / resolution);
+                float altitude = fields.Sample(SphericalGeographicFieldType.AltitudeMeters, direction);
+                vertices[index] = direction * (settings.radiusMeters + altitude);
+                normals[index] = direction;
+                uv[index] = new Vector2((float)x / resolution, (float)y / resolution);
+                colors[index] = GetGeographicFieldColor(fields.Sample(field, direction), field);
+                index++;
+            }
+            int t = 0;
+            for (int y = 0; y < resolution; y++)
+            for (int x = 0; x < resolution; x++)
+            {
+                int a = y * side + x, b = a + 1, c = a + side, d = c + 1;
+                triangles[t++] = a; triangles[t++] = b; triangles[t++] = c;
+                triangles[t++] = b; triangles[t++] = d; triangles[t++] = c;
+            }
+            Mesh mesh = new Mesh { name = $"Planet_Geographic_{field}_{face}",
+                indexFormat = count > 65535 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
+            mesh.vertices = vertices; mesh.normals = normals; mesh.uv = uv; mesh.colors = colors;
+            mesh.triangles = triangles; mesh.RecalculateBounds();
+            return mesh;
+        }
+
+        private static Color GetGeographicFieldColor(float value, SphericalGeographicFieldType field)
+        {
+            switch (field)
+            {
+                case SphericalGeographicFieldType.AltitudeMeters:
+                    return Color.Lerp(new Color(0.05f, 0.12f, 0.35f),
+                        new Color(0.9f, 0.88f, 0.72f), Mathf.InverseLerp(-2500f, 3000f, value));
+                case SphericalGeographicFieldType.TemperatureNormalized:
+                    return Color.Lerp(new Color(0.12f, 0.28f, 0.82f),
+                        new Color(0.92f, 0.28f, 0.08f), Mathf.Clamp01(value));
+                case SphericalGeographicFieldType.SlopeDegrees:
+                    return Color.Lerp(new Color(0.12f, 0.55f, 0.22f),
+                        new Color(0.88f, 0.12f, 0.08f), Mathf.InverseLerp(0f, 45f, value));
+                default:
+                    return Color.magenta;
+            }
         }
 
         public static Mesh[] GenerateGlobeFaces(SphericalPlanetStudioSettings settings)

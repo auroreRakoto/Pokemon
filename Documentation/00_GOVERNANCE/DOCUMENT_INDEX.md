@@ -54,6 +54,14 @@
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-001_IMPLEMENTATION_REPORT.md` — initial code slice, validation evidence and remaining Unity checks.
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-001_IMPLEMENTATION_PROGRESS_01.md` — visible runtime demo, camera and temporary surface movement implementation progress.
 
+## WORLD-002
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-002_ASSET_READINESS_CHECKLIST.md` — snapshot-based inventory of existing environment models, missing tree/material/prefab requirements and preparation/acceptance checklist.
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-002_SPHERICAL_GEOGRAPHIC_FIELDS.md` — approved/pushed work package for spherical climate, water, moisture, slope, vegetation suitability, biomes, settlement suitability, map exports, hybrid vegetation preview and required-asset readiness inventory.
+
 ## WORLD-001 amendments
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-001_LAYERED_PLANET_STUDIO_PROGRESS_01.md` — first implementation slice of the layered generation studio and dual-view preview.
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-001_LAYERED_PLANET_STUDIO_AMENDMENT.md` — approved scope amendment for the non-destructive base-sphere + three-layer generation workflow, independent thematic maps, and spherical/planisphere inspection views.
+
+## WORLD-002 asset planning
+
+| `WORLD-002_EXHAUSTIVE_VISUAL_ASSET_CATALOG.md` | Exhaustive scoped visual asset inventory, Blender batch set and owner approval register for WORLD-002. |

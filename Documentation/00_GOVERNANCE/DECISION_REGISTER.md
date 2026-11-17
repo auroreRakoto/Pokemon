@@ -56,3 +56,5 @@ This is the authoritative list of project decisions. Add entries; do not erase h
 5. Obtain project-owner approval.
 6. Add a new decision entry; supersede the old one.
 7. Update architecture, contracts, instructions, and implementation plan.
+
+| DEC-042 | Vegetation presentation | Use a hybrid presentation: biome-aware ground textures/materials plus actual 3D vegetation instances | CONFIRMED | Both must consume the same generated vegetation-suitability and biome data; no unrelated random scatter. See WORLD-002 plan. |

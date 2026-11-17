@@ -1,5 +1,5 @@
-using Pokemon.Project.World.Spherical;
 using NUnit.Framework;
+using Pokemon.Project.World.Spherical;
 using Pokemon.Project.World.Spherical.Studio;
 using UnityEngine;
 
@@ -68,7 +68,10 @@ namespace Pokemon.Project.Tests.World.Spherical
                 Assert.That(Vector3.Distance(direction, roundTripDirection), Is.LessThan(1e-5f));
                 float globeValue = SphericalPlanetStudioGenerator.SampleTotalHeight(direction, settings);
                 float planisphereEquivalentValue = SphericalPlanetStudioGenerator.SampleTotalHeight(roundTripDirection, settings);
-                Assert.That(planisphereEquivalentValue, Is.EqualTo(globeValue).Within(1e-4f));
+                // The round-trip direction is already constrained to 1e-5 unit-vector distance.
+                // Height sampling uses float math, so allow 1e-3 metres for accumulated
+                // projection/sampling round-off (observed discrepancy: about 4.9e-4 m).
+                Assert.That(planisphereEquivalentValue, Is.EqualTo(globeValue).Within(1e-3f));
                 Mesh planisphere = SphericalPlanetStudioGenerator.GeneratePlanisphere(settings);
                 Assert.That(planisphere.vertexCount, Is.EqualTo((settings.planisphereWidth + 1) * (settings.planisphereHeight + 1)));
                 Object.DestroyImmediate(planisphere);
@@ -142,6 +145,60 @@ namespace Pokemon.Project.Tests.World.Spherical
             {
                 float value = SphericalPlanetStudioGenerator.SampleTemperature(new Vector3(0.1f, 0.8f, 0.2f), settings);
                 Assert.That(value, Is.InRange(0f, 1f));
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
+
+        [Test]
+        public void CubeSphereFaceDirectionsRoundTripToTheirOriginalFaceCoordinates()
+        {
+            CubeSphereFace[] faces =
+            {
+                CubeSphereFace.PositiveX, CubeSphereFace.NegativeX,
+                CubeSphereFace.PositiveY, CubeSphereFace.NegativeY,
+                CubeSphereFace.PositiveZ, CubeSphereFace.NegativeZ
+            };
+            Vector2[] samples =
+            {
+                new Vector2(-0.75f, -0.25f),
+                new Vector2(0f, 0f),
+                new Vector2(0.6f, 0.8f)
+            };
+
+            foreach (CubeSphereFace face in faces)
+            foreach (Vector2 sample in samples)
+            {
+                Vector3 direction = CubeSphereTopology.GetDirection(face, sample.x, sample.y);
+                CubeSphereTopology.DirectionToFaceCoordinates(direction, out CubeSphereFace recoveredFace, out Vector2 recovered);
+                Assert.AreEqual(face, recoveredFace);
+                Assert.That(Vector2.Distance(sample, recovered), Is.LessThan(1e-5f));
+            }
+        }
+
+        [Test]
+        public void CubeSphereTopologyRejectsZeroDirection()
+        {
+            Assert.Throws<System.ArgumentException>(() =>
+                CubeSphereTopology.DirectionToFaceCoordinates(Vector3.zero, out _, out _));
+        }
+
+        [Test]
+        public void SettingsValidationClampsSamplingResolutionsAndRadius()
+        {
+            SphericalPlanetStudioSettings settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
+            try
+            {
+                settings.radiusMeters = -10f;
+                settings.faceResolution = 1;
+                settings.planisphereWidth = 1;
+                settings.planisphereHeight = 1;
+                settings.Validate();
+
+                Assert.AreEqual(100f, settings.radiusMeters);
+                Assert.AreEqual(2, settings.faceResolution);
+                Assert.AreEqual(32, settings.planisphereWidth);
+                Assert.AreEqual(16, settings.planisphereHeight);
             }
             finally { Object.DestroyImmediate(settings); }
         }

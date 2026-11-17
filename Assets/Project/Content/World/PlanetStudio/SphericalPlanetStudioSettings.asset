@@ -17,9 +17,9 @@ MonoBehaviour:
   planisphereWidth: 512
   planisphereHeight: 256
   seed: 481516
-  layer1Enabled: 0
-  layer2Enabled: 0
-  layer3Enabled: 0
+  layer1Enabled: 1
+  layer2Enabled: 1
+  layer3Enabled: 1
   layer1AmplitudeMeters: 1800
   layer1Frequency: 2.2
   continentThreshold: 0.47
@@ -29,6 +29,6 @@ MonoBehaviour:
   layer3Frequency: 34
   previewStage: 4
   view: 0
-  map: 0
+  map: 3
   temperatureLatitudeInfluence: 0.75
   temperatureNoiseInfluence: 0.25
