@@ -63,6 +63,9 @@ The physical layout follows module ownership. Folder placement is not a substitu
 
 ```text
 Assets/Project/
+├── Data/
+│   └── WorldGeneration/      # Source JSON configuration for procedural world generation
+│       └── world_generation.json
 ├── Runtime/
 │   ├── Composition/          # Explicit scene/bootstrap and cross-domain wiring
 │   ├── Pokemon/
@@ -89,7 +92,7 @@ Assets/Project/
 │   │   ├── Movement/          # Transform/locomotion adapter implementing IWorldMovement
 │   │   ├── Generation/Biomes/ # Biome-region topology generation
 │   │   └── Placement/         # World placement (vegetation, etc.)
-│   ├── Data/
+│   ├── DataServices/         # Runtime contracts, loading and projections for source data
 │   │   ├── Contracts/
 │   │   ├── Loading/
 │   │   └── Projections/
@@ -106,6 +109,17 @@ Assets/Project/
     └── Tools/Blender/
 ```
 
+### Source data versus runtime data services
+
+There is exactly one project-level `Data` directory: `Assets/Project/Data`. It contains source data files and configuration, including `WorldGeneration/world_generation.json`.
+
+Do not create `Assets/Project/Runtime/Data`. Runtime code that reads, validates, maps or projects those files belongs under `Assets/Project/Runtime/DataServices`:
+- `Contracts/` — runtime-facing data contracts;
+- `Loading/` — parsing, validation and loading adapters;
+- `Projections/` — runtime models or generated projections derived from source data.
+
+The JSON file is configuration input, not executable code and not a Unity scene asset. The loader must expose validated settings to the world-generation core without making that core depend on file paths, `UnityEditor`, or a particular storage backend. Choose the concrete loading mechanism to work in both Editor and player builds; do not assume a file under `Assets/Project/Data` is automatically available through `Resources`.
+
 ### Ownership placement rules
 
 - Species definitions belong to `Pokemon/Definitions`; mutable needs, identity and lifecycle systems belong to `Pokemon/Individual`.
@@ -117,7 +131,7 @@ Assets/Project/
 - Biome/world topology and spatial placement stay in `World`.
 - Ecological maps and state are owned by Ecology; rendering/UI adapters belong in Presentation.
 - Cross-domain telemetry/logging is infrastructure, not a gameplay-domain owner.
-- Runtime data contracts, loading and generated projections are separate concerns under Data.
+- Runtime data contracts, loading and generated projections are separate concerns under `Runtime/DataServices`. The authoritative source files (including world-generation JSON configuration) live under the single project-level `Assets/Project/Data` directory.
 - `UnityEditor` APIs and AssetDatabase work remain under `Editor`.
 
 Population tuning lives in `Content/Population/Profiles`, separate from species definitions. Moving a script must move its `.meta` file with it so Unity GUID references remain stable. A folder move alone does not prove runtime behaviour or compilation; Unity import/build validation is still required.

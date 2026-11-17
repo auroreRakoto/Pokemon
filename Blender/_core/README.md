@@ -44,13 +44,13 @@ if not result.success:
     raise RuntimeError(result.message)
 ```
 
-## Profils
+## Configuration et profils
 
-- `ExportProfile.static_mesh()` : objets statiques ; aucune animation.
-- `ExportProfile.skinned_mesh()` : mesh + armature ; export d'animation désactivé.
-- `ExportProfile.animated_mesh()` : export d'animation FBX et NLA strips.
+La configuration runtime unique est `Blender/config/project.json` (modèle : `project.example.json`). Elle centralise les chemins du projet, les unités et tous les paramètres FBX communs : axes, échelle, modificateurs, lissage et options d'animation.
 
-Les valeurs d'axes `-Z / Y` sont des valeurs initiales à confirmer par un round-trip dans Unity 6000.4.11f1. Ne pas considérer le profil comme définitivement validé avant ce test.
+Un générateur charge cette configuration avec `load_project_config(paths)`, puis utilise `ExportProfile.static_mesh(config)`, `ExportProfile.skinned_mesh(config)` ou `ExportProfile.animated_mesh(config)`. Les paramètres propres à un asset restent dans son générateur.
+
+Les axes `-Z / Y` sont des valeurs candidates, pas encore validées. La procédure complète Blender → FBX → Unity 6000.4.11f1 et ses critères d'acceptation sont documentés dans `Documentation/02_DOMAINS/ART_AND_ASSET_PIPELINE.md`. Chaque profil doit réussir séparément avant d'être déclaré validé.
 
 ## Règles de sécurité
 
@@ -65,7 +65,7 @@ Les valeurs d'axes `-Z / Y` sont des valeurs initiales à confirmer par un round
 ## Limites v0.1.0
 
 - Le package n'a pas encore été exécuté dans Blender : tests de syntaxe Python uniquement.
-- Les profils FBX doivent être vérifiés dans le Unity 6 du projet.
+- Les profils FBX doivent être vérifiés individuellement dans le Unity 6 du projet selon la procédure de round-trip.
 - Les clips d'animation dépendent de la configuration Action/NLA du fichier Blender.
 - Les fonctions LOD/collision/sockets sont des helpers de conventions et d'inspection, pas des générateurs automatiques complets.
 - L'import/synchronisation Unity reste sous responsabilité TOOLS.

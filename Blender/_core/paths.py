@@ -41,13 +41,22 @@ class ProjectPaths:
     def blender(self):
         return self.root / "Blender"
 
+    def _configured_path(self, key, default):
+        from .config import load_project_config
+        data = load_project_config(self)
+        relative = data.get("paths", {}).get(key, default)
+        path = (self.root / relative).resolve()
+        if not _is_inside(path, self.root):
+            raise PathConfigurationError(f"Le chemin configuré '{key}' sort du projet : {relative}")
+        return path
+
     @property
     def source(self):
-        return self.blender / "source"
+        return self._configured_path("source_root", "Blender/source")
 
     @property
     def exports(self):
-        return self.blender / "exports"
+        return self._configured_path("exports_root", "Blender/exports")
 
     @property
     def config(self):
@@ -55,7 +64,7 @@ class ProjectPaths:
 
     @property
     def unity_models(self):
-        return self.root / "Assets" / "Project" / "Content" / "Models"
+        return self._configured_path("unity_models_root", "Assets/Project/Content/Models")
 
     def source_asset(self, domain, asset):
         return self._safe(self.source / _safe_name(domain) / _safe_name(asset), self.source)

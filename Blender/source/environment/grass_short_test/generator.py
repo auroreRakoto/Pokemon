@@ -14,6 +14,7 @@ from _core.paths import ProjectPaths
 from _core.collections import get_or_create_collection, move_objects_to_collection
 from _core.materials import get_or_create_material, assign_material
 from _core.export import ExportProfile, export_fbx
+from _core.config import load_project_config
 
 ASSET_ID = "environment.vegetation.grass_short_test"
 COLLECTION_NAME = "ART_TEST_GrassShort"
@@ -137,6 +138,7 @@ def generate():
     obj.scale = (1.0, 1.0, 1.0)
     bpy.context.view_layer.update()
 
+    config = load_project_config(paths)
     export_dir = paths.export_asset("environment", "grass_short_test")
     destination = export_dir / FBX_NAME
     result = export_fbx(
@@ -146,7 +148,7 @@ def generate():
         domain="environment",
         asset_type="static_mesh",
         unity_destination=UNITY_TEST_DESTINATION,
-        profile=ExportProfile.static_mesh(),
+        profile=ExportProfile.static_mesh(config),
         source_path="Blender/source/environment/grass_short_test/",
         allowed_export_root=paths.exports,
         require_materials=True,

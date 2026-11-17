@@ -20,6 +20,9 @@ This is the authoritative list of project decisions. Add entries; do not erase h
 | DEC-014 | Terrain rendering | Script-generated layers/materials and alphamaps if Unity Terrain selected | PROPOSED | Do not treat as final before DEC-013 |
 | DEC-015 | Shared data | Shared contracts/models separated from client/server presentation | PROPOSED | Final assembly/package strategy OPEN |
 | DEC-016 | Git workflow | Two mandatory milestone commits on the same branch: pushed plan before implementation, then implementation milestone; development agent + QA verify; project owner gives final approval | CONFIRMED | Conventional Commits with mandatory Agent footer; see GIT_WORKFLOW.md |
+| DEC-017 | Procedural world fields | Generate Perlin Noise base fields for height, temperature, vegetation variation, water potential and settlement variation; derive moisture from water distance, height and temperature | CONFIRMED | Moisture is not an independent noise map. Use an exact two-pass separable Euclidean Distance Transform on the water mask, then a configurable moisture/evaporation model. Keep settlement suitability as a mandatory, separate map for villages, towns and large cities. See WORLD_AND_BIOMES.md and TERRAIN_AND_RENDERING.md. Terrain renderer (Unity Terrain vs custom mesh) remains OPEN |
+| DEC-018 | Settlement road/path network | Generate a separate deterministic road/path network connecting selected villages, towns and cities using a settlement graph and terrain-aware A*/Dijkstra least-cost routing | CONFIRMED | Do not use Perlin Noise or straight Euclidean lines as the route algorithm. Use traversal costs for slope, water/flood risk, biome/ground and obstacles; output route polylines and a rasterized path mask. See WORLD_AND_BIOMES.md and WORLD_ARCHITECTURE.md |
+| DEC-020 | World-generation configuration location | Keep source JSON configuration under the single project-level `Assets/Project/Data` directory; runtime loading/contracts/projections belong under `Runtime/DataServices` | CONFIRMED | Do not create a second `Data` directory under `Runtime`. The loader must work in Editor and player builds without coupling the generation core to file access or `UnityEditor`. See UNITY_ARCHITECTURE.md |
 
 ## Decision change procedure
 
@@ -30,3 +33,5 @@ This is the authoritative list of project decisions. Add entries; do not erase h
 5. Obtain project-owner approval.
 6. Add a new decision entry; supersede the old one.
 7. Update architecture, contracts, instructions, and implementation plan.
+
+| DEC-019 | World generation tooling and visualisation | One shared runtime-safe generation core callable from Unity Editor and Play Mode, with flat/debug/height/asset visualisation, scene terrain instantiation and independent map export | CONFIRMED | Editor workflow must instantiate/update a real terrain GameObject in the active scene from generated data; Play Mode uses the runtime-safe scene adapter. Editor UI/export stays in Editor-only assemblies. See TERRAIN_AND_RENDERING.md and WORLD_ARCHITECTURE.md. |

@@ -60,3 +60,10 @@ Assets/Project/Scripts/Pokemon/AI/PokemonMovement.cs
 Assets/Project/Scripts/Pokemon/AI/PokemonMovement.cs.meta
 Assets/Project/Scripts/Pokemon/Spawning/PokemonSpawnPoint.cs
 Assets/Project/Scripts/Pokemon/Spawning/PokemonSpawnPoint.cs.meta
+# Python / Blender generated cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

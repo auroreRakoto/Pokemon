@@ -3,6 +3,7 @@
 Record meaningful documentation changes. Keep entries concise and link to proposals/decision IDs.
 
 ## Unreleased
+- Clarified the single source-data location at `Assets/Project/Data`; renamed the runtime data-services folder to `Runtime/DataServices` to avoid a second `Data` directory. Added DEC-020 and updated the canonical Unity layout.
 - Added the confirmed two-milestone Git workflow, Conventional Commit format and mandatory agent attribution footer.
 - Added DEC-016 to record the project-owner-approved Git workflow.
 - Added the repository alignment plan and static audit findings for the supplied Unity snapshot.
@@ -40,3 +41,24 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Added `IPokemonFactory` and `PokemonUnityFactory` so population rules no longer instantiate/destroy GameObjects or add concrete movement components.
 - Added `PokemonPopulationProfile` assets to separate scenario population tuning from species biology.
 - Added the full 59-file / 196-method ownership inventory and the implementation compliance report.
+
+## 2026-11-17 — Settlement suitability and route network specification
+
+- Reaffirmed the settlement-suitability map as a mandatory, separate output for village, town and large-city candidate locations.
+- Added a distinct mandatory road/path network map derived after settlement selection.
+- Specified settlement graph construction and terrain-aware A*/Dijkstra least-cost routing, including slope, water crossings, biome/ground costs, deterministic routing and route-mask outputs (DEC-018).
+
+## 2026-11-17 — World generation tooling and visual inspection
+
+- Specified a shared generation request/result contract and one runtime-safe generation core callable from both Unity Editor and Play Mode.
+- Added flat thematic, single-map debug, 3D height and asset/placeholder visualisation modes.
+- Required independent native-resolution export of every map with precision-aware formats and metadata sidecars.
+- Formalized sparse settlement connectivity: villages normally connect to one suitable town/city; routes avoid or reject cliffs, ravines and impassable terrain rather than forcing all settlements into an all-to-all network (DEC-019).
+
+
+## 2026-11-17 — Explicit terrain instantiation in Unity scenes
+
+- Clarified that procedural generation is launched from a dedicated Unity Editor tool and is also callable in Play Mode through the same runtime-safe core.
+- Made actual terrain creation in the active Unity scene a required outcome, not merely a 2D/3D Editor preview or exported map.
+- Added the `Generate & Apply to Scene` workflow, generator-owned scene root/update behaviour, backend-specific terrain collider requirement and Undo support.
+- Recorded the initial configurable world target as 2,000 m × 2,000 m; kept Unity Terrain versus custom mesh as an open renderer decision (DEC-019).

@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "world_meadow_01",
-  "displayName": "Prairie de d\u00e9monstration",
+  "displayName": "Prairie de démonstration",
   "seed": 481516,
-  "generatorVersion": "0.1.0",
+  "generatorVersion": "0.2.0",
   "size": {
-    "x": 128.0,
-    "z": 128.0
+    "x": 2000.0,
+    "z": 2000.0
   },
   "origin": {
-    "x": -64.0,
-    "z": -64.0
+    "x": -1000.0,
+    "z": -1000.0
   },
   "mapResolution": {
-    "width": 64,
-    "height": 64
+    "width": 256,
+    "height": 256
   },
   "layers": [
     {
@@ -38,5 +38,5 @@
     "meadow",
     "forest"
   ],
-  "notes": "Dataset technique de d\u00e9monstration. Les valeurs et seuils ne sont pas des r\u00e9glages de gameplay valid\u00e9s."
+  "notes": "World flat de 2 x 2 km. Les réglages de génération restent configurables dans la fenêtre Unity Tools/Pokemon World/World Generator."
 }
