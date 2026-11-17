@@ -341,3 +341,24 @@ TOOLS does not own:
 - a failed replacement leaves the previous valid destination intact;
 - import settings are deterministic across first import and reimport;
 - the tool is Editor-only and does not affect player builds.
+
+
+### Implemented Editor synchronizer (initial version)
+
+The first implementation lives at `Assets/Project/Editor/Tools/Blender/BlenderFbxSync.cs`. It is Editor-only and uses Unity's `EditorApplication.update` loop to scan the configured export directory every three seconds while the Editor is idle. A candidate must have an unchanged FBX and manifest file stamp over consecutive scans before it can be copied. This avoids importing a file while Blender is still writing it.
+
+The synchronizer reads `Blender/config/project.json` (`paths.exports_root` and `paths.unity_models_root`) and the adjacent manifest. It uses `unity.destination` as the sole destination authority. For compatibility with existing test generators, it accepts either a path relative to Models or the full `Assets/Project/Content/Models/...` path; it normalizes both to a Models-relative path before validation. It never infers a production destination from the FBX filename.
+
+Manifests marked `extra.test_only=true` may target a path containing `_ART_TEST`. Production destinations must follow the documented domain/category structure. Unknown production categories are rejected and logged; update this architecture before adding a new category. Duplicate destinations are rejected for every conflicting manifest.
+
+The service replaces existing FBX files using a temporary sibling file and a backup/rollback strategy. It never transfers or edits `.meta` files. Unity creates and maintains `.meta` files; replacing the FBX at the same path is intended to preserve the existing GUID. The service then imports only the changed asset and applies the centralized `ModelImporter` profile. Unchanged exports are skipped using a signature stored in `EditorPrefs`.
+
+The initial import policy imports standard FBX material data into the model prefab, preserves material slots and basic diffuse colours, disables camera/light import, imports normals, calculates MikkTSpace tangents, enables blend shapes, disables mesh compression and Read/Write, and enables mesh optimization. Static meshes do not import animation; skinned meshes use a Generic rig without clips; animated meshes use a Generic rig with animation import. These defaults must be checked against the project's actual assets. FBX import does not create reusable Unity `.mat` assets or recreate URP Shader Graphs.
+
+The synchronizer logs success, unchanged, waiting and failure outcomes to the Unity Console. It exposes `Tools > Blender Sync > Rescan Now`, `Pause` and `Resume`. It does not run in player builds.
+
+**Safety gate:** `extra.test_only=true` assets can be synchronized into `_ART_TEST` while the material round-trip is being debugged. Production exports remain blocked until `round_trip.status` is `VALIDATED` and `round_trip.validated_profile` matches the profile being imported. Set and validate profiles independently.
+
+### Material colour troubleshooting
+
+The shared Blender material helper must set both `Material.diffuse_color` and the Principled BSDF `Base Color`. Setting only the viewport diffuse colour is not sufficient evidence that the FBX contains the intended material colour. After updating the helper, regenerate a test asset, confirm its FBX imports with the expected basic diffuse colour, and only then mark the static material round-trip as passed. Unity's final URP material/shader authoring remains a separate content task.

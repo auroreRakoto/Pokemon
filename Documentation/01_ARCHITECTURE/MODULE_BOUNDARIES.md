@@ -51,3 +51,7 @@ The domain table above is complemented by supporting layers that do not take own
 | Composition | Runtime startup pipelines and explicit service wiring | Domain decisions and ownership of domain state |
 
 These layers may depend on narrow domain-facing APIs. Domain rules must not depend on Presentation, Editor, or infrastructure implementations.
+
+## Blender FBX synchronizer implementation
+
+The initial TOOLS implementation is `Assets/Project/Editor/Tools/Blender/BlenderFbxSync.cs`. It is Editor-only, scans the configured Blender export root on a three-second Editor update interval, waits for stable FBX/manifest timestamps, validates the explicit manifest destination, performs a staged replacement with rollback on import failure, applies a centralized `ModelImporter` profile, and reports results in the Unity Console. It never edits `.meta` files directly. Test-only manifests may target `_ART_TEST`; production imports remain gated by per-profile round-trip validation. See `Documentation/02_DOMAINS/ART_AND_ASSET_PIPELINE.md` and the synchronizer README for operational details.
