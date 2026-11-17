@@ -63,9 +63,6 @@ The physical layout follows module ownership. Folder placement is not a substitu
 
 ```text
 Assets/Project/
-├── Data/
-│   └── WorldGeneration/      # Source JSON configuration for procedural world generation
-│       └── world_generation.json
 ├── Runtime/
 │   ├── Composition/          # Explicit scene/bootstrap and cross-domain wiring
 │   ├── Pokemon/
@@ -92,7 +89,7 @@ Assets/Project/
 │   │   ├── Movement/          # Transform/locomotion adapter implementing IWorldMovement
 │   │   ├── Generation/Biomes/ # Biome-region topology generation
 │   │   └── Placement/         # World placement (vegetation, etc.)
-│   ├── DataServices/         # Runtime contracts, loading and projections for source data
+│   ├── Data/
 │   │   ├── Contracts/
 │   │   ├── Loading/
 │   │   └── Projections/
@@ -109,17 +106,6 @@ Assets/Project/
     └── Tools/Blender/
 ```
 
-### Source data versus runtime data services
-
-There is exactly one project-level `Data` directory: `Assets/Project/Data`. It contains source data files and configuration, including `WorldGeneration/world_generation.json`.
-
-Do not create `Assets/Project/Runtime/Data`. Runtime code that reads, validates, maps or projects those files belongs under `Assets/Project/Runtime/DataServices`:
-- `Contracts/` — runtime-facing data contracts;
-- `Loading/` — parsing, validation and loading adapters;
-- `Projections/` — runtime models or generated projections derived from source data.
-
-The JSON file is configuration input, not executable code and not a Unity scene asset. The loader must expose validated settings to the world-generation core without making that core depend on file paths, `UnityEditor`, or a particular storage backend. Choose the concrete loading mechanism to work in both Editor and player builds; do not assume a file under `Assets/Project/Data` is automatically available through `Resources`.
-
 ### Ownership placement rules
 
 - Species definitions belong to `Pokemon/Definitions`; mutable needs, identity and lifecycle systems belong to `Pokemon/Individual`.
@@ -131,7 +117,35 @@ The JSON file is configuration input, not executable code and not a Unity scene 
 - Biome/world topology and spatial placement stay in `World`.
 - Ecological maps and state are owned by Ecology; rendering/UI adapters belong in Presentation.
 - Cross-domain telemetry/logging is infrastructure, not a gameplay-domain owner.
-- Runtime data contracts, loading and generated projections are separate concerns under `Runtime/DataServices`. The authoritative source files (including world-generation JSON configuration) live under the single project-level `Assets/Project/Data` directory.
+- Runtime data contracts, loading and generated projections are separate concerns under Data.
 - `UnityEditor` APIs and AssetDatabase work remain under `Editor`.
 
 Population tuning lives in `Content/Population/Profiles`, separate from species definitions. Moving a script must move its `.meta` file with it so Unity GUID references remain stable. A folder move alone does not prove runtime behaviour or compilation; Unity import/build validation is still required.
+
+### Canonical Unity content layout
+
+All authored/imported project content is rooted at `Assets/Project/Content/`. The asset taxonomy and complete model destination rules are defined in `Documentation/02_DOMAINS/ART_AND_ASSET_PIPELINE.md`; that document is authoritative for Blender manifests and TOOLS validation.
+
+```text
+Assets/Project/Content/
+├── Models/          # FBX models, organized by domain/category/species
+├── Materials/       # Unity .mat assets
+├── Textures/        # Texture source/import assets
+├── Animations/      # Unity clips/controllers where separately authored
+├── Prefabs/         # Composed Unity GameObjects
+├── VFX/             # Visual effects
+├── Audio/           # Audio content
+├── UI/              # UI-only sprites/icons/content
+├── Data/            # Unity-side content data assets
+└── _ART_TEST/       # Disposable round-trip fixtures; never production content
+```
+
+The tree is a target architecture, not a requirement to pre-create empty directories. Create folders when content is introduced. Do not place scripts, runtime data schemas, editor tooling or source Blender files under `Content/`.
+
+The FBX synchronizer may write only to `Content/Models/`. It must not create prefabs, materials, textures, animation controllers, VFX or audio assets as an implicit side effect. Those have separate authoring/import workflows and ownership.
+
+### Blender FBX synchronization (Editor-only)
+
+The Blender-to-Unity synchronization service belongs under `Assets/Project/Editor/Tools/Blender/`. It scans the configured external Blender export directory, validates each FBX/manifest pair, copies the FBX to the explicit manifest destination under `Assets/Project/Content/Models/`, and triggers a targeted `AssetDatabase` import. It must not be referenced by runtime assemblies.
+
+The service replaces an existing FBX in place, stages the replacement before committing it, and leaves the existing `.meta` file untouched so Unity preserves the asset GUID. It never copies or edits Blender-side `.meta` files. Import settings are applied deterministically through `ModelImporter`/`AssetPostprocessor` according to the validated asset profile. The synchronization service logs success, skipped unchanged files, validation errors, copy failures and import failures to the Unity Console. See `ART_AND_ASSET_PIPELINE.md` for the complete manifest, destination, retry and acceptance contract.

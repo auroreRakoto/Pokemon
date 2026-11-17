@@ -102,7 +102,7 @@ Before export/import, validate:
 
 ## Manifest
 
-Each export should ideally include a manifest with asset ID, source path, export version, generator version, dependencies, units/scale, material references and intended Unity destination.
+Each export manifest must include at least: `asset_id`, `asset_domain`, `asset_category`, `source_path`, `export_version`, `generator_version`, `dependencies`, `units`, `scale`, `profile`, and explicit `unity.destination`. Pokémon exports must also include `species_id`; form and attachment exports include their corresponding stable IDs. Optional material references and asset-specific metadata may be added. The manifest schema is the contract between Blender and TOOLS; unknown or missing required fields are validation errors, not reasons to guess.
 ## Blender project configuration
 
 The runtime configuration is `Blender/config/project.json` (the tracked template is `project.example.json`). It is the single source of truth for:
@@ -163,6 +163,181 @@ A profile is validated only when all applicable checks pass:
 
 Record the outcome per profile (`static_mesh`, `skinned_mesh`, `animated_mesh`), including exact Blender/Unity versions, tested axis pair, importer settings, screenshots, known limitations and pass/fail. Only then set `round_trip.status` to `VALIDATED` and `round_trip.validated_profile` to the tested profile in `project.json`. Validate each profile independently; success for static meshes does not validate rigged or animated meshes.
 
-### Out of scope until validation is approved
+### FBX-to-Unity transfer contract
 
-No script may copy FBX files into Unity `Assets/`, edit/delete/create `.meta` files, or trigger Unity imports as part of generation. After the manual round-trip passes, define the FBX-to-Unity handoff separately (destination mapping, overwrite policy, `.meta`/GUID preservation, import settings, failure handling and ownership under TOOLS) before implementing it.
+**Implementation owner: TOOLS (Unity Editor only).** Blender owns asset generation and FBX export. TOOLS owns discovery, validation, transfer, Unity import configuration and reporting. Runtime/domain modules must not depend on this editor workflow.
+
+Automatic transfer is enabled only after the relevant FBX profile has passed the round-trip validation above. Until then, exports remain in `Blender/exports/` and are imported manually into `_ART_TEST`.
+
+#### Canonical Unity asset architecture and destination mapping
+
+The canonical Unity content root is `Assets/Project/Content/`. Content is separated by asset type first. The FBX synchronizer writes only under `Models/`; it must not decide or create destinations in the other content roots.
+
+```text
+Assets/Project/Content/
+├── Models/                         # FBX-imported meshes and model hierarchies
+│   ├── Pokemon/
+│   │   └── <SpeciesId>/             # One stable folder per Pokédex species ID
+│   │       ├── SM_Pokemon_<SpeciesId>_Base.fbx
+│   │       ├── Forms/<FormId>/      # Only genuine geometry/model variants
+│   │       └── Attachments/<AttachmentId>/ # Reusable species-specific geometry
+│   ├── Environment/
+│   │   ├── Trees/
+│   │   ├── Vegetation/
+│   │   ├── Rocks/
+│   │   ├── Ground/
+│   │   ├── Water/
+│   │   ├── Structures/
+│   │   └── NaturalFeatures/         # Logs, stumps, cliffs, caves, etc.
+│   ├── Collectibles/
+│   │   ├── Berries/
+│   │   ├── Food/
+│   │   ├── Materials/
+│   │   └── QuestItems/
+│   ├── Props/
+│   │   ├── Furniture/
+│   │   ├── Containers/
+│   │   ├── Tools/
+│   │   ├── Decorations/
+│   │   └── Interactive/
+│   └── Shared/                      # Reusable models with no single domain owner
+├── Materials/                       # Unity Material assets (.mat)
+│   ├── Pokemon/<SpeciesId>/
+│   ├── Environment/<CategoryId>/
+│   ├── Collectibles/<CategoryId>/
+│   ├── Props/<CategoryId>/
+│   └── Shared/
+├── Textures/                        # Source/imported texture files
+│   ├── Pokemon/<SpeciesId>/
+│   ├── Environment/<CategoryId>/
+│   ├── Collectibles/<CategoryId>/
+│   ├── Props/<CategoryId>/
+│   └── Shared/
+├── Animations/                      # Unity animation clips/controllers when stored as assets
+│   └── Pokemon/<SpeciesId>/
+├── Prefabs/                         # Composed Unity objects, not raw Blender exports
+│   ├── Pokemon/<SpeciesId>/
+│   ├── Environment/<CategoryId>/
+│   ├── Collectibles/<CategoryId>/
+│   ├── Props/<CategoryId>/
+│   └── Shared/
+├── VFX/                             # Visual-effect assets and graphs
+│   ├── Pokemon/<SpeciesId>/
+│   ├── Abilities/<AbilityId>/
+│   ├── Environment/<CategoryId>/
+│   └── Shared/
+├── Audio/                           # Audio clips and authored audio assets
+│   ├── Pokemon/<SpeciesId>/
+│   ├── Environment/<CategoryId>/
+│   ├── UI/
+│   └── Shared/
+├── UI/                              # UI sprites, icons and other UI-only content
+├── Data/                            # Content data assets; not imported by the FBX tool
+└── _ART_TEST/                       # Temporary manual round-trip fixtures only
+```
+
+This is the canonical target architecture. It describes where new content must go; it does not claim every directory already exists in the repository. Create a directory only when its first asset is added. Do not create empty placeholder folders solely to mirror this tree.
+
+##### Model routing rules (authoritative for TOOLS)
+
+Every FBX manifest must contain an explicit `unity.destination`, relative to `Assets/Project/Content/Models/`. The destination is the complete path including the `.fbx` filename. TOOLS must not infer any part of it from the source path, filename, asset ID or Blender package name.
+
+| Asset kind | Required destination pattern | Example |
+|---|---|---|
+| Pokémon base model | `Pokemon/<SpeciesId>/SM_Pokemon_<SpeciesId>_Base.fbx` | `Pokemon/Chenipotte/SM_Pokemon_Chenipotte_Base.fbx` |
+| Pokémon form model | `Pokemon/<SpeciesId>/Forms/<FormId>/SM_Pokemon_<SpeciesId>_<FormId>.fbx` | `Pokemon/Chenipotte/Forms/Alternate/SM_Pokemon_Chenipotte_Alternate.fbx` |
+| Pokémon-specific attachment | `Pokemon/<SpeciesId>/Attachments/<AttachmentId>/<filename>.fbx` | `Pokemon/Chenipotte/Attachments/LeafCocoon/SM_Leaf_Cocoon.fbx` |
+| Environment model | `Environment/<CategoryId>/<filename>.fbx` | `Environment/Trees/SM_Tree_Oak.fbx` |
+| Collectible model | `Collectibles/<CategoryId>/<filename>.fbx` | `Collectibles/Berries/SM_Berry_Oran.fbx` |
+| Prop model | `Props/<CategoryId>/<filename>.fbx` | `Props/Containers/SM_Wooden_Crate.fbx` |
+| Shared reusable model | `Shared/<CategoryId>/<filename>.fbx` | `Shared/Markers/SM_Spawn_Marker.fbx` |
+
+`SpeciesId`, `FormId`, `AttachmentId` and `CategoryId` are stable, filesystem-safe identifiers, not display names. Use the canonical IDs already defined by the relevant domain/data contract. Do not translate, localize or change their spelling for presentation.
+
+The supported category IDs are exactly the folder names listed in the tree above. If an asset does not fit one of them, do not put it in the nearest-looking folder and do not invent a new category in a manifest. Propose and document a category addition first, then update the validator's allow-list. `Shared` is reserved for assets genuinely reused across domains; it is not a fallback for uncertain classification.
+
+##### Destination validation
+
+TOOLS validates all of the following before copying:
+
+- `unity.destination` is present, relative, normalized and uses `/` separators;
+- it contains no drive prefix, root prefix, `..`, empty segment or path traversal;
+- its first segment is one of `Pokemon`, `Environment`, `Collectibles`, `Props`, `Shared`;
+- its category/species/form/attachment segments follow the routing table and use stable IDs;
+- its extension is `.fbx`;
+- its resolved destination remains inside `Assets/Project/Content/Models/`;
+- it is not under `_ART_TEST`, `Editor`, `Resources` or another reserved path;
+- no other manifest claims the same destination with a different `asset_id`;
+- the destination is not already claimed by a different asset identity in the synchronization registry.
+
+For Pokémon, the manifest should also carry the canonical `species_id`; TOOLS checks that the destination's species segment matches it. For other domains, the manifest should carry `asset_domain` and `asset_category`; TOOLS checks that they match the path. These fields describe and validate the explicit destination; they do not replace it.
+
+Non-model content has its own owner and import workflow. Materials belong in `Materials/`, texture files in `Textures/`, animation controllers/clips in `Animations/`, composed Unity objects in `Prefabs/`, and VFX/audio in their corresponding roots. The FBX synchronizer must not create or move these assets as a side effect of importing a model. ModelImporter material extraction/creation must remain disabled unless a separately approved material workflow explicitly requires it.
+
+#### Discovery and trigger
+
+TOOLS runs as an Editor-only synchronization service while the Unity project is open. It periodically scans the configured `Blender/exports/` tree for FBX files with their matching manifests. It must not run in player builds or introduce runtime dependencies.
+
+A candidate is processed only when both files exist and the FBX is stable/complete (for example, unchanged size and modification time across consecutive scans). The tool records processed file identity/version so it does not repeatedly import unchanged exports. A changed FBX or manifest is eligible for another synchronization. The user does not need to press a button for normal transfers; an explicit rescan command may be provided for recovery and diagnostics.
+
+#### Copy and replacement
+
+- Copy the FBX to the manifest destination, creating missing directories.
+- If the destination FBX already exists, replace its contents. Do not create numbered duplicates or silently choose another destination.
+- Stage the new file in a temporary file beside the destination and replace the destination only after the copy succeeds. A failed copy must leave the previous destination untouched.
+- Never copy a `.meta` file from Blender. Unity owns `.meta` files and generates them when needed.
+- When replacing an existing FBX, leave its existing `.meta` file untouched so Unity retains the asset GUID and existing references.
+- After a successful copy, request an import/update through `AssetDatabase` for that exact asset path. Do not call broad project-wide refreshes for every asset if a targeted import is sufficient.
+
+#### Import settings
+
+TOOLS applies import settings through Unity Editor APIs (`ModelImporter` and an Editor-only `AssetPostprocessor`/import configuration service), not through Blender and not by editing `.meta` text directly. The manifest's validated profile (`static_mesh`, `skinned_mesh`, or `animated_mesh`) selects a centralized import profile. The same profile must produce the same settings on every import/reimport.
+
+The import profile must explicitly configure, where applicable:
+
+- model scale/conversion and mesh import;
+- normals and tangents;
+- material import policy;
+- animation import, clip settings and rig type for skinned/animated assets;
+- camera/light import (disabled unless a documented asset requires them);
+- mesh optimization/compression and read/write policy only when justified by project runtime needs.
+
+Do not guess final numeric or enum values before the matching Blender-to-Unity round-trip profile has passed. Record the tested values in the import profile and this document. Avoid per-asset Inspector tweaks: exceptions must be explicit in the manifest or a reviewed central override, with a clear reason. Unity's `.meta` remains the persistence mechanism for importer settings; TOOLS must not manually create, delete or rewrite it.
+
+FBX material import does not recreate Unity shader graphs. The default policy should preserve mesh material slots and use Unity-managed materials; material creation/assignment is a separate explicit content step, not an implicit side effect of FBX transfer.
+
+#### Errors and reporting
+
+Every candidate must end in a clear result logged to the Unity Console, including asset ID, source FBX, destination and outcome. Use `Debug.Log` for success, `Debug.LogWarning` for recoverable issues and `Debug.LogError` for failed transfers/imports. Include the exception or actionable reason; do not silently skip assets.
+
+A failure must not delete the source export or destroy a previously valid destination. A failed import is reported separately from a successful file copy. The tool must be able to retry on the next scan or explicit rescan without duplicating assets. A concise summary should report scanned, imported/updated, skipped-unchanged and failed counts.
+
+#### TOOLS ownership boundary
+
+TOOLS owns:
+
+- scanning the external Blender export directory and pairing FBX files with manifests;
+- manifest/schema/path validation and duplicate destination detection;
+- safe copy, overwrite and retry behaviour;
+- Unity `AssetDatabase` import triggering;
+- deterministic `ModelImporter` settings based on the validated profile;
+- Editor Console diagnostics and synchronization summary;
+- optional Editor menu/status controls for pause, rescan and diagnostics.
+
+TOOLS does not own:
+
+- mesh generation, rigging, materials authoring or FBX export (Blender / Art);
+- gameplay meaning or runtime asset selection (owning gameplay domains / Data);
+- Unity runtime loading or player-build synchronization;
+- editing `.meta` files directly or copying Blender-side `.meta` files;
+- silently repairing invalid geometry or changing an asset's destination.
+
+#### Acceptance criteria for the transfer tool
+
+- a new valid export is automatically copied and imported to its explicit manifest destination;
+- a changed export replaces the existing FBX without changing its GUID or breaking references;
+- unchanged exports are not reimported on every scan;
+- invalid/missing manifests, unsafe destinations, incomplete FBX files and copy/import failures produce actionable Console logs;
+- a failed replacement leaves the previous valid destination intact;
+- import settings are deterministic across first import and reimport;
+- the tool is Editor-only and does not affect player builds.

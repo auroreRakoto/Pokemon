@@ -9,7 +9,7 @@
 | Art | Model/rig/material/animation/VFX/audio content standards | Gameplay authority and ecological rules | All visual consumers |
 | Networking | Transport, replication, authority, session connectivity | Domain-specific rules | All runtime domains |
 | Persistence | Save/load lifecycle and serialization | Deciding gameplay rules | Server, Data, all domains |
-| Tools | Editor automation, import/export, validation tooling | Reimplementing domain logic | Art, World, Data |
+| Tools | Editor automation, Blender export discovery, manifest/path validation, FBX transfer/replacement, ModelImporter configuration, validation tooling and diagnostics | Reimplementing domain logic, generating meshes, authoring materials/prefabs, choosing destinations by guesswork | Art, World, Data |
 | QA | Tests, profiling, acceptance evidence | Unapproved feature design | All domains |
 | Composition | Scene bootstrap, dependency wiring, cross-domain orchestration | Domain rules, resource ownership, presentation decisions | World, Ecology, Pokemon, Infrastructure, Presentation |
 
