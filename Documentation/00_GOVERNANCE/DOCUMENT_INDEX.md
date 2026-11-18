@@ -68,3 +68,6 @@
 ## WORLD-002 asset planning
 
 | `WORLD-002_EXHAUSTIVE_VISUAL_ASSET_CATALOG.md` | Exhaustive scoped visual asset inventory, Blender batch set and owner approval register for WORLD-002. |
+
+## WORLD-007
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-007_CONFIGURABLE_PLANET_SIZE_AND_OCEAN_RANGE.md` — plan for selecting small or large playable planet radii with one generation system and configuring ocean coverage from 1% to 99%.

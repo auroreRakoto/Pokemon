@@ -111,3 +111,10 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Kept planet-scale preview meshes free of MeshColliders.
 - Added focused EditMode motor tests and documented the current approximation boundaries and Unity validation sequence.
 - Status remains implementation-in-progress until Unity compilation, tests and manual Play Mode checks are reported passing.
+
+
+## 2026-11-18 — WORLD-007 configurable planet size and ocean range plan
+
+- Recorded DEC-045: small and large planets use one playable generation system; no test/production scale modes or automatic scaling of terrain/gameplay settings.
+- Added the WORLD-007 plan to expose radius in kilometres while retaining metres internally and expand ocean coverage to 1–99%, preserving the 65% default.
+- Documented current implementation findings, expected code targets, automated tests, manual Unity acceptance and the mandatory plan-push gate.

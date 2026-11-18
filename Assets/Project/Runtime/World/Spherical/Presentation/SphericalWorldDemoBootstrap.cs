@@ -21,7 +21,6 @@ namespace Pokemon.Project.World.Spherical.Presentation
 
         [Header("Demo controls")]
         [SerializeField] private bool generateOnPlay = true;
-        [SerializeField] private float playerMovementSpeed = 8f;
 
         private Transform _generatedRoot;
 
@@ -88,8 +87,6 @@ namespace Pokemon.Project.World.Spherical.Presentation
             if (primitiveCollider != null)
                 DestroyOwnedObject(primitiveCollider);
 
-            SphericalPlayerController controller = player.AddComponent<SphericalPlayerController>();
-
             GameObject cameraObject = new GameObject("SphericalThirdPersonCamera");
             cameraObject.tag = "MainCamera";
             cameraObject.transform.SetParent(_generatedRoot, false);
@@ -101,7 +98,6 @@ namespace Pokemon.Project.World.Spherical.Presentation
             cameraObject.AddComponent<AudioListener>();
             SphericalThirdPersonCamera cameraRig = cameraObject.AddComponent<SphericalThirdPersonCamera>();
             cameraRig.Initialize(player.transform, cameraComponent);
-            controller.Initialize(settings, cameraRig, playerMovementSpeed);
 
             SphericalWorldDemoOverlay overlay = cameraObject.AddComponent<SphericalWorldDemoOverlay>();
             overlay.Initialize(cameraRig, settings.seed, settings.planetRadiusMeters);

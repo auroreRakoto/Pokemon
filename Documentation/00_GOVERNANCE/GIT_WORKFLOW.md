@@ -148,6 +148,56 @@ QA does not need to create a third milestone commit merely to record a review. Q
 - Do not rewrite a pushed plan to hide a deviation; preserve the decision trail.
 - A failed or blocked QA result must remain visible and must not be described as passed.
 
+
+## 6A. Session checkpoints and commit-message handoff
+
+In addition to the two mandatory work-package milestones, every independently implemented and validated feature or implementation increment must receive its own commit message. The same applies when a work session is ending before the current task is complete: prepare a checkpoint commit message that describes the actual state, even if the work is partial or blocked.
+
+The development assistant must proactively provide the exact commit message at either point; the project owner must not need to ask for it. The assistant must not claim that a commit was created, committed or pushed unless that action was actually performed and confirmed.
+
+### When a feature is implemented and validated
+
+- Prepare a normal Conventional Commit message using the format in Section 2.
+- State the relevant work-package ID and reference the plan commit when available.
+- Mention the meaningful validation performed in the body; never imply tests passed if they were not run.
+- Keep the commit scoped to the feature/increment that was validated.
+
+Example:
+
+```text
+feat(world): enable spherical player traversal
+
+Implement and validate ground movement, radial gravity and camera follow
+on the approved spherical-world scene.
+
+Work-Package: WORLD-004
+Plan-Commit: <hash>
+Agent: WORLD
+```
+
+### When work stops before validation or completion
+
+- Prepare a checkpoint message with a truthful partial-work description.
+- Use only an accepted Conventional Commit type from Section 2; do not introduce `wip` as a new type without owner approval. Make the incomplete checkpoint explicit in the subject or body.
+- Explicitly record what is implemented, what is not validated, the current blocker, and the next action.
+- A checkpoint commit is not the implementation milestone and does not mean the feature is accepted, QA-passed or complete.
+
+Example:
+
+```text
+fix(world): checkpoint player bootstrap integration
+
+Partial checkpoint: the controller call site has been updated, but Unity
+compilation and Play Mode validation have not yet been run.
+Next: compile the project, inspect all Initialize call sites and resolve
+any remaining errors.
+
+Work-Package: WORLD-004
+Agent: WORLD
+```
+
+If no source files changed during the session, do not invent a code commit; report that there is nothing to commit and provide the next-step handoff. Documentation-only changes use `docs(...)`.
+
 ## 7. Branch and push rules
 
 - The plan and implementation milestones for a work package must be on the same working branch.
