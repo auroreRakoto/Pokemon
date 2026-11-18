@@ -7,13 +7,7 @@
 Record meaningful documentation changes. Keep entries concise and link to proposals/decision IDs.
 
 ## Unreleased
-- Expanded `07_Testing` with a source-grounded coverage matrix and detailed test plans for the implemented spherical foundation, geographic fields, planar world-generation pipeline and runtime PlayMode integration.
-- Consolidated project testing documentation under `Documentation/07_Testing/`; moved the common testing standard and WORLD-002 testing/PlayMode/deprecated-API reports, and updated module references.
-- Added a project-wide prohibition on introducing deprecated/obsolete APIs; fixed the initial spherical PlayMode test namespace import and replaced deprecated instance-ID checks with reference-identity assertions.
-- Added the first WORLD spherical PlayMode test assembly and runtime mesh-generation/scene-lifecycle smoke tests; Unity discovery and execution pending.
-- Extended the shared testing standard with Unity PlayMode strategy, test-assembly setup, and runtime lifecycle/integration acceptance criteria; added a WORLD-002 PlayMode matrix.
-- Standardized feature testing and validation across modules; added WORLD-002 test matrix and retrospective regression coverage; corrected the planisphere/globe float tolerance based on observed Unity output.
-- Added WORLD-002 spherical neighbour-graph prototype, great-circle edge weights, multi-source Dijkstra and a small-scale great-circle reference benchmark; Unity validation remains pending.
+- Added a common Unity/C# compile-error prevention checklist for `CS0246`, covering exact namespace discovery, type accessibility, `.asmdef` references, Runtime/Editor dependency direction and mandatory Unity compilation before delivery.
 - Added DEC-042 confirming hybrid vegetation presentation (biome-aware ground textures/materials plus deterministic 3D vegetation instances). Added the proposed WORLD-002 spherical geographic-fields plan, including a globe-correct hydrology/distance design gate, independent map outputs, dual-view inspection/export, biome and settlement suitability, and vegetation preview scope.
 - Clarified the single source-data location at `Assets/Project/Data`; renamed the runtime data-services folder to `Runtime/DataServices` to avoid a second `Data` directory. Added DEC-020 and updated the canonical Unity layout.
 - Added the confirmed two-milestone Git workflow, Conventional Commit format and mandatory agent attribution footer.

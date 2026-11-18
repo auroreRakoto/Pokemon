@@ -29,6 +29,19 @@ namespace Pokemon.Project.World.Spherical.Studio
         Slope
     }
 
+    public enum SphericalDrainagePreviewMode
+    {
+        RiverCandidates,
+        FlowAccumulation,
+        FlowDirection
+    }
+
+    public enum SphericalDrainageInputMode
+    {
+        TerrainHeightfield,
+        FlatBaseSphereDiagnostic
+    }
+
     [CreateAssetMenu(menuName = "Pokemon/World/Spherical Planet Studio Settings", fileName = "SphericalPlanetStudioSettings")]
     public sealed class SphericalPlanetStudioSettings : ScriptableObject
     {
@@ -64,12 +77,23 @@ namespace Pokemon.Project.World.Spherical.Studio
         [Min(0f)] public float temperatureLatitudeInfluence = 0.75f;
         [Min(0f)] public float temperatureNoiseInfluence = 0.25f;
 
+        [Header("Drainage preview (experimental)")]
+        public SphericalDrainageInputMode drainageInputMode = SphericalDrainageInputMode.TerrainHeightfield;
+        [Range(8, 512)] public int drainageResolution = 512;
+        public float drainageSeaLevelMeters = 0f;
+        [Min(1f)] public float riverAccumulationThreshold = 100f;
+        public SphericalDrainagePreviewMode drainagePreviewMode = SphericalDrainagePreviewMode.RiverCandidates;
+        [Range(1, 64)] public int flowDirectionStride = 12;
+
         public void Validate()
         {
             radiusMeters = Mathf.Max(100f, radiusMeters);
             faceResolution = Mathf.Clamp(faceResolution, 2, 256);
             planisphereWidth = Mathf.Clamp(planisphereWidth, 32, 2048);
             planisphereHeight = Mathf.Clamp(planisphereHeight, 16, 1024);
+            drainageResolution = Mathf.Clamp(drainageResolution, 8, 512);
+            riverAccumulationThreshold = Mathf.Max(1f, riverAccumulationThreshold);
+            flowDirectionStride = Mathf.Clamp(flowDirectionStride, 1, 64);
             layer1AmplitudeMeters = Mathf.Max(0f, layer1AmplitudeMeters);
             layer2AmplitudeMeters = Mathf.Max(0f, layer2AmplitudeMeters);
             layer3AmplitudeMeters = Mathf.Max(0f, layer3AmplitudeMeters);

@@ -21,12 +21,14 @@ internal static class BlenderFbxSync
         new Dictionary<string, FileStamp>(StringComparer.OrdinalIgnoreCase);
 
     private static double _nextScanTime;
-    private static bool _paused;
+    private static bool _paused = true;
+    private static bool _updateHooked;
 
     static BlenderFbxSync()
     {
-        EditorApplication.update += Update;
-        Debug.Log("[Blender Sync] Service Editor initialisé. Surveillance de Blender/exports activée.");
+        // Automatic polling is deliberately disabled by default. Use the
+        // explicit Resume menu command to opt into continuous synchronization.
+        Debug.Log("[Blender Sync] Initialisé en pause. Utiliser Tools/Blender Sync/Resume pour activer la surveillance.");
     }
 
     [MenuItem("Tools/Blender Sync/Rescan Now")]
@@ -40,6 +42,11 @@ internal static class BlenderFbxSync
     private static void Pause()
     {
         _paused = true;
+        if (_updateHooked)
+        {
+            EditorApplication.update -= Update;
+            _updateHooked = false;
+        }
         Debug.Log("[Blender Sync] Synchronisation mise en pause.");
     }
 
@@ -47,8 +54,13 @@ internal static class BlenderFbxSync
     private static void Resume()
     {
         _paused = false;
-        _nextScanTime = 0;
-        Debug.Log("[Blender Sync] Synchronisation reprise.");
+        _nextScanTime = EditorApplication.timeSinceStartup + ScanIntervalSeconds;
+        if (!_updateHooked)
+        {
+            EditorApplication.update += Update;
+            _updateHooked = true;
+        }
+        Debug.Log("[Blender Sync] Synchronisation reprise (scan automatique toutes les 3 secondes).");
     }
 
     private static void Update()

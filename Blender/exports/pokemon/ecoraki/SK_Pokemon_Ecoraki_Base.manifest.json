@@ -1,0 +1,63 @@
+{
+  "animations": [],
+  "asset_category": "BaseSpecies",
+  "asset_domain": "Pokemon",
+  "asset_id": "pokemon.ecoraki",
+  "asset_type": "static_mesh",
+  "dependencies": [],
+  "domain": "pokemon",
+  "export": {
+    "format": "fbx",
+    "path": "SK_Pokemon_Ecoraki_Base.fbx",
+    "profile": "static_mesh"
+  },
+  "extra": {
+    "animation_status": "deferred_until_model_approval",
+    "design_reference": "Approved Ecoraki V2 concept",
+    "export_version": "0.2.0",
+    "generator_version": "0.2.0",
+    "model_status": "geometry_blockout_for_visual_review",
+    "notes": [
+      "Lemur-like quadruped",
+      "Thick continuous ringed curled tail",
+      "Layered leaf collar and crown",
+      "Golden botanical markings"
+    ],
+    "rig_status": "deferred_until_model_approval",
+    "scale": {
+      "object_scale": [
+        1,
+        1,
+        1
+      ],
+      "scale_length": 1.0
+    },
+    "species_id": "ecoraki",
+    "units": {
+      "length": "METERS",
+      "scale_length": 1.0,
+      "system": "METRIC"
+    }
+  },
+  "geometry": {
+    "edge_count": 26662,
+    "object_count": 75,
+    "polygon_count": 12936,
+    "vertex_count": 13788
+  },
+  "pipeline": {
+    "core_version": "0.1.0"
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "Blender/source/pokemon/ecoraki/"
+  },
+  "unity": {
+    "destination": "Assets/Project/Content/Models/Pokemon/_ART_TEST/Ecoraki/SK_Pokemon_Ecoraki_Base.fbx"
+  },
+  "validation": {
+    "errors": [],
+    "status": "passed",
+    "warnings": []
+  }
+}

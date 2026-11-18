@@ -1,0 +1,1 @@
+"""Pokemon asset authoring modules."""

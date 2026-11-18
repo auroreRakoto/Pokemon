@@ -116,10 +116,6 @@ The supplied snapshot contains no imported environment `.mat`, environment textu
 - The vegetation renderer consumes biome/vegetation suitability fields and stable deterministic placement IDs; asset selection must not change the generated field values.
 - Missing assets are listed in the implementation report with owner/action required.
 
-## 3.5 Exhaustive WORLD-002 visual asset catalogue
-
-The complete scoped asset list, proposed stable keys, source generators, export destinations, Unity prefabs, required materials, optional props, Blender batch registration set and owner approval register are maintained in `WORLD-002_EXHAUSTIVE_VISUAL_ASSET_CATALOG.md`. This catalogue is exhaustive for the WORLD-002 validation preview only, not for the final game. It must be reviewed and approved before production visual generation.
-
 ## 3.5 Mandatory asset approval gate before visual generation
 
 **This is a blocking gate, not an optional checklist.** Do not start the visualisation-generation stage (biome ground materials, vegetation instances, settlement markers represented by final art, or other environment presentation assets) until the asset inventory and visual asset list have been reviewed and explicitly approved by the project owner.
@@ -306,63 +302,6 @@ Do not assume exact filenames or create parallel field systems before inspecting
 This is Milestone A for WORLD-002. It is a proposed plan, not permission to begin implementation. Per `Documentation/00_GOVERNANCE/GIT_WORKFLOW.md`, implementation may begin only after the project owner approves this plan and confirms it has been committed and pushed to the same working branch. The implementation milestone must then report actual tests, Unity validation evidence, documentation updates and QA status. QA PASS and project-owner approval are required before closure.
 
 
-## Implementation traceability
+### Drainage visual integration increment
 
-First implementation tranche and validation status: `WORLD-002_IMPLEMENTATION_PROGRESS_01.md`. This report does not claim the work package is complete; hydrology/moisture remain gated by the spherical distance-to-water design validation.
-
-
-## 9. Testing & Validation
-
-- Standard: `Documentation/07_Testing/TESTING_AND_VALIDATION.md`
-- Test layer: Unity EditMode for deterministic field/topology logic; Editor/manual visual checks for Planet Studio; performance measurements on the project owner's PC.
-- Deterministic fixture: fixed `SphericalPlanetStudioSettings`, fixed seed and explicit face/planisphere resolutions.
-- Physical units: altitude and graph distance in metres; slope in degrees; normalized temperature/moisture/suitability in `[0,1]`.
-
-| Category | WORLD-002 acceptance criterion | Evidence |
-|---|---|---|
-| Functional | Every implemented field has a valid output at every supported sample | EditMode field tests |
-| Determinism | Same seed, generator version and settings produce identical fields | Repeated-run tests |
-| Invariants | Temperature/moisture/suitability stay in declared ranges; graph distances are non-negative | Property/range tests |
-| Boundaries | Cube-face seams, cube corners, poles and planisphere wrap are continuous and unambiguous | Cross-face and round-trip tests |
-| Robustness | Invalid resolution, radius, direction and empty-source requests fail explicitly | Negative tests |
-| Regression | Existing WORLD-001 terrain geometry and projection behaviour remain stable | Studio regression tests |
-| Integration | Globe and planisphere inspect the same direction-based field data | Editor/manual and automated sampling tests |
-| Performance | Graph construction and distance propagation are measured at representative resolutions on owner PC | Benchmark report |
-| Visual/content QA | Legends, map ranges, seam appearance and unavailable-stage states are correct | Planet Studio checklist/screenshots |
-
-Hydrology-specific numerical error bounds and production performance budgets remain OPEN until prototype benchmark evidence is reviewed. No production hydrology acceptance may be claimed before those values are approved.
-
-
-### 9.1 PlayMode validation
-
-The current WORLD-002 geographic-field algorithms are suitable for EditMode coverage. PlayMode coverage is required when the fields are integrated into runtime world generation or runtime scene presentation.
-
-| Runtime behaviour | PlayMode acceptance criterion | Status |
-|---|---|---|
-| Runtime generation entry point | A runtime caller can request generation with a fixed seed/settings and receive a valid field result | NOT IMPLEMENTED / NOT TESTED |
-| Scene application | Generated spherical terrain/field presentation is attached under the intended generator-owned root | NOT TESTED |
-| Refresh and cleanup | Re-generation replaces only generator-owned objects; clearing removes generated objects without deleting unrelated scene content | NOT TESTED |
-| Runtime lifecycle | Disable/enable and scene unload/reload do not leave duplicate roots or stale references | NOT TESTED |
-| Runtime performance | Generation time, allocations, mesh counts and cleanup cost are measured in a representative scene | NOT MEASURED |
-| Runtime physics | If terrain colliders are added, representative raycasts/ground contact agree with generated terrain | NOT IMPLEMENTED / NOT TESTED |
-
-EditMode remains the primary mode for the current pure spherical field and graph algorithms. The PlayMode matrix above is not evidence that those runtime integrations already exist.
-
-
-### 9.2 Initial PlayMode tests added
-
-Assembly: `Pokemon.Project.Tests.World.Spherical.PlayMode`
-
-Initial runtime tests:
-- generate and inspect six globe face meshes;
-- generate and inspect a planisphere mesh;
-- attach a generated face mesh to a scene GameObject and verify it remains valid after a frame;
-- verify scene object/mesh cleanup;
-- verify repeated generation creates a fresh mesh instance.
-
-These are smoke/integration tests for the current mesh-generation API only. They do not imply that runtime world streaming, physics, player movement, water, vegetation or biome systems are implemented or tested.
-
-
-## Testing documentation
-
-Detailed current coverage and outstanding tests are maintained in `Documentation/07_Testing/`. See `COVERAGE_MATRIX.md` and `Work_Packages/WORLD-002_SPHERICAL_FIELDS_TEST_PLAN.md`.
+Planet Studio now has an experimental hydrology panel and overlay modes for river candidates, flow accumulation and sampled flow direction. The sea-level cutoff is configurable and provisional. This tool enables visual inspection on globe and planisphere; it does not itself validate hydrographic networks. See `Documentation/07_Testing/Work_Packages/WORLD-002_DRAINAGE_VISUAL_INTEGRATION.md`.

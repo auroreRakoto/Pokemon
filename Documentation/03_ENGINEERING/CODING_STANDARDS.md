@@ -22,6 +22,31 @@
 - Make generators idempotent and deterministic when possible.
 - Handle missing references with clear diagnostics.
 
+
+## Common Unity/C# compile errors to prevent
+
+### Type or namespace cannot be found (`CS0246`)
+
+Before committing or delivering a script that references a type declared elsewhere:
+
+1. **Locate the authoritative declaration** of the type in the current project. Do not infer its namespace from its folder path or from a similarly named type.
+2. Copy the exact namespace from the declaration and either add the matching `using` directive or use the fully qualified type name.
+3. Check the type's accessibility (`public` when another assembly must consume it).
+4. Check assembly boundaries: an Editor assembly can reference Runtime assemblies, but Runtime code must never reference Editor-only code. If the type is in another assembly definition (`.asmdef`), verify that the consuming assembly has the required reference and that the dependency direction remains valid.
+5. Check the exact spelling and casing of the type and namespace.
+6. Compile the affected scripts in Unity before packaging the change. A static review or a successful compile of a different assembly is not sufficient.
+
+**Required pre-delivery reference check**
+- [ ] Every newly referenced project type has been located in its actual source declaration.
+- [ ] Its exact namespace and accessibility have been verified.
+- [ ] The consuming assembly can reference the declaring assembly.
+- [ ] No Runtime-to-Editor dependency has been introduced.
+- [ ] Unity compilation has been run after the change, and all new compiler errors are resolved.
+
+**Observed example (WORLD-002 visual integration):** `SphericalPlanetGenerationStudioWindow.cs` referenced `CubeSphereFace`, but the Editor script did not resolve the type. Unity reported `CS0246` at line 177. The correct response is to inspect the declaration of `CubeSphereFace` and verify its namespace and assembly visibility, then fix the import/reference. Do not guess a namespace based only on the `Spherical` folder name.
+
+Treat repeated `CS0246` errors as a process failure: inspect the declaration and assembly graph before adding more imports or moving files.
+
 ## Blender Python
 
 - Reuse `_core` and package modules.

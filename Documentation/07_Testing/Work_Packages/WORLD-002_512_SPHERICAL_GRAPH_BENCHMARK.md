@@ -52,3 +52,15 @@ These are structural expectations; the test must confirm the actual edge count.
 - 512 explicit benchmark authored.
 - Unity compilation/execution: pending owner run.
 - Hydrology acceptance: pending benchmark review.
+
+
+## Owner-run graph benchmark evidence (2026-11-17)
+
+The owner supplied a Unity Test Runner screenshot showing the explicit 512 test passed:
+- Nodes: 1,572,866
+- Edges: 3,145,728
+- Graph build: 1,514.2 ms
+- Dijkstra: 2,046.2 ms (three sources)
+- Estimated persistent graph storage: 81,813,564 bytes / 78.0 MiB
+
+This evidence validates graph construction and the tested three-source Dijkstra run only. It does not validate priority-flood drainage, flow accumulation, river extraction, or hydrographic network quality.
