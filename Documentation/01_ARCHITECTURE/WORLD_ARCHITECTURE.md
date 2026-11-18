@@ -179,3 +179,23 @@ Independent thematic maps (altitude, temperature, derived moisture, slope, water
 The next planned spherical-world work package is `WORLD-002_SPHERICAL_GEOGRAPHIC_FIELDS.md`. It extends the WORLD-001 Planet Studio with shared, deterministic fields for temperature, water/hydrology, slope, spherical distance-to-water, derived moisture, vegetation suitability, biome classification and settlement suitability. These are separate outputs with explicit dependencies; downstream presentation and simulation must consume the same fields rather than regenerating contradictory local versions.
 
 The confirmed vegetation presentation is hybrid: biome-aware ground materials/textures plus deterministic 3D vegetation instances driven by vegetation suitability and environmental exclusion masks (DEC-042). The planisphere remains a presentation projection of the same spherical dataset. The planar EDT specified in the terrain domain must not be applied naïvely to the globe; WORLD-002 contains a mandatory spherical distance/hydrology design gate. The work package is currently a proposed plan and must not be treated as implemented or approved until the project-owner milestone gate is satisfied.
+
+
+## Spherical player movement foundation (WORLD-004)
+
+The first reusable player movement implementation is owned by the World domain under `Assets/Project/Runtime/World/Spherical/Movement/`. WORLD-003 remains a temporary Play Mode inspection/bootstrap fixture and must not own production locomotion rules.
+
+The player motor uses world-space velocity and radial gravity directed toward the planet centre. Ground height, slope and categorical water state come from the same `SphericalGeographicFieldSet` used to render the WORLD-002 planet; do not fall back to the older WORLD-001 height sampler. Ground contact is field-aware because the six full-face preview meshes intentionally have no `MeshCollider` (their current triangles are too large for stable physics queries). The first implementation supports terrain grounding, falling, landing, walking and jumping, but not arbitrary collision with trees/rocks/buildings or dynamic terrain.
+
+Movement is tangent to the local spherical surface and camera-relative, with a transported tangent basis to avoid orientation discontinuities across cube-sphere face seams and near poles. Character orientation follows the sampled terrain normal with radial-up fallback. Ocean/lake/river cells are not solid ground; swimming and water traversal are later features. Steep-slope blocking is configurable and validated against the WORLD-002 slope field.
+
+The movement motor must not poll input directly. A narrow Unity Input System adapter supplies movement/jump intent; the existing spherical third-person camera remains the camera implementation unless a focused extension is required. World-owned movement remains the only owner of player Transform mutation, consistent with the `IWorldMovement` boundary.
+
+See `Documentation/03_ENGINEERING/WORK_PACKAGES/WORLD-004_PLAYER_CONTROLLER_AND_SPHERICAL_LOCOMOTION.md` for the implementation plan, defaults, tests and acceptance criteria.
+
+
+## Player movement on the spherical surface (WORLD-004)
+
+The World domain owns player world-position mutation. `SphericalPlayerMotor` stores world-space velocity and applies gravity toward the explicit planet centre. `SphericalGroundProbe` queries the same `SphericalGeographicFieldSet` that drives WORLD-002 terrain/biome rendering; it does not depend on the six coarse preview meshes or their colliders. `SphericalPlayerController` is the current PC Input System adapter and consumes the existing `SphericalThirdPersonCamera` tangent movement basis.
+
+This first slice supports field-based ground contact, radial falling, grounded jump, camera-relative walking, a slope threshold and blocking grounded entry into water. It does not yet provide swept capsule collision, step climbing, prop collision, swimming, traversal abilities, animation, multiplayer prediction or server-authoritative player state. Those remain separate follow-up work packages.

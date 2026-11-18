@@ -58,6 +58,7 @@
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-002_ASSET_READINESS_CHECKLIST.md` — snapshot-based inventory of existing environment models, missing tree/material/prefab requirements and preparation/acceptance checklist.
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-002_SPHERICAL_GEOGRAPHIC_FIELDS.md` — approved/pushed work package for spherical climate, water, moisture, slope, vegetation suitability, biomes, settlement suitability, map exports, hybrid vegetation preview and required-asset readiness inventory.
 - `03_ENGINEERING/WORK_PACKAGES/WORLD-002_IMPLEMENTATION_PROGRESS_02.md` — ocean coverage and four-biome implementation status, limitations and owner validation steps.
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-003_PLAYABLE_BIOME_INSPECTION.md` — temporary Play Mode scene for inspecting the generated spherical biomes at player height.
 - `07_Testing/Work_Packages/WORLD-002_OCEAN_BIOME_TEST_PLAN.md` — automated and manual acceptance checks for ocean coverage, water distance and biome classification.
 
 ## WORLD-001 amendments

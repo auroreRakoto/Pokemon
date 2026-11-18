@@ -9,7 +9,6 @@
 Record meaningful documentation changes. Keep entries concise and link to proposals/decision IDs.
 
 ## Unreleased
-- Added DEC-043 (65% configurable spherical ocean-coverage target) and DEC-044 (four initial terrestrial biomes: plains, forest, desert, mountains), superseding the three-biome DEC-022 scope. Added a WORLD-002 plan amendment with area-weighted sea-level derivation, separate inland-water classes, field/visualisation requirements and acceptance tests. Implementation remains gated on pushing this plan milestone.
 - Added DEC-042 confirming hybrid vegetation presentation (biome-aware ground textures/materials plus deterministic 3D vegetation instances). Added the proposed WORLD-002 spherical geographic-fields plan, including a globe-correct hydrology/distance design gate, independent map outputs, dual-view inspection/export, biome and settlement suitability, and vegetation preview scope.
 - Clarified the single source-data location at `Assets/Project/Data`; renamed the runtime data-services folder to `Runtime/DataServices` to avoid a second `Data` directory. Added DEC-020 and updated the canonical Unity layout.
 - Added the confirmed two-milestone Git workflow, Conventional Commit format and mandatory agent attribution footer.
@@ -98,11 +97,17 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Added asset preparation tasks, canonical content-root/pipeline constraints, and minimum asset acceptance criteria.
 - Clarified that field generation must continue with labelled debug presentation when production art assets are unavailable; no placeholder is to be represented as final art.
 
+## 2026-11-18 — WORLD-004 plan
 
-## 2026-11-18 — WORLD-002 ocean coverage and four-biome implementation tranche
+- Added the WORLD-004 player controller and spherical locomotion plan, separating production movement from the temporary WORLD-003 inspection controller.
+- Clarified field-based ground contact, radial gravity, water/slope policy, camera reuse, collision limitations, test coverage and acceptance criteria in the world architecture.
+- Status is plan-ready; implementation remains gated on project-owner approval and the required plan milestone push.
 
-- Added area-weighted spherical ocean coverage with a configurable 65% default and derived sea-level diagnostics.
-- Added graph-geodesic distance-to-ocean and prototype moisture fields, explicitly marked as not production-certified.
-- Added the four approved land biome IDs and deterministic climate/terrain classification.
-- Added Planet Studio Water, Biomes, Distance to Water and Moisture inspection maps for globe and planisphere.
-- Added EditMode coverage and a dedicated ocean/biome test plan; Unity execution and owner visual acceptance remain pending.
+
+## 2026-11-18 — WORLD-004 first implementation increment
+
+- Added spherical field-aware ground probing and a world-space player motor/controller.
+- Integrated the controller into the temporary WORLD-003 playable inspection bootstrap.
+- Kept planet-scale preview meshes free of MeshColliders.
+- Added focused EditMode motor tests and documented the current approximation boundaries and Unity validation sequence.
+- Status remains implementation-in-progress until Unity compilation, tests and manual Play Mode checks are reported passing.

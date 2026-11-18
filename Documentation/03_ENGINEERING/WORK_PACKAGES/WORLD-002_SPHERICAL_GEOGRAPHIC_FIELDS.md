@@ -118,9 +118,9 @@ The supplied snapshot contains no imported environment `.mat`, environment textu
 
 ## 3.5 Mandatory asset approval gate before visual generation
 
-**This is a blocking gate, not an optional checklist.** Do not start the visualisation-generation stage (biome ground materials, vegetation instances, settlement markers represented by final art, or other environment presentation assets) until the asset inventory and visual asset list have been reviewed and explicitly approved by the project owner.
+**This is a blocking gate, not an optional checklist.** Do not start a production visualisation batch (vegetation instances, settlement markers represented by final art, or other environment presentation assets) until the relevant asset inventory has been reviewed and explicitly approved by the project owner. The initial set of four biome ground materials, one water material and `CFG_BiomeMaterialMapping` has since been explicitly approved and is covered by the initial URP material-generation increment below; that approval does not approve the still-pending Blender vegetation models or prefabs.
 
-The gate must be completed after the field/data pipeline is ready for visual validation and before any production visual asset generation or batch export is launched.
+The gate must be completed for each remaining asset group after the field/data pipeline is ready for visual validation and before its production visual generation or batch export is launched.
 
 Required approval record:
 - The exact asset list, grouped by role (ground materials, water material, vegetation models, tree canopy models, natural props, Unity prefabs, optional LOD/billboards).
@@ -155,6 +155,18 @@ The batch may continue to support TEST and CUSTOM modes, but those modes must no
 - Existing assets are referenced by stable paths/GUIDs and are not duplicated.
 - The batch report records the approved inventory version, selected assets, skipped unapproved assets, generated outputs and failures.
 - No final-quality visualisation is declared complete while required approved assets remain missing or unresolved.
+
+
+### 3.6 Initial URP biome material assets
+
+The first material-creation increment is Editor-scripted and uses the project's Universal Render Pipeline (URP):
+
+- `Assets/Project/Editor/World/Spherical/Biomes/SphericalBiomeMaterialGenerator.cs` creates or refreshes four terrestrial ground materials and one water material using `Universal Render Pipeline/Lit`.
+- `Assets/Project/Runtime/World/Spherical/Presentation/SphericalBiomeMaterialMapping.cs` defines `CFG_BiomeMaterialMapping`, the runtime-readable mapping from `SphericalBiome` IDs to materials plus the water material reference.
+- Generated assets are stored under `Assets/Project/Content/Materials/Environment/`; the mapping asset is stored at `Assets/Project/Content/World/PlanetStudio/CFG_BiomeMaterialMapping.asset`.
+- Invoke the tool from **Tools → World → Generate or Refresh Biome Materials (URP)**. It is safe to rerun: it updates generator-owned shader properties while preserving existing texture assignments.
+- This increment creates coloured URP/Lit material assets only. It does not create texture maps, modify the geographic fields, or assign materials to the planet mesh. Biome-aware surface application and transition blending remain a separate presentation task.
+
 
 ## 4. Explicit exclusions
 
@@ -242,7 +254,7 @@ Stages must declare their input dependencies. Changing a presentation property m
 - Inspect every implemented field on the globe and planisphere with legends.
 - Inspect all six Cube-Sphere boundaries, planisphere left/right wrap and both poles.
 - Compare raw fields and derived outputs; confirm moisture gradients around water and plausible basin/river behaviour.
-- Confirm biome colours/material transitions and vegetation density are readable at close, regional and distant views.
+- Confirm the URP material-generation tool creates all five materials and the mapping asset; then, once surface integration exists, confirm biome colours/material transitions and vegetation density at close, regional and distant views.
 - Confirm the hybrid vegetation result includes both ground treatment and 3D instances, and can be toggled/cleared without losing source maps.
 - Regenerate the same seed and compare outputs; switch views without changing the generated result.
 - Run EditMode and relevant PlayMode tests, then independent QA review.

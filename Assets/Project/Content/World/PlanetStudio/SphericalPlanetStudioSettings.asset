@@ -32,6 +32,18 @@ MonoBehaviour:
   map: 0
   temperatureLatitudeInfluence: 0.75
   temperatureNoiseInfluence: 0.25
+  geographicSettingsVersion: 1
+  oceanCoverageTargetPercent: 65
+  moistureDistanceScaleRadiusMultiplier: 0.18
+  moistureTemperatureEvaporation: 0.35
+  moistureSlopeLoss: 0.2
+  mountainElevationThresholdMeters: 1800
+  mountainSlopeThresholdDegrees: 28
+  desertMoistureThreshold: 0.2
+  desertMinimumTemperature: 0.3
+  forestMoistureThreshold: 0.48
+  forestMinimumTemperature: 0.18
+  forestMaximumTemperature: 0.9
   drainageInputMode: 0
   drainageResolution: 512
   drainageSeaLevelMeters: 0
