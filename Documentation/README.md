@@ -49,3 +49,5 @@ The initial static audit of the supplied Unity snapshot is recorded in `06_AUDIT
 ## Important caveat
 
 This handbook describes the intended architecture and rules. It is not proof that a system already exists. Verify the repository before assuming implementation.
+
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-002_OCEAN_COVERAGE_AND_FOUR_BIOMES_AMENDMENT.md` — plan milestone for configurable 65% spherical ocean coverage and the four initial terrestrial biomes; must be pushed before implementation.

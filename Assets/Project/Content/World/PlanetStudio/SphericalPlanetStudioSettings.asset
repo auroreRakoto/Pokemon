@@ -27,12 +27,12 @@ MonoBehaviour:
   layer2Frequency: 9
   layer3AmplitudeMeters: 65
   layer3Frequency: 34
-  previewStage: 0
+  previewStage: 4
   view: 0
   map: 0
   temperatureLatitudeInfluence: 0.75
   temperatureNoiseInfluence: 0.25
-  drainageInputMode: 1
+  drainageInputMode: 0
   drainageResolution: 512
   drainageSeaLevelMeters: 0
   riverAccumulationThreshold: 50

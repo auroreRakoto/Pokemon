@@ -85,7 +85,29 @@ namespace Pokemon.Project.World.Spherical.Studio
             try
             {
                 for (int f = 0; f < 6; f++)
-                    meshes[f] = GenerateGeographicCubeFace((CubeSphereFace)f, settings, fields, field);
+                    meshes[f] = GenerateGeographicCubeFace((CubeSphereFace)f, settings, fields,
+                        direction => GetGeographicFieldColor(fields.Sample(field, direction), field, settings.radiusMeters), false);
+                return meshes;
+            }
+            catch
+            {
+                foreach (Mesh mesh in meshes) if (mesh != null) DestroyMesh(mesh);
+                throw;
+            }
+        }
+
+        public static Mesh[] GenerateGeographicGlobeFaces(
+            SphericalPlanetStudioSettings settings, SphericalGeographicFieldSet fields,
+            SphericalPlanetStudioMap map)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
+            Mesh[] meshes = new Mesh[6];
+            try
+            {
+                for (int f = 0; f < 6; f++)
+                    meshes[f] = GenerateGeographicCubeFace((CubeSphereFace)f, settings, fields,
+                        direction => GetThematicMapColor(fields, direction, map), map == SphericalPlanetStudioMap.Water);
                 return meshes;
             }
             catch
@@ -101,6 +123,24 @@ namespace Pokemon.Project.World.Spherical.Studio
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (fields == null) throw new ArgumentNullException(nameof(fields));
+            return GenerateGeographicPlanisphereInternal(settings, fields,
+                direction => GetGeographicFieldColor(fields.Sample(field, direction), field, settings.radiusMeters));
+        }
+
+        public static Mesh GenerateGeographicPlanisphere(
+            SphericalPlanetStudioSettings settings, SphericalGeographicFieldSet fields,
+            SphericalPlanetStudioMap map)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
+            return GenerateGeographicPlanisphereInternal(settings, fields,
+                direction => GetThematicMapColor(fields, direction, map));
+        }
+
+        private static Mesh GenerateGeographicPlanisphereInternal(
+            SphericalPlanetStudioSettings settings, SphericalGeographicFieldSet fields,
+            Func<Vector3, Color> colorSampler)
+        {
             int width = settings.planisphereWidth;
             int height = settings.planisphereHeight;
             int count = (width + 1) * (height + 1);
@@ -120,7 +160,7 @@ namespace Pokemon.Project.World.Spherical.Studio
                     (v - 0.5f) * Mathf.PI * settings.radiusMeters, 0f);
                 normals[index] = Vector3.forward;
                 uv[index] = new Vector2(u, v);
-                colors[index] = GetGeographicFieldColor(fields.Sample(field, direction), field);
+                colors[index] = colorSampler(direction);
                 index++;
             }
             int t = 0;
@@ -140,7 +180,7 @@ namespace Pokemon.Project.World.Spherical.Studio
 
         private static Mesh GenerateGeographicCubeFace(
             CubeSphereFace face, SphericalPlanetStudioSettings settings,
-            SphericalGeographicFieldSet fields, SphericalGeographicFieldType field)
+            SphericalGeographicFieldSet fields, Func<Vector3, Color> colorSampler, bool waterSurface)
         {
             int resolution = settings.faceResolution;
             int side = resolution + 1;
@@ -157,10 +197,12 @@ namespace Pokemon.Project.World.Spherical.Studio
                 Vector3 direction = CubeSphereTopology.GetDirection(face,
                     -1f + 2f * x / resolution, -1f + 2f * y / resolution);
                 float altitude = fields.Sample(SphericalGeographicFieldType.AltitudeMeters, direction);
+                if (waterSurface && fields.SampleWaterClass(direction) == SphericalWaterClass.Ocean)
+                    altitude = fields.DerivedSeaLevelMeters + 0.5f;
                 vertices[index] = direction * (settings.radiusMeters + altitude);
                 normals[index] = direction;
                 uv[index] = new Vector2((float)x / resolution, (float)y / resolution);
-                colors[index] = GetGeographicFieldColor(fields.Sample(field, direction), field);
+                colors[index] = colorSampler(direction);
                 index++;
             }
             int t = 0;
@@ -171,14 +213,48 @@ namespace Pokemon.Project.World.Spherical.Studio
                 triangles[t++] = a; triangles[t++] = b; triangles[t++] = c;
                 triangles[t++] = b; triangles[t++] = d; triangles[t++] = c;
             }
-            Mesh mesh = new Mesh { name = $"Planet_Geographic_{field}_{face}",
+            Mesh mesh = new Mesh { name = $"Planet_Geographic_{face}",
                 indexFormat = count > 65535 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
             mesh.vertices = vertices; mesh.normals = normals; mesh.uv = uv; mesh.colors = colors;
             mesh.triangles = triangles; mesh.RecalculateBounds();
             return mesh;
         }
 
-        private static Color GetGeographicFieldColor(float value, SphericalGeographicFieldType field)
+        private static Color GetThematicMapColor(SphericalGeographicFieldSet fields, Vector3 direction,
+            SphericalPlanetStudioMap map)
+        {
+            if (map == SphericalPlanetStudioMap.Water)
+            {
+                switch (fields.SampleWaterClass(direction))
+                {
+                    case SphericalWaterClass.Ocean: return new Color(0.035f, 0.24f, 0.58f, 1f);
+                    case SphericalWaterClass.LakeOrPond: return new Color(0.08f, 0.48f, 0.72f, 1f);
+                    case SphericalWaterClass.River: return new Color(0.12f, 0.68f, 0.88f, 1f);
+                    default: return new Color(0.55f, 0.57f, 0.48f, 1f);
+                }
+            }
+            if (map == SphericalPlanetStudioMap.Biomes)
+            {
+                switch (fields.SampleBiome(direction))
+                {
+                    case SphericalBiome.Plains: return new Color(0.72f, 0.68f, 0.36f, 1f);
+                    case SphericalBiome.Forest: return new Color(0.12f, 0.42f, 0.20f, 1f);
+                    case SphericalBiome.Desert: return new Color(0.86f, 0.56f, 0.25f, 1f);
+                    case SphericalBiome.Mountains: return new Color(0.62f, 0.63f, 0.66f, 1f);
+                    default: return new Color(0.035f, 0.24f, 0.58f, 1f);
+                }
+            }
+            if (map == SphericalPlanetStudioMap.Moisture)
+                return Color.Lerp(new Color(0.78f, 0.58f, 0.28f), new Color(0.08f, 0.35f, 0.78f),
+                    fields.Sample(SphericalGeographicFieldType.MoistureNormalized, direction));
+            if (map == SphericalPlanetStudioMap.DistanceToWater)
+                return Color.Lerp(new Color(0.05f, 0.28f, 0.78f), new Color(0.88f, 0.76f, 0.35f),
+                    Mathf.InverseLerp(0f, fields.PlanetRadiusMeters * 0.5f,
+                        fields.Sample(SphericalGeographicFieldType.DistanceToWaterMeters, direction)));
+            throw new ArgumentOutOfRangeException(nameof(map), map, "Map is not a generated thematic field.");
+        }
+
+        private static Color GetGeographicFieldColor(float value, SphericalGeographicFieldType field, float planetRadiusMeters)
         {
             switch (field)
             {
@@ -191,6 +267,12 @@ namespace Pokemon.Project.World.Spherical.Studio
                 case SphericalGeographicFieldType.SlopeDegrees:
                     return Color.Lerp(new Color(0.12f, 0.55f, 0.22f),
                         new Color(0.88f, 0.12f, 0.08f), Mathf.InverseLerp(0f, 45f, value));
+                case SphericalGeographicFieldType.MoistureNormalized:
+                    return Color.Lerp(new Color(0.78f, 0.58f, 0.28f),
+                        new Color(0.08f, 0.35f, 0.78f), Mathf.Clamp01(value));
+                case SphericalGeographicFieldType.DistanceToWaterMeters:
+                    return Color.Lerp(new Color(0.05f, 0.28f, 0.78f), new Color(0.88f, 0.76f, 0.35f),
+                        Mathf.InverseLerp(0f, planetRadiusMeters * 0.5f, value));
                 default:
                     return Color.magenta;
             }

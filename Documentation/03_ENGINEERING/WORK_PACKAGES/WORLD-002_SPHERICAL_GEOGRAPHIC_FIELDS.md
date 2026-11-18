@@ -33,12 +33,12 @@ The plan is based on the latest supplied project snapshot `Pokemon-WORLD-001-lay
 
 1. **Height / terrain input review:** consume the existing WORLD-001 composed height field. Add only the metadata, validation or small corrections needed to make it a stable upstream input. Do not redesign the three approved relief layers in this package.
 2. **Temperature:** replace the prototype preview field with a versioned, deterministic normalized field combining broad latitude/world-scale trends, a dedicated seeded Perlin component and configurable altitude cooling from the height field.
-3. **Water:** generate an independently inspectable water classification field from dedicated seeded water-potential noise plus height, basin/shoreline constraints and deterministic hydrological rules. Distinguish ocean/sea, lake/pond and river where supported by the chosen prototype scale. Rivers must follow downhill flow and avoid arbitrary ridge placement or disconnected noise fragments.
+3. **Water:** generate an independently inspectable water classification field. Derive the ocean sea-level threshold from the configurable 65% area-weighted spherical ocean-coverage target; classify inland lakes/ponds and rivers separately, using basin/shoreline constraints and deterministic hydrological rules. Rivers must follow downhill flow and avoid arbitrary ridge placement or disconnected noise fragments.
 4. **Slope:** derive slope from the spherical height field using seam-aware neighbouring samples and world-space distances. Define behaviour at cube-face boundaries and near poles.
 5. **Distance to water:** produce a world-space nearest-water distance field on the sphere. The planar two-pass EDT described in the existing domain documentation must not be applied naïvely to an equirectangular image or individual cube faces.
 6. **Moisture:** derive ecological ground-moisture from water proximity, terrain retention/slope and temperature-dependent evaporation. Do not add an independent moisture Perlin map.
 7. **Vegetation suitability / potential density:** generate a dedicated seeded variation field and combine it with temperature, moisture, elevation and biome suitability. This is a field, not individual plant placement.
-8. **Biome classification:** generate an independently inspectable categorical biome map from height, temperature, moisture and water constraints. Preserve the currently confirmed initial biome scope: plains, forest and desert; settlements are not biomes. Additional biome categories require a separate documented decision.
+8. **Biome classification:** generate an independently inspectable categorical terrestrial-biome map from height, temperature, moisture and slope constraints. The confirmed initial set is plains, forest, desert and mountains. Mountains are primarily elevation/slope-driven. Ocean, lake/pond and river are water classes, not terrestrial biomes; settlements are not biomes. Additional biome categories require a separate documented decision.
 9. **Settlement suitability:** generate separate candidate-suitability outputs for villages, towns and large cities using slope/elevation, fresh-water access, flood risk, contiguous buildable area and deterministic suitability variation. This is a suitability field, not actual village layout or final placement.
 
 ### 3.2 Included inspection and presentation
@@ -102,7 +102,7 @@ The supplied snapshot contains no imported environment `.mat`, environment textu
 
 1. **Audit first:** inspect the current active branch for reusable models, materials, textures, prefabs, shaders and existing LOD setups. Record exact paths and Unity GUIDs; do not duplicate assets because a folder was absent in the planning snapshot.
 2. **Select a small preview set:** start with short grass, tall grass, wild grass and reeds from the existing imported models. Add at least two tree models before claiming that a forest canopy preview is visually representative. Use temporary clearly labelled primitives/billboards only if tree assets are not yet available.
-3. **Prepare ground materials:** define a minimal preview material set for plains, forest floor and desert/dry ground, plus water. Reuse compatible existing shaders and project conventions. Material creation/assignment is an explicit Art/Unity content task; the FBX synchronizer must not create materials as a side effect.
+3. **Prepare ground materials:** define a minimal preview material set for plains, forest floor, desert/dry ground and mountain/rock ground, plus water. Reuse compatible existing shaders and project conventions. Material creation/assignment is an explicit Art/Unity content task; the FBX synchronizer must not create materials as a side effect.
 4. **Compose Unity prefabs:** create stable prefabs for the chosen instance prototypes under the canonical `Assets/Project/Content/Prefabs/Environment/` hierarchy, with explicit orientation, scale, renderer, shadow and optional LOD/collider settings. Raw FBX models remain under `Models/Environment/`.
 5. **Preserve pipeline contracts:** environment model exports must follow `ART_AND_ASSET_PIPELINE.md`, including canonical categories, manifests and the `generate_all.py` production/test policy. `_ART_TEST` content remains test-only. Materials, textures and prefabs follow their own content roots and must not be implicitly created by FBX import.
 6. **Record missing production assets:** if tree models or biome materials are unavailable, keep field generation and map export progressing with debug presentation; report the gap and do not label the hybrid production preview complete.
@@ -111,7 +111,7 @@ The supplied snapshot contains no imported environment `.mat`, environment textu
 
 - At least one usable instance prefab for each vegetation category actually enabled in the preview.
 - At least two distinct tree prefabs before accepting a forest-canopy preview as representative; otherwise show a labelled placeholder and record the limitation.
-- Preview ground materials for plains, forest and desert/dry ground, plus a water debug/presentation material.
+- Preview ground materials for plains, forest, desert/dry ground and mountain/rock ground, plus a water debug/presentation material.
 - All referenced assets resolve to stable project paths and GUIDs; no `_ART_TEST` asset is treated as production content.
 - The vegetation renderer consumes biome/vegetation suitability fields and stable deterministic placement IDs; asset selection must not change the generated field values.
 - Missing assets are listed in the implementation report with owner/action required.
@@ -249,13 +249,17 @@ Stages must declare their input dependencies. Changing a presentation property m
 
 ## 10. Acceptance criteria
 
+**Implementation status (2026-11-18):** the first ocean/four-biome code tranche is prepared and tracked in `WORLD-002_IMPLEMENTATION_PROGRESS_02.md`. It adds area-weighted ocean coverage, graph-geodesic distance-to-ocean, prototype moisture and four-biome fields plus Planet Studio maps. Unity validation and visual acceptance are still pending. Lakes/rivers are not yet populated into the shared water-class field, and the graph-distance approximation is not production-certified. See `Documentation/07_Testing/Work_Packages/WORLD-002_OCEAN_BIOME_TEST_PLAN.md`.
+
+
 1. All included fields are real generated outputs, not UI-only enum entries or fabricated placeholders.
 2. Height, temperature, water, slope, distance-to-water, moisture, vegetation suitability, biome and settlement-suitability outputs are independently inspectable.
 3. The same generated data is displayed in spherical and planisphere views; projection switching does not regenerate or mutate fields.
 4. Spherical face seams, planisphere wrap and polar behaviour pass automated and visual checks.
 5. Spherical nearest-water distance uses a documented, validated globe-correct algorithm with stated accuracy/cost; no planar EDT is misapplied to the globe.
 6. Water, moisture, vegetation, biome and settlement dependencies follow the approved order and shared source fields.
-7. Initial biome outputs include plains, forest and desert; villages remain settlement candidates, not a biome.
+6a. At the configured default, ocean coverage is 65% of spherical surface area within the documented cell-area quantization tolerance; changing the target changes the derived sea-level threshold deterministically. Inland lakes/ponds and rivers are excluded from this ratio.
+7. Initial terrestrial biome outputs include plains, forest, desert and mountains; mountains are primarily elevation/slope-driven. Ocean, lake/pond and river remain water classes, not biomes; villages remain settlement candidates, not a biome.
 8. Settlement suitability remains a separate output for village, town and large-city candidates; actual settlement layouts are not generated in this package.
 9. Hybrid vegetation preview uses both biome-aware ground materials/textures and deterministic 3D vegetation instances, driven by suitability and exclusion fields.
 10. Every implemented field can be exported independently at native resolution with correct precision/encoding and metadata.
@@ -267,10 +271,10 @@ Stages must declare their input dependencies. Changing a presentation property m
 
 ## 11. Open questions / decisions deliberately not invented
 
-- Exact water-level/sea-level model and whether the prototype uses one global sea level or additional basin rules.
+- Exact biome thresholds/blend widths for plains, forest, desert and mountains; expose and record them as generation settings.
 - Spherical nearest-water algorithm selection, accuracy target and performance threshold (must be resolved by the Section 5 design gate).
 - Exact temperature latitude curve, noise weights and seasonal baseline (WORLD-002 prototype only; full climate remains future work).
-- Exact thresholds and blend widths for plains, forest and desert.
+- Exact thresholds and blend widths for plains, forest, desert and mountains.
 - Initial vegetation prefab catalogue, per-biome species profiles and visual density targets; inspect available assets before selecting final references.
 - Whether village/town/city suitability is only a continuous score map or also includes deterministic candidate marker extraction thresholds; the plan requires both score fields and preview candidate markers, but final settlement counts remain open.
 - Water body size thresholds and river ordering/width presentation.

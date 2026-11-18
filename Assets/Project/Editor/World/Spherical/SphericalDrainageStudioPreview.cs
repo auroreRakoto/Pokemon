@@ -10,6 +10,17 @@ using UnityEngine.Rendering;
 namespace Pokemon.Project.Editor.World.Spherical
 {
     /// <summary>Builds the experimental drainage data and a reusable visual overlay mesh for Planet Studio.</summary>
+    public struct SphericalDrainageOverlayDiagnostics
+    {
+        public int EligibleFrontHemisphereSegments;
+        public int RenderedFrontHemisphereSegments;
+        public int RenderedVerticesBelowTerrain;
+        public float MinimumRadialClearanceMeters;
+        public float MedianRadialClearanceMeters;
+        public float MaximumRadialClearanceMeters;
+        public bool HasCameraReference;
+    }
+
     public static class SphericalDrainageStudioPreview
     {
         public static SphericalDrainageResult Generate(SphericalPlanetStudioSettings settings, out SphericalNeighbourGraph graph)
@@ -117,6 +128,15 @@ namespace Pokemon.Project.Editor.World.Spherical
             SphericalPlanetStudioSettings settings, bool planisphere,
             out int eligibleSegments, out int renderedSegments, out int samplingStride)
         {
+            return BuildOverlayMesh(graph, result, settings, planisphere, Vector3.zero, false,
+                out eligibleSegments, out renderedSegments, out samplingStride, out _);
+        }
+
+        public static Mesh BuildOverlayMesh(SphericalNeighbourGraph graph, SphericalDrainageResult result,
+            SphericalPlanetStudioSettings settings, bool planisphere, Vector3 cameraDirectionLocal,
+            bool hasCameraReference, out int eligibleSegments, out int renderedSegments,
+            out int samplingStride, out SphericalDrainageOverlayDiagnostics diagnostics)
+        {
             if (graph == null) throw new ArgumentNullException(nameof(graph));
             if (result == null) throw new ArgumentNullException(nameof(result));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
@@ -125,6 +145,16 @@ namespace Pokemon.Project.Editor.World.Spherical
             eligibleSegments = 0;
             renderedSegments = 0;
             samplingStride = 1;
+            diagnostics = new SphericalDrainageOverlayDiagnostics
+            {
+                MinimumRadialClearanceMeters = float.PositiveInfinity,
+                MaximumRadialClearanceMeters = float.NegativeInfinity,
+                HasCameraReference = hasCameraReference
+            };
+            if (hasCameraReference && cameraDirectionLocal.sqrMagnitude > 1e-8f)
+                cameraDirectionLocal.Normalize();
+            else
+                hasCameraReference = false;
             int directionStride = Mathf.Max(1, settings.flowDirectionStride);
 
             // First pass counts exactly the segments selected by the current overlay mode.
@@ -147,7 +177,18 @@ namespace Pokemon.Project.Editor.World.Spherical
                         include = result.RiverMask[node];
                         break;
                 }
-                if (include) eligibleSegments++;
+                if (include)
+                {
+                    eligibleSegments++;
+                    if (!planisphere && hasCameraReference)
+                    {
+                        int downstream = result.DownstreamNodeIds[node];
+                        Vector3 midpointDirection = Vector3.Slerp(
+                            graph.GetDirection(node), graph.GetDirection(downstream), 0.5f).normalized;
+                        if (Vector3.Dot(midpointDirection, cameraDirectionLocal) > 0f)
+                            diagnostics.EligibleFrontHemisphereSegments++;
+                    }
+                }
             }
 
             if (eligibleSegments == 0) return null;
@@ -161,8 +202,14 @@ namespace Pokemon.Project.Editor.World.Spherical
             var colors = new List<Color>(Mathf.Min(eligibleSegments, maximumRenderedSegments) * 4);
             var triangles = new List<int>(Mathf.Min(eligibleSegments, maximumRenderedSegments) * 6);
 
-            float width = Mathf.Max(10f, settings.radiusMeters * 0.008f);
-            float visualLift = Mathf.Max(50f, settings.radiusMeters * 0.003f);
+            // The drainage graph is sampled more densely than the display terrain.
+            // Keep ribbons narrow relative to graph spacing; the previous 0.8%-of-radius
+            // width merged neighbouring edges into large cyan patches.
+            float width = Mathf.Max(4f, settings.radiusMeters * 0.0008f);
+            // The displayed globe is a lower-resolution mesh. A visible radial offset
+            // is required to avoid its interpolated triangles occluding the high-res overlay.
+            // Production preview clearance; the exaggerated 2 km diagnostic offset is removed.
+            float visualLift = Mathf.Max(300f, settings.radiusMeters * 0.006f);
             int eligibleOrdinal = 0;
 
             for (int node = 0; node < graph.NodeCount; node++)
@@ -200,14 +247,43 @@ namespace Pokemon.Project.Editor.World.Spherical
 
                 Vector3 aDirection = graph.GetDirection(node);
                 Vector3 bDirection = graph.GetDirection(downstream);
-                float aHeight = result.FilledElevationMeters[node];
-                float bHeight = result.FilledElevationMeters[downstream];
+                // FilledElevationMeters belongs to the Priority-Flood routing surface:
+                // it raises depressions to spill elevation and is NOT the terrain surface.
+                // Using it to position ribbons can put them inside the rendered terrain.
+                // Render on the exact procedural terrain sampled by the globe generator instead.
+                float aHeight = SphericalPlanetStudioGenerator.SamplePreviewHeight(
+                    aDirection, settings, settings.previewStage);
+                float bHeight = SphericalPlanetStudioGenerator.SamplePreviewHeight(
+                    bDirection, settings, settings.previewStage);
                 if (planisphere)
+                {
                     AddPlanisphereSegment(aDirection, bDirection, settings.radiusMeters, width,
                         color, vertices, colors, triangles);
+                }
                 else
+                {
+                    Vector3 midpointDirection = Vector3.Slerp(aDirection, bDirection, 0.5f).normalized;
+                    bool cameraFacing = hasCameraReference &&
+                        Vector3.Dot(midpointDirection, cameraDirectionLocal) > 0f;
+                    if (cameraFacing) diagnostics.RenderedFrontHemisphereSegments++;
+
+                    int vertexStart = vertices.Count;
                     AddGlobeSegment(aDirection, bDirection, settings.radiusMeters, aHeight, bHeight,
                         width, visualLift, color, vertices, colors, triangles);
+                    for (int vertexIndex = vertexStart; vertexIndex < vertices.Count; vertexIndex++)
+                    {
+                        Vector3 vertex = vertices[vertexIndex];
+                        float terrainRadius = settings.radiusMeters +
+                            SphericalPlanetStudioGenerator.SamplePreviewHeight(
+                                vertex.normalized, settings, settings.previewStage);
+                        float clearance = vertex.magnitude - terrainRadius;
+                        diagnostics.MinimumRadialClearanceMeters = Mathf.Min(
+                            diagnostics.MinimumRadialClearanceMeters, clearance);
+                        diagnostics.MaximumRadialClearanceMeters = Mathf.Max(
+                            diagnostics.MaximumRadialClearanceMeters, clearance);
+                        if (clearance < 0f) diagnostics.RenderedVerticesBelowTerrain++;
+                    }
+                }
                 renderedSegments++;
             }
 
@@ -222,6 +298,31 @@ namespace Pokemon.Project.Editor.World.Spherical
             mesh.SetTriangles(triangles, 0);
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+
+            if (!planisphere && vertices.Count > 0)
+            {
+                var clearances = new List<float>(vertices.Count);
+                for (int i = 0; i < vertices.Count; i++)
+                {
+                    Vector3 vertex = vertices[i];
+                    float terrainRadius = settings.radiusMeters +
+                        SphericalPlanetStudioGenerator.SamplePreviewHeight(
+                            vertex.normalized, settings, settings.previewStage);
+                    clearances.Add(vertex.magnitude - terrainRadius);
+                }
+                clearances.Sort();
+                diagnostics.MedianRadialClearanceMeters = clearances[clearances.Count / 2];
+                if (float.IsPositiveInfinity(diagnostics.MinimumRadialClearanceMeters))
+                    diagnostics.MinimumRadialClearanceMeters = 0f;
+                if (float.IsNegativeInfinity(diagnostics.MaximumRadialClearanceMeters))
+                    diagnostics.MaximumRadialClearanceMeters = 0f;
+            }
+            else
+            {
+                diagnostics.MinimumRadialClearanceMeters = 0f;
+                diagnostics.MedianRadialClearanceMeters = 0f;
+                diagnostics.MaximumRadialClearanceMeters = 0f;
+            }
             return mesh;
         }
 

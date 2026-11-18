@@ -44,3 +44,30 @@ Memory caveat: the sampled working set is process-wide and includes Unity Editor
 - No absolute performance threshold is imposed until the owner's PC baseline is reviewed.
 
 Passing these tests and benchmark validates the drainage prototype's topology invariants and execution cost only. It does not validate river-network visual quality or hydrological realism.
+
+
+## Visual integration gate (separate from topology and benchmark)
+
+Passing the topology suite and the three-run 512 benchmark validates graph connectivity,
+acyclic routing, accumulation invariants and execution cost. It does **not** validate the
+rendered hydrographic network.
+
+Visual acceptance is tracked separately in
+`WORLD-002_DRAINAGE_ISOLATION_TEST_PLAN.md`, Test C. In particular:
+
+- a non-empty overlay mesh is not a visual pass;
+- the camera-facing hemisphere must contain eligible and rendered drainage segments;
+- the overlay must be positioned outside the displayed terrain in the same local coordinate
+  frame, using the original sampled terrain elevation rather than Priority-Flood filled elevation;
+- continuous paths must be visible across the near hemisphere, not merely fragments at the
+  silhouette;
+- an exaggerated 2 km clearance is diagnostic only and cannot be accepted as final placement.
+
+Current status (2026-11-18): topology and 512 benchmark were owner-reported passing; Test A and
+Test B were owner-reported passing; Test C remains **FAIL / not accepted** based on the latest
+Unity screenshot. Do not mark the hydrographic network visually validated until Test C passes.
+
+
+## Implementation note — opaque overlay depth behaviour (2026-11-18)
+
+Do not use `Sprites/Default` as the production drainage overlay material: its transparent sorting and disabled depth writes can hide an otherwise valid overlay behind the six large terrain-face renderers. Use `Hidden/Pokemon/DrainageOverlayOpaque`, which preserves vertex colours and uses opaque depth-writing, double-sided rendering. This is a rendering-only correction; it does not alter Priority-Flood, flow directions, accumulation, water masks, river candidates, or graph topology. The 2 km forced-clearance experiment is removed.

@@ -26,7 +26,8 @@ namespace Pokemon.Project.World.Spherical.Studio
         Water,
         Biomes,
         Villages,
-        Slope
+        Slope,
+        DistanceToWater
     }
 
     public enum SphericalDrainagePreviewMode
@@ -77,6 +78,20 @@ namespace Pokemon.Project.World.Spherical.Studio
         [Min(0f)] public float temperatureLatitudeInfluence = 0.75f;
         [Min(0f)] public float temperatureNoiseInfluence = 0.25f;
 
+        [Header("Oceans and biomes")]
+        [Min(0)] public int geographicSettingsVersion = 1;
+        [Range(50f, 80f)] public float oceanCoverageTargetPercent = 65f;
+        [Min(0.01f)] public float moistureDistanceScaleRadiusMultiplier = 0.18f;
+        [Range(0f, 1f)] public float moistureTemperatureEvaporation = 0.35f;
+        [Range(0f, 1f)] public float moistureSlopeLoss = 0.2f;
+        [Min(0f)] public float mountainElevationThresholdMeters = 1800f;
+        [Range(0f, 90f)] public float mountainSlopeThresholdDegrees = 28f;
+        [Range(0f, 1f)] public float desertMoistureThreshold = 0.2f;
+        [Range(0f, 1f)] public float desertMinimumTemperature = 0.3f;
+        [Range(0f, 1f)] public float forestMoistureThreshold = 0.48f;
+        [Range(0f, 1f)] public float forestMinimumTemperature = 0.18f;
+        [Range(0f, 1f)] public float forestMaximumTemperature = 0.9f;
+
         [Header("Drainage preview (experimental)")]
         public SphericalDrainageInputMode drainageInputMode = SphericalDrainageInputMode.TerrainHeightfield;
         [Range(8, 512)] public int drainageResolution = 512;
@@ -87,6 +102,23 @@ namespace Pokemon.Project.World.Spherical.Studio
 
         public void Validate()
         {
+            // Existing serialized settings assets predate WORLD-002. A versioned migration
+            // preserves the approved 65% default instead of interpreting missing fields as zero.
+            if (geographicSettingsVersion < 1)
+            {
+                oceanCoverageTargetPercent = 65f;
+                moistureDistanceScaleRadiusMultiplier = 0.18f;
+                moistureTemperatureEvaporation = 0.35f;
+                moistureSlopeLoss = 0.2f;
+                mountainElevationThresholdMeters = 1800f;
+                mountainSlopeThresholdDegrees = 28f;
+                desertMoistureThreshold = 0.2f;
+                desertMinimumTemperature = 0.3f;
+                forestMoistureThreshold = 0.48f;
+                forestMinimumTemperature = 0.18f;
+                forestMaximumTemperature = 0.9f;
+                geographicSettingsVersion = 1;
+            }
             radiusMeters = Mathf.Max(100f, radiusMeters);
             faceResolution = Mathf.Clamp(faceResolution, 2, 256);
             planisphereWidth = Mathf.Clamp(planisphereWidth, 32, 2048);
@@ -94,6 +126,17 @@ namespace Pokemon.Project.World.Spherical.Studio
             drainageResolution = Mathf.Clamp(drainageResolution, 8, 512);
             riverAccumulationThreshold = Mathf.Max(1f, riverAccumulationThreshold);
             flowDirectionStride = Mathf.Clamp(flowDirectionStride, 1, 64);
+            oceanCoverageTargetPercent = Mathf.Clamp(oceanCoverageTargetPercent, 50f, 80f);
+            moistureDistanceScaleRadiusMultiplier = Mathf.Max(0.01f, moistureDistanceScaleRadiusMultiplier);
+            moistureTemperatureEvaporation = Mathf.Clamp01(moistureTemperatureEvaporation);
+            moistureSlopeLoss = Mathf.Clamp01(moistureSlopeLoss);
+            mountainElevationThresholdMeters = Mathf.Max(0f, mountainElevationThresholdMeters);
+            mountainSlopeThresholdDegrees = Mathf.Clamp(mountainSlopeThresholdDegrees, 0f, 90f);
+            desertMoistureThreshold = Mathf.Clamp01(desertMoistureThreshold);
+            desertMinimumTemperature = Mathf.Clamp01(desertMinimumTemperature);
+            forestMoistureThreshold = Mathf.Clamp01(forestMoistureThreshold);
+            forestMinimumTemperature = Mathf.Clamp01(forestMinimumTemperature);
+            forestMaximumTemperature = Mathf.Clamp(forestMaximumTemperature, forestMinimumTemperature, 1f);
             layer1AmplitudeMeters = Mathf.Max(0f, layer1AmplitudeMeters);
             layer2AmplitudeMeters = Mathf.Max(0f, layer2AmplitudeMeters);
             layer3AmplitudeMeters = Mathf.Max(0f, layer3AmplitudeMeters);

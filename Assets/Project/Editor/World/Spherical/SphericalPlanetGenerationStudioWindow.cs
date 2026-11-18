@@ -47,6 +47,8 @@ namespace Pokemon.Project.Editor.World.Spherical
             DrawInspection();
             EditorGUILayout.Space(8);
             DrawDrainageControls();
+            EditorGUILayout.Space(8);
+            DrawOceanAndBiomeSettings();
             bool changed = EditorGUI.EndChangeCheck();
             EditorGUILayout.Space(12);
             using (new EditorGUILayout.HorizontalScope())
@@ -60,7 +62,7 @@ namespace Pokemon.Project.Editor.World.Spherical
                 Repaint();
             }
             EditorGUILayout.Space(8);
-            EditorGUILayout.HelpBox("Drainage is an experimental WORLD-002 preview. The sea-level threshold and river accumulation threshold are editable; visual output is not yet hydrographically approved.", MessageType.Warning);
+            EditorGUILayout.HelpBox("WORLD-002 ocean/biome fields are a prototype. Ocean coverage is area-weighted; moisture uses graph distance to ocean only. Lakes/rivers are not yet merged into the water-class field, and graph-distance accuracy still requires validation.", MessageType.Warning);
             EditorGUILayout.EndScrollView();
         }
 
@@ -111,8 +113,64 @@ namespace Pokemon.Project.Editor.World.Spherical
             {
                 settings.map = (SphericalPlanetStudioMap)EditorGUILayout.EnumPopup("Map", settings.map);
             }
-            if (settings.map == SphericalPlanetStudioMap.Moisture || settings.map == SphericalPlanetStudioMap.Water || settings.map == SphericalPlanetStudioMap.Biomes || settings.map == SphericalPlanetStudioMap.Villages || settings.map == SphericalPlanetStudioMap.Slope)
-                EditorGUILayout.HelpBox("This map is not generated yet. Choose Terrain, Altitude or Temperature for an implemented preview.", MessageType.Warning);
+            if (settings.map == SphericalPlanetStudioMap.Villages)
+                EditorGUILayout.HelpBox("Settlement suitability is not part of this milestone. Choose another map.", MessageType.Warning);
+            else if (settings.map != SphericalPlanetStudioMap.Terrain)
+                EditorGUILayout.HelpBox("The selected map is generated from one shared spherical field set for both globe and planisphere.", MessageType.Info);
+            DrawMapLegend();
+        }
+
+        private void DrawMapLegend()
+        {
+            if (settings.map == SphericalPlanetStudioMap.Biomes)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    DrawLegendItem(new Color(0.72f, 0.68f, 0.36f), "Plains");
+                    DrawLegendItem(new Color(0.12f, 0.42f, 0.20f), "Forest");
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    DrawLegendItem(new Color(0.86f, 0.56f, 0.25f), "Desert");
+                    DrawLegendItem(new Color(0.62f, 0.63f, 0.66f), "Mountains");
+                    DrawLegendItem(new Color(0.035f, 0.24f, 0.58f), "Ocean");
+                }
+            }
+            else if (settings.map == SphericalPlanetStudioMap.Water)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    DrawLegendItem(new Color(0.55f, 0.57f, 0.48f), "Land");
+                    DrawLegendItem(new Color(0.035f, 0.24f, 0.58f), "Ocean");
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    DrawLegendItem(new Color(0.08f, 0.48f, 0.72f), "Lake / Pond");
+                    DrawLegendItem(new Color(0.12f, 0.68f, 0.88f), "River");
+                }
+            }
+            else if (settings.map == SphericalPlanetStudioMap.Moisture)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    DrawLegendItem(new Color(0.78f, 0.58f, 0.28f), "Dry");
+                    DrawLegendItem(new Color(0.08f, 0.35f, 0.78f), "Moist");
+                }
+            }
+            else if (settings.map == SphericalPlanetStudioMap.DistanceToWater)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    DrawLegendItem(new Color(0.05f, 0.28f, 0.78f), "Near water");
+                    DrawLegendItem(new Color(0.88f, 0.76f, 0.35f), "Far inland");
+                }
+            }
+        }
+
+        private static void DrawLegendItem(Color color, string label)
+        {
+            EditorGUILayout.ColorField(GUIContent.none, color, false, false, false, GUILayout.Width(34));
+            EditorGUILayout.LabelField(label, GUILayout.MinWidth(58));
         }
 
         private void DrawDrainageControls()
@@ -150,16 +208,48 @@ namespace Pokemon.Project.Editor.World.Spherical
                 MessageType.None);
         }
 
+        private void DrawOceanAndBiomeSettings()
+        {
+            EditorGUILayout.LabelField("WORLD-002 — Oceans and Biomes", EditorStyles.boldLabel);
+            settings.oceanCoverageTargetPercent = EditorGUILayout.Slider("Ocean coverage (%)", settings.oceanCoverageTargetPercent, 50f, 80f);
+            settings.moistureDistanceScaleRadiusMultiplier = EditorGUILayout.Slider("Moisture distance / radius", settings.moistureDistanceScaleRadiusMultiplier, 0.05f, 0.5f);
+            settings.moistureTemperatureEvaporation = EditorGUILayout.Slider("Temperature evaporation", settings.moistureTemperatureEvaporation, 0f, 1f);
+            settings.moistureSlopeLoss = EditorGUILayout.Slider("Slope moisture loss", settings.moistureSlopeLoss, 0f, 1f);
+            settings.mountainElevationThresholdMeters = EditorGUILayout.FloatField("Mountain elevation (m)", settings.mountainElevationThresholdMeters);
+            settings.mountainSlopeThresholdDegrees = EditorGUILayout.Slider("Mountain slope (°)", settings.mountainSlopeThresholdDegrees, 0f, 90f);
+            settings.desertMoistureThreshold = EditorGUILayout.Slider("Desert moisture max", settings.desertMoistureThreshold, 0f, 1f);
+            settings.desertMinimumTemperature = EditorGUILayout.Slider("Desert minimum temperature", settings.desertMinimumTemperature, 0f, 1f);
+            settings.forestMoistureThreshold = EditorGUILayout.Slider("Forest moisture min", settings.forestMoistureThreshold, 0f, 1f);
+            settings.forestMinimumTemperature = EditorGUILayout.Slider("Forest temperature min", settings.forestMinimumTemperature, 0f, 1f);
+            settings.forestMaximumTemperature = EditorGUILayout.Slider("Forest temperature max", settings.forestMaximumTemperature, settings.forestMinimumTemperature, 1f);
+        }
+
         private void EnsureSettings()
         {
-            if (settings != null) return;
+            if (settings != null)
+            {
+                MigrateGeographicSettingsIfRequired();
+                return;
+            }
             settings = AssetDatabase.LoadAssetAtPath<SphericalPlanetStudioSettings>(SettingsPath);
-            if (settings != null) return;
+            if (settings != null)
+            {
+                MigrateGeographicSettingsIfRequired();
+                return;
+            }
             string folder = "Assets/Project/Content/World/PlanetStudio";
             EnsureFolder("Assets/Project/Content/World");
             EnsureFolder(folder);
             settings = CreateInstance<SphericalPlanetStudioSettings>();
             AssetDatabase.CreateAsset(settings, SettingsPath);
+            AssetDatabase.SaveAssets();
+        }
+
+        private void MigrateGeographicSettingsIfRequired()
+        {
+            if (settings.geographicSettingsVersion >= 1) return;
+            settings.Validate();
+            EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
         }
 
@@ -179,33 +269,67 @@ namespace Pokemon.Project.Editor.World.Spherical
                 EditorUtility.DisplayDialog("Planet Studio", "Stop Play Mode before generating an Editor preview.", "OK");
                 return;
             }
-            if (settings.map != SphericalPlanetStudioMap.Terrain && settings.map != SphericalPlanetStudioMap.Altitude && settings.map != SphericalPlanetStudioMap.Temperature)
+            bool geographicMap = settings.map != SphericalPlanetStudioMap.Terrain &&
+                settings.map != SphericalPlanetStudioMap.Villages;
+            if (settings.map == SphericalPlanetStudioMap.Villages)
             {
-                EditorUtility.DisplayDialog("Planet Studio", "This thematic map is not implemented yet. No preview was generated.", "OK");
+                EditorUtility.DisplayDialog("Planet Studio", "Settlement suitability is not part of this milestone.", "OK");
                 return;
             }
             settings.Validate();
             EditorUtility.SetDirty(settings);
+            SphericalGeographicFieldSet fields = geographicMap
+                ? SphericalGeographicFieldGenerator.Generate(settings) : null;
             ClearPreview();
             GameObject root = new GameObject(PreviewRootName);
             Undo.RegisterCreatedObjectUndo(root, "Generate Planet Studio Preview");
             Material material = CreatePreviewMaterial();
             if (settings.view == SphericalPlanetStudioView.Spherical)
             {
-                Mesh[] meshes = SphericalPlanetStudioGenerator.GenerateGlobeFaces(settings);
+                Mesh[] meshes = geographicMap
+                    ? IsContinuousFieldMap(settings.map)
+                        ? SphericalPlanetStudioGenerator.GenerateGeographicGlobeFaces(settings, fields, ToFieldType(settings.map))
+                        : SphericalPlanetStudioGenerator.GenerateGeographicGlobeFaces(settings, fields, settings.map)
+                    : SphericalPlanetStudioGenerator.GenerateGlobeFaces(settings);
                 for (int i = 0; i < meshes.Length; i++) CreateMeshObject(root.transform, ((CubeSphereFace)i).ToString(), meshes[i], material);
             }
             else
             {
-                Mesh mesh = SphericalPlanetStudioGenerator.GeneratePlanisphere(settings);
+                Mesh mesh = geographicMap
+                    ? IsContinuousFieldMap(settings.map)
+                        ? SphericalPlanetStudioGenerator.GenerateGeographicPlanisphere(settings, fields, ToFieldType(settings.map))
+                        : SphericalPlanetStudioGenerator.GenerateGeographicPlanisphere(settings, fields, settings.map)
+                    : SphericalPlanetStudioGenerator.GeneratePlanisphere(settings);
                 CreateMeshObject(root.transform, "Planisphere_Equirectangular", mesh, material);
             }
             Selection.activeGameObject = root;
             EditorSceneManager.MarkSceneDirty(root.scene);
             SceneView.RepaintAll();
-            Debug.Log($"Planet Studio preview generated. View={settings.view}, Map={settings.map}, Seed={settings.seed}, Stage={settings.previewStage}, Layers=[{settings.layer1Enabled},{settings.layer2Enabled},{settings.layer3Enabled}].", root);
+            if (fields != null)
+                Debug.Log($"Planet Studio preview generated. View={settings.view}, Map={settings.map}, Seed={settings.seed}, OceanTarget={fields.OceanCoverageTargetPercent:F2}%, OceanActual={fields.ActualOceanCoveragePercent:F2}% (quantization ±{fields.OceanCoverageQuantizationTolerancePercent:F3}%), SeaLevel={fields.DerivedSeaLevelMeters:F2}m.", root);
+            else
+                Debug.Log($"Planet Studio preview generated. View={settings.view}, Map={settings.map}, Seed={settings.seed}, Stage={settings.previewStage}, Layers=[{settings.layer1Enabled},{settings.layer2Enabled},{settings.layer3Enabled}].", root);
         }
 
+        private static bool IsContinuousFieldMap(SphericalPlanetStudioMap map)
+        {
+            return map == SphericalPlanetStudioMap.Altitude || map == SphericalPlanetStudioMap.Temperature ||
+                   map == SphericalPlanetStudioMap.Slope || map == SphericalPlanetStudioMap.Moisture ||
+                   map == SphericalPlanetStudioMap.DistanceToWater;
+        }
+
+        private static SphericalGeographicFieldType ToFieldType(SphericalPlanetStudioMap map)
+        {
+            switch (map)
+            {
+                case SphericalPlanetStudioMap.Altitude: return SphericalGeographicFieldType.AltitudeMeters;
+                case SphericalPlanetStudioMap.Temperature: return SphericalGeographicFieldType.TemperatureNormalized;
+                case SphericalPlanetStudioMap.Slope: return SphericalGeographicFieldType.SlopeDegrees;
+                case SphericalPlanetStudioMap.Moisture: return SphericalGeographicFieldType.MoistureNormalized;
+                case SphericalPlanetStudioMap.DistanceToWater: return SphericalGeographicFieldType.DistanceToWaterMeters;
+                default: throw new ArgumentOutOfRangeException(nameof(map), map, "Map is not a continuous geographic field.");
+            }
+        }
 
         private void RunDrainageLogicOnlyDiagnostic()
         {
@@ -365,9 +489,16 @@ namespace Pokemon.Project.Editor.World.Spherical
                 GameObject root = GameObject.Find(PreviewRootName);
                 if (root == null) throw new InvalidOperationException("Planet preview root could not be created.");
                 ClearDrainageObjects(root.transform);
+                SceneView sceneView = SceneView.lastActiveSceneView;
+                bool hasCameraReference = sceneView != null && sceneView.camera != null &&
+                    settings.view == SphericalPlanetStudioView.Spherical;
+                Vector3 cameraDirectionLocal = hasCameraReference
+                    ? root.transform.InverseTransformPoint(sceneView.camera.transform.position).normalized
+                    : Vector3.zero;
                 Mesh overlay = SphericalDrainageStudioPreview.BuildOverlayMesh(lastDrainageGraph, lastDrainageResult,
-                    settings, settings.view == SphericalPlanetStudioView.Planisphere,
-                    out int eligibleSegments, out int renderedSegments, out int samplingStride);
+                    settings, settings.view == SphericalPlanetStudioView.Planisphere, cameraDirectionLocal,
+                    hasCameraReference, out int eligibleSegments, out int renderedSegments,
+                    out int samplingStride, out SphericalDrainageOverlayDiagnostics diagnostics);
                 if (overlay == null)
                     throw new InvalidOperationException(
                         $"No drainage segments matched the current overlay settings. Input={settings.drainageInputMode}, " +
@@ -375,6 +506,7 @@ namespace Pokemon.Project.Editor.World.Spherical
                         $"Candidates={CountTrue(lastDrainageResult.RiverMask)}. For real terrain drainage, use Terrain Heightfield and inspect Sea Level / Accumulation Threshold.");
                 Material material = CreateDrainageMaterial();
                 CreateMeshObject(root.transform, "WORLD-002_DrainageOverlay", overlay, material);
+                Transform overlayTransform = root.transform.Find("WORLD-002_DrainageOverlay");
                 EditorSceneManager.MarkSceneDirty(root.scene);
                 SceneView.RepaintAll();
                 Debug.Log(
@@ -382,6 +514,12 @@ namespace Pokemon.Project.Editor.World.Spherical
                     $"Nodes={lastDrainageGraph.NodeCount}, WaterNodes={lastDrainageResult.InitialWaterNodeCount}, " +
                     $"RiverCandidates={CountTrue(lastDrainageResult.RiverMask)}, EligibleSegments={eligibleSegments}, " +
                     $"RenderedSegments={renderedSegments}, SamplingStride={samplingStride}, Vertices={overlay.vertexCount}, " +
+                    $"CameraRef={diagnostics.HasCameraReference}, EligibleFront={diagnostics.EligibleFrontHemisphereSegments}, " +
+                    $"RenderedFront={diagnostics.RenderedFrontHemisphereSegments}, VerticesBelowTerrain={diagnostics.RenderedVerticesBelowTerrain}, " +
+                    $"ClearanceMinMedianMax={diagnostics.MinimumRadialClearanceMeters:F1}/{diagnostics.MedianRadialClearanceMeters:F1}/{diagnostics.MaximumRadialClearanceMeters:F1}m, " +
+                    $"RootPos={root.transform.position}, RootRot={root.transform.rotation.eulerAngles}, RootScale={root.transform.lossyScale}, " +
+                    $"OverlayLocalPos={overlayTransform.localPosition}, OverlayLocalRot={overlayTransform.localRotation.eulerAngles}, " +
+                    $"OverlayLocalScale={overlayTransform.localScale}, " +
                     $"Threshold={settings.riverAccumulationThreshold}, Overlay={settings.drainagePreviewMode}.", root);
             }
             catch (Exception exception)
@@ -405,13 +543,15 @@ namespace Pokemon.Project.Editor.World.Spherical
 
         private static Material CreateDrainageMaterial()
         {
-            Shader shader = Shader.Find("Sprites/Default");
-            if (shader == null) shader = Shader.Find("Unlit/Color");
-            if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (shader == null) throw new InvalidOperationException("No compatible shader was found for drainage overlay.");
+            // Sprites/Default is transparent and uses ZWrite Off. Whole-renderer
+            // transparent sorting can place this large overlay behind the six terrain
+            // face renderers, leaving only silhouette fragments visible.
+            Shader shader = Shader.Find("Hidden/Pokemon/DrainageOverlayOpaque");
+            if (shader == null)
+                throw new InvalidOperationException(
+                    "The opaque drainage overlay shader was not found. Reimport DrainageOverlayOpaque.shader.");
             var material = new Material(shader) { name = "WORLD-002_DrainageOverlayMaterial" };
-            if (material.HasProperty("_Color")) material.SetColor("_Color", Color.white);
-            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", Color.white);
+            material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
             return material;
         }
 

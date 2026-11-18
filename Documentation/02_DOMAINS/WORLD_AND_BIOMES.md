@@ -7,16 +7,21 @@ Owns spatial world generation, terrain representation, biome placement, environm
 
 ## Confirmed initial world content and presentation scope
 
-### Initial biome scope
+### Initial ocean and biome scope
 
-The initial biome set is:
+The initial spherical-world generation targets **65% ocean coverage** by planet surface area. This is a configurable target, not a hard-coded elevation. The generator derives the sea-level threshold from the generated terrain elevation distribution so the requested ocean fraction can be approached consistently across seeds and resolutions. Coverage is area-weighted on the sphere; counting Cube-Sphere samples as if they represented identical surface areas is not an acceptable measurement. Inland lakes/ponds and rivers are separate water classes and do not count toward the ocean-coverage target.
+
+The initial terrestrial biome set is:
 - **Plains**
 - **Forest**
 - **Desert**
+- **Mountains**
+
+Mountains are classified primarily from elevation and slope constraints. Plains, forest and desert are distinguished primarily through temperature, derived moisture and terrain constraints. Water bodies are not terrestrial biomes: ocean, lake/pond and river remain water classifications. Coastlines/shore influence may be represented as a separate mask or transition layer, not as a fifth biome.
 
 A **village is a settlement, not a biome**. It is a generated/placed built environment located within a suitable biome/region. In the initial implementation, a village must at least be identifiable by one house/building marker; the complete village layout and building catalogue can be developed separately. Settlement suitability remains a separate field from biome classification.
 
-The world also includes ponds and rivers. Environment and vegetation placement are intended to be procedural. Village generation may use a hybrid approach: procedural site selection/layout with selected authored or generated building assets. The exact division is OPEN. Both natural trails and constructed roads are in scope; the current generation stage identifies their locations/classes, while final surface styling and construction details can follow.
+The world also includes lakes/ponds and rivers. Environment and vegetation placement are intended to be procedural. Village generation may use a hybrid approach: procedural site selection/layout with selected authored or generated building assets. The exact division is OPEN. Both natural trails and constructed roads are in scope; the current generation stage identifies their locations/classes, while final surface styling and construction details can follow.
 
 ### Traversal and habitat suitability
 
@@ -85,7 +90,7 @@ Additional fields such as roughness, erosion or rock exposure may be added when 
 - Normalize field values and document any alternate ranges.
 - Use distinct deterministic seed offsets or streams for each field. A world seed must determine all fields reproducibly without making them share identical patterns.
 - Generate temperature from its own field plus documented world-scale/altitude influences. Derive moisture only after water generation and distance calculation; do not generate an independent moisture Perlin map.
-- Classify biomes primarily from the combined height, temperature and moisture values; water presence/type also constrains and shapes aquatic, coastal, riverbank and wetland regions. Vegetation potential controls vegetation suitability/density within the resulting environment and can refine biome-specific vegetation profiles.
+- Classify the four initial terrestrial biomes (plains, forest, desert, mountains) from shared height, temperature, moisture and slope fields. Mountains use elevation/slope as their primary criteria; plains/forest/desert use climate and terrain constraints. Water presence/type is classified separately; coast/shore influence is a separate mask or transition, not a terrestrial biome. Vegetation potential controls vegetation suitability/density within the resulting environment and can refine biome-specific vegetation profiles.
 - Derive moisture from water proximity (Euclidean distance transform), terrain elevation/retention and temperature-dependent evaporation. The moisture field must correlate spatially with water: all else equal, cells farther from water must not become wetter merely because of an unrelated noise sample. Use the derived moisture for vegetation suitability, water-dependent biomes and resource/habitat placement. Keep generation dependencies ordered to avoid circular calculations.
 - Generate settlement suitability only after terrain and water constraints are available. Reject or penalize steep, submerged and flood-prone locations; prefer suitable fresh-water access, contiguous buildable ground and connectivity.
 - Produce separate candidate classes for villages, towns and large cities. Large cities must be rarer and require larger suitable areas and stronger access conditions than villages. Apply deterministic spacing and exclusion rules.
@@ -108,7 +113,7 @@ Additional fields such as roughness, erosion or rock exposure may be added when 
 4. Compute the exact Euclidean distance-to-water field using a two-pass separable EDT (row pass, then column pass; square-root after the second pass).
 5. Derive moisture from distance-to-water, height/terrain retention and temperature-dependent evaporation.
 6. Calculate vegetation potential from its noise field and environmental suitability, including derived moisture.
-7. Classify biome regions from the combined terrain, temperature, derived moisture and water fields.
+7. Classify the four terrestrial biomes (plains, forest, desert, mountains) from terrain, temperature, derived moisture and slope; keep ocean/lake/river and optional coastal influence masks separate.
 8. Generate the settlement suitability map and select village, town and large-city candidate sites; retain this map as its own output.
 9. Build a terrain traversal-cost field and a graph of selected settlements.
 10. Connect the graph with A*/Dijkstra least-cost routes; output route polylines and a rasterized road/path map.

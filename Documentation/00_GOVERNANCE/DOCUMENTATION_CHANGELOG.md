@@ -1,3 +1,5 @@
+- WORLD-002: added the first runtime geographic-field tranche (altitude, temperature, slope) and implementation progress report; hydrology/moisture remain gated.
+
 - WORLD-002: added exhaustive scoped visual asset catalogue, Blender production batch registration set, and per-asset owner approval register.
 
 - WORLD-002: added a mandatory owner-approved asset-list gate before visualisation generation and required registration/preflight in Blender's environment batch generator.
@@ -7,7 +9,7 @@
 Record meaningful documentation changes. Keep entries concise and link to proposals/decision IDs.
 
 ## Unreleased
-- Added a common Unity/C# compile-error prevention checklist for `CS0246`, covering exact namespace discovery, type accessibility, `.asmdef` references, Runtime/Editor dependency direction and mandatory Unity compilation before delivery.
+- Added DEC-043 (65% configurable spherical ocean-coverage target) and DEC-044 (four initial terrestrial biomes: plains, forest, desert, mountains), superseding the three-biome DEC-022 scope. Added a WORLD-002 plan amendment with area-weighted sea-level derivation, separate inland-water classes, field/visualisation requirements and acceptance tests. Implementation remains gated on pushing this plan milestone.
 - Added DEC-042 confirming hybrid vegetation presentation (biome-aware ground textures/materials plus deterministic 3D vegetation instances). Added the proposed WORLD-002 spherical geographic-fields plan, including a globe-correct hydrology/distance design gate, independent map outputs, dual-view inspection/export, biome and settlement suitability, and vegetation preview scope.
 - Clarified the single source-data location at `Assets/Project/Data`; renamed the runtime data-services folder to `Runtime/DataServices` to avoid a second `Data` directory. Added DEC-020 and updated the canonical Unity layout.
 - Added the confirmed two-milestone Git workflow, Conventional Commit format and mandatory agent attribution footer.
@@ -95,3 +97,12 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Identified existing grass, wild-grass and reed models as candidates for the first vegetation preview; identified tree models and biome ground materials/textures as gaps in the inspected snapshot.
 - Added asset preparation tasks, canonical content-root/pipeline constraints, and minimum asset acceptance criteria.
 - Clarified that field generation must continue with labelled debug presentation when production art assets are unavailable; no placeholder is to be represented as final art.
+
+
+## 2026-11-18 — WORLD-002 ocean coverage and four-biome implementation tranche
+
+- Added area-weighted spherical ocean coverage with a configurable 65% default and derived sea-level diagnostics.
+- Added graph-geodesic distance-to-ocean and prototype moisture fields, explicitly marked as not production-certified.
+- Added the four approved land biome IDs and deterministic climate/terrain classification.
+- Added Planet Studio Water, Biomes, Distance to Water and Moisture inspection maps for globe and planisphere.
+- Added EditMode coverage and a dedicated ocean/biome test plan; Unity execution and owner visual acceptance remain pending.
