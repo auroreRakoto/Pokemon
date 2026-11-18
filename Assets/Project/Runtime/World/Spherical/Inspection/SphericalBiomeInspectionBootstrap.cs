@@ -1,9 +1,9 @@
 using System;
 using Pokemon.Project.World.Spherical.Geography;
 using Pokemon.Project.World.Spherical.Movement;
+using Pokemon.Project.World.Spherical.Presentation;
 using Pokemon.Project.World.Spherical.Studio;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Pokemon.Project.World.Spherical.Inspection
 {
@@ -17,8 +17,8 @@ namespace Pokemon.Project.World.Spherical.Inspection
     {
         [SerializeField] private SphericalPlanetStudioSettings settings;
         [SerializeField, Min(0.1f)] private float capsuleHeightMeters = 1.8f;
-        [SerializeField, Tooltip("Legacy optional material slot. Playable terrain always uses the project's opaque Pokemon/WorldVertexColor shader.")]
-        private Material biomeMaterial;
+        [SerializeField] private Material biomeMaterial;
+        [SerializeField] private SphericalBiomeMaterialMapping biomeMaterialMapping;
         [SerializeField] private bool generateOnPlay = true;
 
         private Transform _generatedRoot;
@@ -28,8 +28,34 @@ namespace Pokemon.Project.World.Spherical.Inspection
 
         private void Start()
         {
+            DisableOverlappingPlanetStudioPreview();
             if (generateOnPlay)
                 GenerateInspectionWorld();
+        }
+
+        /// <summary>
+        /// The legacy Planet Studio preview is a separate full-size sphere. If it remains
+        /// active in the inspection scene it can cover the playable textured planet.
+        /// Disable only that known preview root for this Play Mode session.
+        /// Unity restores the scene object's authored active state when Play Mode stops.
+        /// </summary>
+        private void DisableOverlappingPlanetStudioPreview()
+        {
+            GameObject[] roots = gameObject.scene.GetRootGameObjects();
+            for (int i = 0; i < roots.Length; i++)
+            {
+                if (roots[i] == gameObject || roots[i].name != "WORLD-001_PlanetStudioPreview")
+                    continue;
+
+                if (roots[i].activeSelf)
+                {
+                    roots[i].SetActive(false);
+                    Debug.Log(
+                        "[WORLD-010] Disabled WORLD-001_PlanetStudioPreview during playable inspection " +
+                        "to prevent it from covering the textured WORLD-002 planet.", this);
+                }
+                return;
+            }
         }
 
         [ContextMenu("Generate / Refresh Playable Biome Inspection")]
@@ -81,8 +107,11 @@ namespace Pokemon.Project.World.Spherical.Inspection
 
         private void BuildPlanet()
         {
-            Mesh[] meshes = SphericalPlanetStudioGenerator.GenerateGeographicGlobeFaces(
-                settings, _fields, SphericalPlanetStudioMap.Biomes);
+            // Vertex RGBA stores normalized biome weights; UV2.x stores ocean weight.
+            // The shader samples all biome textures in world-space triplanar coordinates,
+            // so texture scale remains physical and independent of planet radius.
+            Mesh[] meshes = SphericalBiomeSurfaceMeshGenerator.GenerateAllFaces(
+                settings, _fields, transitionWidthCells: 2f);
             _generatedMeshes = meshes;
             Material material = ResolveBiomeMaterial();
             try
@@ -107,28 +136,27 @@ namespace Pokemon.Project.World.Spherical.Inspection
 
         private Material ResolveBiomeMaterial()
         {
-            // This inspection mesh is opaque terrain, not a sprite or transparent overlay.
-            // Always use the project's existing URP vertex-colour shader so depth testing
-            // and depth writes remain enabled even if an old scene has a sprite material
-            // serialized in the optional biomeMaterial field.
-            Shader shader = Shader.Find("Pokemon/WorldVertexColor");
+            if (biomeMaterialMapping == null)
+                throw new InvalidOperationException(
+                    "The biome material mapping is not assigned. Run Tools/World/Generate or Refresh Biome Materials (URP), " +
+                    "then Tools/World/Assign Biome Mapping to Current Inspection Scene.");
+
+            Shader shader = Shader.Find("Pokemon/World/SphericalBiomeBlend");
             if (shader == null)
                 throw new InvalidOperationException(
-                    "The opaque terrain shader 'Pokemon/WorldVertexColor' could not be found. " +
-                    "Check that Assets/Project/Runtime/World/Generation/WorldVertexColor.shader is present and compiles.");
+                    "The opaque URP shader 'Pokemon/World/SphericalBiomeBlend' could not be found or compiled.");
 
-            if (biomeMaterial != null && biomeMaterial.shader != shader)
+            if (biomeMaterial != null)
                 Debug.LogWarning(
-                    $"Ignoring assigned biome material '{biomeMaterial.name}' because playable terrain requires the opaque " +
-                    "'Pokemon/WorldVertexColor' shader. The inspection bootstrap creates a safe opaque material instead.", this);
+                    $"Ignoring legacy single biome material '{biomeMaterial.name}'. The playable surface now uses " +
+                    "CFG_BiomeMaterialMapping and the four-biome blend shader.", this);
 
             _ownedMaterial = new Material(shader)
             {
-                name = "WORLD-002_BiomeInspectionOpaqueVertexColour",
-                renderQueue = (int)RenderQueue.Geometry
+                name = "WORLD-002_BiomeBlend_Opaque",
+                renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry
             };
-            if (_ownedMaterial.HasProperty("_BaseColor"))
-                _ownedMaterial.SetColor("_BaseColor", Color.white);
+            biomeMaterialMapping.ConfigureBlendMaterial(_ownedMaterial);
             return _ownedMaterial;
         }
 
@@ -150,7 +178,10 @@ namespace Pokemon.Project.World.Spherical.Inspection
             cameraObject.tag = "MainCamera";
             cameraObject.transform.SetParent(_generatedRoot, false);
             Camera camera = cameraObject.AddComponent<Camera>();
-            camera.clearFlags = CameraClearFlags.Skybox;
+            // The camera follows the planet-local up vector. A global skybox horizon
+            // therefore appears tilted while traversing the sphere.
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.48f, 0.67f, 0.82f, 1f);
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = Mathf.Max(10000f, settings.radiusMeters * 2.5f);
             cameraObject.AddComponent<AudioListener>();

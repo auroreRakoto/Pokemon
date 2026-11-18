@@ -111,10 +111,28 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Kept planet-scale preview meshes free of MeshColliders.
 - Added focused EditMode motor tests and documented the current approximation boundaries and Unity validation sequence.
 - Status remains implementation-in-progress until Unity compilation, tests and manual Play Mode checks are reported passing.
+\n\n## 2026-11-18 — WORLD-010-A/B biome texturing implementation checkpoint\n\n- Integrated the existing opaque URP biome blend shader and world-space triplanar mapping into the playable spherical inspection bootstrap.\n- Switched playable mesh generation to normalized geographic biome weights and the dedicated ocean mask.\n- Added an Editor command to assign the existing biome material mapping to an open inspection scene without recreating it.\n- Added distinct deterministic Plains grass-striation and Forest moss/leaf-litter texture patterns; kept Desert and Mountains on their existing detail patterns for WORLD-010-C.\n- Preserved the solid-colour background correction and documented the 18 m physical texture repeat scale.\n- Added focused texture regression tests. Unity compilation, EditMode execution and visual validation remain pending.\n
+
+## 2026-11-18 — WORLD-010 biome texture visibility correction
+
+- Confirmed the mapping asset is assigned; the legacy single `Biome Material` slot is not used by the blended renderer and may remain empty.
+- Replaced the pale Plains tint with a grass-green palette and strengthened the procedural grass blade/tuft and forest floor patterns.
+- Reduced physical texture repeat size from 18 m to 8 m and added a Plains contrast regression test.
+- Unity material regeneration and Play Mode visual validation remain pending.
 
 
-## 2026-11-18 — WORLD-009-A opaque biome inspection terrain
+## 2026-11-18 — WORLD-010 production texture restoration
 
-- Replaced the `Sprites/Default` fallback in the playable biome inspection bootstrap with the existing URP `Pokemon/WorldVertexColor` opaque shader.
-- Ensured the generated terrain material uses the Geometry render queue and preserves mesh vertex colours.
-- Documented acceptance checks and explicitly kept movement/camera work out of scope until opaque rendering is validated.
+- Removed the temporary checkerboard diagnostic shader and texture generator from the production path; restored the normal opaque biome blend shader.
+- Restored the stronger procedural Plains/Forest texture patterns and green Plains material tint.
+- Confirmed the diagnostic checkerboard was visible when the separate `WORLD-001_PlanetStudioPreview` sphere was disabled, identifying the preview as the surface that had masked the playable textured planet.
+- Updated the playable inspection bootstrap to disable that exact legacy preview root for the duration of Play Mode.
+- Unity validation of the restored production textures remains pending; no feature-complete commit should be made yet.
+
+
+## 2026-11-19 — WORLD-010 Plains grass readability pass
+
+- Replaced subtle Plains noise marks with deterministic, tapered grass-blade strokes and wrapped tile-edge rasterization.
+- Brightened the Plains material tint to improve the green read in gameplay.
+- Added a focused Plains texture variation regression test.
+- Unity compilation, generated texture refresh and visual validation remain pending; do not mark WORLD-010-A/B complete yet.

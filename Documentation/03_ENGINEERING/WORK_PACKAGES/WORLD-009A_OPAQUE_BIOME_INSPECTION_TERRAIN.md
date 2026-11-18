@@ -44,3 +44,15 @@ The generated biome inspection meshes store their biome palette in vertex colour
 ## Scope boundary
 
 This step does not claim to fix the player's floating sensation. It removes an invalid transparent rendering fallback so the remaining ground-contact and movement behaviour can be assessed accurately. If floating persists after this validation, proceed to WORLD-009-B ground-contact investigation.
+
+
+## Background / horizon correction
+
+The inspection camera follows the player's local spherical tangent frame. Unity's default skybox horizon is aligned to global world-up, so as the camera moves around the sphere its horizon can appear tilted relative to the local ground.
+
+The inspection camera therefore uses `CameraClearFlags.SolidColor` with a uniform soft blue background. This removes the misleading global horizon reference without rotating the camera, changing player orientation, or changing the planet geometry.
+
+Additional acceptance criteria:
+- The Game view background has no visible skybox horizon line.
+- The background remains visually uniform as the player walks around the sphere.
+- The camera still follows the local tangent frame and the terrain remains opaque.

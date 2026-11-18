@@ -37,7 +37,7 @@ namespace Pokemon.Project.World.Spherical.Presentation
             SetBlendTexture(blendMaterial, "_ForestTex", forest);
             SetBlendTexture(blendMaterial, "_DesertTex", desert);
             SetBlendTexture(blendMaterial, "_MountainsTex", mountains);
-            if (blendMaterial.HasProperty("_TextureWorldSize")) blendMaterial.SetFloat("_TextureWorldSize", 18f);
+            if (blendMaterial.HasProperty("_TextureWorldSize")) blendMaterial.SetFloat("_TextureWorldSize", 8f);
         }
 
         private static void SetBlendTexture(Material target, string propertyName, Material source)

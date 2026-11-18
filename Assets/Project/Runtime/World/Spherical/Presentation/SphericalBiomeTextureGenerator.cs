@@ -35,27 +35,135 @@ namespace Pokemon.Project.World.Spherical.Presentation
                 float value = 0.88f + (broad - 0.5f) * 0.19f + (medium - 0.5f) * 0.13f
                     + (fine - 0.5f) * 0.075f + (grain - 0.5f) * 0.035f;
 
-                // Gentle biome-specific painted marks; keep the texture low-contrast so it reads at distance.
+                // Tileable biome-specific surface signatures. Detail is intentionally
+                // stronger than the first pass so it remains visible in the playable camera.
                 float mark = PeriodicNoise(u, v, biome == SphericalBiome.Desert ? 7 : 13, biomeSeed + 401);
-                if (biome == SphericalBiome.Desert)
-                    value += (mark > 0.69f ? 0.045f : 0f) - (mark < 0.27f ? 0.018f : 0f);
-                else if (biome == SphericalBiome.Forest)
-                    value += mark > 0.73f ? 0.035f : (mark < 0.25f ? -0.025f : 0f);
-                else if (biome == SphericalBiome.Mountains)
-                    value += (medium > 0.68f ? 0.035f : 0f) - (medium < 0.31f ? 0.035f : 0f);
-                else
-                    value += mark > 0.76f ? 0.025f : (mark < 0.22f ? -0.015f : 0f);
+                float redMultiplier = value;
+                float greenMultiplier = value;
+                float blueMultiplier = value;
 
-                value = Mathf.Clamp(value, 0.68f, 1.12f);
-                float warm = (broad - 0.5f) * 0.025f;
-                float cool = (fine - 0.5f) * 0.018f;
-                byte r = ToByte(value + warm);
-                byte g = ToByte(value);
-                byte b = ToByte(value - warm + cool);
+                if (biome == SphericalBiome.Plains)
+                {
+                    // Keep the base albedo fairly clean: the visible grass structure is
+                    // rasterized as individual tapered blades below, not buried in noise.
+                    float patch = PeriodicNoise(u, v, 5, biomeSeed + 503);
+                    float soil = Mathf.Pow(1f - PeriodicNoise(u, v, 19, biomeSeed + 509), 13f);
+                    float patchVariation = (patch - 0.5f) * 0.10f;
+                    redMultiplier += patchVariation * 0.65f - soil * 0.08f;
+                    greenMultiplier += patchVariation + soil * 0.015f;
+                    blueMultiplier += patchVariation * 0.35f - soil * 0.10f;
+                }
+                else if (biome == SphericalBiome.Forest)
+                {
+                    // Stronger moss patches and leaf-litter speckles for a visibly denser floor.
+                    float clusters = PeriodicNoise(u, v, 6, biomeSeed + 601);
+                    float leafSpeckle = PeriodicNoise(u, v, 31, biomeSeed + 607);
+                    float moss = clusters > 0.61f ? 0.16f : (clusters < 0.34f ? -0.12f : 0f);
+                    float litter = leafSpeckle > 0.72f ? 0.10f : (leafSpeckle < 0.2f ? -0.08f : 0f);
+                    redMultiplier += moss * 0.55f + litter * 0.8f;
+                    greenMultiplier += moss + litter * 0.35f;
+                    blueMultiplier += moss * 0.45f - litter * 0.25f;
+                }
+                else if (biome == SphericalBiome.Desert)
+                {
+                    float variation = (mark > 0.69f ? 0.07f : 0f) - (mark < 0.27f ? 0.035f : 0f);
+                    redMultiplier += variation;
+                    greenMultiplier += variation * 0.8f;
+                    blueMultiplier += variation * 0.55f;
+                }
+                else if (biome == SphericalBiome.Mountains)
+                {
+                    float variation = (medium > 0.68f ? 0.07f : 0f) - (medium < 0.31f ? 0.07f : 0f);
+                    redMultiplier += variation;
+                    greenMultiplier += variation;
+                    blueMultiplier += variation * 1.05f;
+                }
+
+                redMultiplier = Mathf.Clamp(redMultiplier + (broad - 0.5f) * 0.035f, 0.48f, 1.30f);
+                greenMultiplier = Mathf.Clamp(greenMultiplier, 0.48f, 1.30f);
+                blueMultiplier = Mathf.Clamp(blueMultiplier + (fine - 0.5f) * 0.025f, 0.48f, 1.30f);
+                byte r = ToByte(redMultiplier);
+                byte g = ToByte(greenMultiplier);
+                byte b = ToByte(blueMultiplier);
                 pixels[y * resolution + x] = new Color32(r, g, b, 255);
             }
+
+            if (biome == SphericalBiome.Plains)
+                DrawPlainsGrassBlades(pixels, resolution, biomeSeed);
+
             return pixels;
         }
+
+        /// <summary>
+        /// Draws small tapered, slightly curved grass blades into the tile. Blade placement
+        /// is generated from wrapped cell coordinates, so opposite texture edges match.
+        /// The 8 m world repeat makes a 512 px tile represent a readable patch of ground.
+        /// </summary>
+        private static void DrawPlainsGrassBlades(Color32[] pixels, int resolution, int seed)
+        {
+            const int cells = 32;
+            float cellSize = (float)resolution / cells;
+
+            for (int cy = 0; cy < cells; cy++)
+            for (int cx = 0; cx < cells; cx++)
+            {
+                int cellSeed = unchecked(seed + cx * 73856093 + cy * 19349663);
+                int bladeCount = 1 + Mathf.FloorToInt(Hash01(cx, cy, cellSeed + 17) * 3f);
+
+                for (int bladeIndex = 0; bladeIndex < bladeCount; bladeIndex++)
+                {
+                    int bladeSeed = cellSeed + bladeIndex * 83492791;
+                    float x0 = (cx + Hash01(cx, cy, bladeSeed + 1)) * cellSize;
+                    float y0 = (cy + Hash01(cx, cy, bladeSeed + 2)) * cellSize;
+                    float length = Mathf.Lerp(5.5f, 15.5f, Hash01(cx, cy, bladeSeed + 3));
+                    float width = Mathf.Lerp(0.65f, 1.55f, Hash01(cx, cy, bladeSeed + 4));
+                    float lean = Mathf.Lerp(-0.34f, 0.34f, Hash01(cx, cy, bladeSeed + 5)) * length;
+                    float curve = Mathf.Lerp(-0.18f, 0.18f, Hash01(cx, cy, bladeSeed + 6)) * length;
+                    bool highlight = Hash01(cx, cy, bladeSeed + 7) > 0.58f;
+
+                    // Rasterize only the blade's local bounds; wrap writes at tile edges.
+                    float horizontalReach = Mathf.Abs(lean) + Mathf.Abs(curve) + width + 1f;
+                    int minX = Mathf.FloorToInt(x0 - horizontalReach);
+                    int maxX = Mathf.CeilToInt(x0 + horizontalReach);
+                    int minY = Mathf.FloorToInt(y0 - 1f);
+                    int maxY = Mathf.CeilToInt(y0 + length + 1f);
+
+                    for (int py = minY; py <= maxY; py++)
+                    {
+                        float t = (py + 0.5f - y0) / length;
+                        if (t < 0f || t > 1f) continue;
+
+                        float centerX = x0 + lean * t + curve * Mathf.Sin(t * Mathf.PI);
+                        float bladeWidth = Mathf.Lerp(width, 0.12f, t);
+                        for (int px = minX; px <= maxX; px++)
+                        {
+                            float distance = Mathf.Abs((px + 0.5f) - centerX);
+                            float edge = bladeWidth - distance;
+                            if (edge <= -0.35f) continue;
+
+                            float coverage = Mathf.Clamp01((edge + 0.35f) / 0.7f);
+                            int wrappedX = Wrap(px, resolution);
+                            int wrappedY = Wrap(py, resolution);
+                            int index = wrappedY * resolution + wrappedX;
+                            Color32 current = pixels[index];
+
+                            // Bright yellow-green highlights and deeper green shadow blades.
+                            float blend = coverage * (highlight ? 0.82f : 0.76f);
+                            float bladeR = highlight ? 1.02f : 0.68f;
+                            float bladeG = highlight ? 1.13f : 0.84f;
+                            float bladeB = highlight ? 0.78f : 0.62f;
+                            pixels[index] = new Color32(
+                                ToByte(Mathf.Lerp(current.r / 255f, bladeR, blend)),
+                                ToByte(Mathf.Lerp(current.g / 255f, bladeG, blend)),
+                                ToByte(Mathf.Lerp(current.b / 255f, bladeB, blend)),
+                                255);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static float Hash01(int x, int y, int seed) => Hash(Wrap(x, 32), Wrap(y, 32), seed);
 
         private static float PeriodicNoise(float u, float v, int cells, int seed)
         {

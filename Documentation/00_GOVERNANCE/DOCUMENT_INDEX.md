@@ -68,7 +68,4 @@
 ## WORLD-002 asset planning
 
 | `WORLD-002_EXHAUSTIVE_VISUAL_ASSET_CATALOG.md` | Exhaustive scoped visual asset inventory, Blender batch set and owner approval register for WORLD-002. |
-
-
-## WORLD-009-A
-- `03_ENGINEERING/WORK_PACKAGES/WORLD-009A_OPAQUE_BIOME_INSPECTION_TERRAIN.md` — replace the sprite shader fallback with the existing URP opaque vertex-colour shader for playable terrain.
+\n\n## WORLD-010\n- `03_ENGINEERING/WORK_PACKAGES/WORLD-010A_BIOME_TEXTURE_RENDERING_AND_PLAINS_FOREST.md` — integrate the existing spherical biome-weight renderer and world-space triplanar shader; author initial Plains and Forest detail textures.\n

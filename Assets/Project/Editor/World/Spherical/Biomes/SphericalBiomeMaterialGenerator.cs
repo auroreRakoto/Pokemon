@@ -13,7 +13,7 @@ namespace Pokemon.Project.Editor.World.Spherical.Biomes
         private const string MaterialFolder = "Assets/Project/Content/Materials/Environment";
         private const string MappingFolder = "Assets/Project/Content/World/PlanetStudio";
         private const string TextureFolder = "Assets/Project/Content/Textures/Environment/Biomes/Generated";
-        private const float TextureWorldSizeMeters = 18f;
+        private const float TextureWorldSizeMeters = 8f;
         private const string MappingPath = MappingFolder + "/CFG_BiomeMaterialMapping.asset";
         private const string UrpLitShaderName = "Universal Render Pipeline/Lit";
 
@@ -33,7 +33,7 @@ namespace Pokemon.Project.Editor.World.Spherical.Biomes
 
         private static readonly MaterialDefinition[] Definitions =
         {
-            new MaterialDefinition("MAT_Ground_Plains", new Color(0.72f, 0.68f, 0.36f, 1f), 0.12f),
+            new MaterialDefinition("MAT_Ground_Plains", new Color(0.24f, 0.60f, 0.16f, 1f), 0.10f),
             new MaterialDefinition("MAT_Ground_Forest", new Color(0.12f, 0.42f, 0.20f, 1f), 0.10f),
             new MaterialDefinition("MAT_Ground_Desert", new Color(0.86f, 0.56f, 0.25f, 1f), 0.08f),
             new MaterialDefinition("MAT_Ground_Mountains", new Color(0.62f, 0.63f, 0.66f, 1f), 0.16f),
