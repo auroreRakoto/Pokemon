@@ -3,6 +3,7 @@ using Pokemon.Project.World.Spherical.Geography;
 using Pokemon.Project.World.Spherical.Movement;
 using Pokemon.Project.World.Spherical.Studio;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Pokemon.Project.World.Spherical.Inspection
 {
@@ -16,7 +17,8 @@ namespace Pokemon.Project.World.Spherical.Inspection
     {
         [SerializeField] private SphericalPlanetStudioSettings settings;
         [SerializeField, Min(0.1f)] private float capsuleHeightMeters = 1.8f;
-        [SerializeField] private Material biomeMaterial;
+        [SerializeField, Tooltip("Legacy optional material slot. Playable terrain always uses the project's opaque Pokemon/WorldVertexColor shader.")]
+        private Material biomeMaterial;
         [SerializeField] private bool generateOnPlay = true;
 
         private Transform _generatedRoot;
@@ -105,15 +107,28 @@ namespace Pokemon.Project.World.Spherical.Inspection
 
         private Material ResolveBiomeMaterial()
         {
-            if (biomeMaterial != null)
-                return biomeMaterial;
-
-            Shader shader = Shader.Find("Sprites/Default");
+            // This inspection mesh is opaque terrain, not a sprite or transparent overlay.
+            // Always use the project's existing URP vertex-colour shader so depth testing
+            // and depth writes remain enabled even if an old scene has a sprite material
+            // serialized in the optional biomeMaterial field.
+            Shader shader = Shader.Find("Pokemon/WorldVertexColor");
             if (shader == null)
-                throw new InvalidOperationException("The vertex-colour shader 'Sprites/Default' is unavailable.");
+                throw new InvalidOperationException(
+                    "The opaque terrain shader 'Pokemon/WorldVertexColor' could not be found. " +
+                    "Check that Assets/Project/Runtime/World/Generation/WorldVertexColor.shader is present and compiles.");
 
-            _ownedMaterial = new Material(shader) { name = "WORLD-002_BiomeInspectionVertexColour" };
-            if (_ownedMaterial.HasProperty("_Color")) _ownedMaterial.SetColor("_Color", Color.white);
+            if (biomeMaterial != null && biomeMaterial.shader != shader)
+                Debug.LogWarning(
+                    $"Ignoring assigned biome material '{biomeMaterial.name}' because playable terrain requires the opaque " +
+                    "'Pokemon/WorldVertexColor' shader. The inspection bootstrap creates a safe opaque material instead.", this);
+
+            _ownedMaterial = new Material(shader)
+            {
+                name = "WORLD-002_BiomeInspectionOpaqueVertexColour",
+                renderQueue = (int)RenderQueue.Geometry
+            };
+            if (_ownedMaterial.HasProperty("_BaseColor"))
+                _ownedMaterial.SetColor("_BaseColor", Color.white);
             return _ownedMaterial;
         }
 

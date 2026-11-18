@@ -33,7 +33,7 @@ MonoBehaviour:
   temperatureLatitudeInfluence: 0.75
   temperatureNoiseInfluence: 0.25
   geographicSettingsVersion: 1
-  oceanCoverageTargetPercent: 65
+  oceanCoverageTargetPercent: 20
   moistureDistanceScaleRadiusMultiplier: 0.18
   moistureTemperatureEvaporation: 0.35
   moistureSlopeLoss: 0.2

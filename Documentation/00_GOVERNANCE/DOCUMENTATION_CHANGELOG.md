@@ -113,26 +113,8 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Status remains implementation-in-progress until Unity compilation, tests and manual Play Mode checks are reported passing.
 
 
-## 2026-11-18 — WORLD-008 JSON world profiles
+## 2026-11-18 — WORLD-009-A opaque biome inspection terrain
 
-- Added versioned JSON world profiles under `Assets/Project/Data/WorldProfiles` and a Planet Studio workflow to load and save profiles.
-- Added five initial profiles covering temperate, continental, archipelago, arid and rugged-highland parameter combinations.
-- Added a serializable profile contract and EditMode round-trip/isolation tests.
-- Recorded DEC-046 and the WORLD-008 work package. Unity compilation and runtime validation remain pending.
-
-## 2026-11-18 — WORLD-007 configurable planet size and ocean range plan
-
-- Recorded DEC-045: small and large planets use one playable generation system; no test/production scale modes or automatic scaling of terrain/gameplay settings.
-- Added configurable radius in kilometres while retaining metres internally and expanded ocean coverage to 1–99%, preserving the 65% default.
-
-
-## 2026-11-18 — Add Tiny World profile
-
-- Added `tiny_world.json`: a 2 km diameter planet (1 km radius) using the same world-generation pipeline and default 65% ocean target.
-- Updated WORLD-008 acceptance criteria to include the 1 km radius profile.
-
-
-## 2026-11-18 — Tune Tiny World relief
-
-- Reduced Tiny World terrain layer amplitudes to 35 m / 8 m / 1.5 m for its 1 km radius, raised face resolution to 128, and tuned mountain thresholds.
-- Added the profile-specific rationale and extended the Tiny World EditMode parameter test. Unity visual validation remains pending.
+- Replaced the `Sprites/Default` fallback in the playable biome inspection bootstrap with the existing URP `Pokemon/WorldVertexColor` opaque shader.
+- Ensured the generated terrain material uses the Geometry render queue and preserves mesh vertex colours.
+- Documented acceptance checks and explicitly kept movement/camera work out of scope until opaque rendering is validated.

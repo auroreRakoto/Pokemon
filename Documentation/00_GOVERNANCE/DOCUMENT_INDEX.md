@@ -70,8 +70,5 @@
 | `WORLD-002_EXHAUSTIVE_VISUAL_ASSET_CATALOG.md` | Exhaustive scoped visual asset inventory, Blender batch set and owner approval register for WORLD-002. |
 
 
-## WORLD-008
-- `03_ENGINEERING/WORK_PACKAGES/WORLD-008_JSON_WORLD_PROFILES.md` — JSON-based named world configurations and Planet Studio profile workflow.
-
-## WORLD-007
-- `03_ENGINEERING/WORK_PACKAGES/WORLD-007_CONFIGURABLE_PLANET_SIZE_AND_OCEAN_RANGE.md` — configurable playable planet radius and 1–99% ocean coverage.
+## WORLD-009-A
+- `03_ENGINEERING/WORK_PACKAGES/WORLD-009A_OPAQUE_BIOME_INSPECTION_TERRAIN.md` — replace the sprite shader fallback with the existing URP opaque vertex-colour shader for playable terrain.
