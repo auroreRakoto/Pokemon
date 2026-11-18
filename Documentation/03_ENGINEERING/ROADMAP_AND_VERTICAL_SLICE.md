@@ -10,6 +10,8 @@ This is a sequencing guide, not a promise of dates.
 - architecture decisions needed for prototype.
 
 ## Phase 1 — Visual and world prototype
+- one playable spherical world with owner-configurable planet radius (small or large; no separate test/production modes; see WORLD-007);
+- ocean coverage target configurable from 1% to 99%, with 65% default;
 - one small test area;
 - one terrain approach prototype;
 - a small material/texture library;

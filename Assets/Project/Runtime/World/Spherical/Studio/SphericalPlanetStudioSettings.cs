@@ -80,7 +80,7 @@ namespace Pokemon.Project.World.Spherical.Studio
 
         [Header("Oceans and biomes")]
         [Min(0)] public int geographicSettingsVersion = 1;
-        [Range(50f, 80f)] public float oceanCoverageTargetPercent = 65f;
+        [Range(1f, 99f)] public float oceanCoverageTargetPercent = 65f;
         [Min(0.01f)] public float moistureDistanceScaleRadiusMultiplier = 0.18f;
         [Range(0f, 1f)] public float moistureTemperatureEvaporation = 0.35f;
         [Range(0f, 1f)] public float moistureSlopeLoss = 0.2f;
@@ -119,14 +119,21 @@ namespace Pokemon.Project.World.Spherical.Studio
                 forestMaximumTemperature = 0.9f;
                 geographicSettingsVersion = 1;
             }
-            radiusMeters = Mathf.Max(100f, radiusMeters);
+            // Radius is a world-generation choice, not a test/production scale.
+            // Keep metres as the runtime unit and recover safely from invalid serialized input.
+            if (float.IsNaN(radiusMeters) || float.IsInfinity(radiusMeters))
+                radiusMeters = 50000f;
+            else
+                radiusMeters = Mathf.Max(100f, radiusMeters);
             faceResolution = Mathf.Clamp(faceResolution, 2, 256);
             planisphereWidth = Mathf.Clamp(planisphereWidth, 32, 2048);
             planisphereHeight = Mathf.Clamp(planisphereHeight, 16, 1024);
             drainageResolution = Mathf.Clamp(drainageResolution, 8, 512);
             riverAccumulationThreshold = Mathf.Max(1f, riverAccumulationThreshold);
             flowDirectionStride = Mathf.Clamp(flowDirectionStride, 1, 64);
-            oceanCoverageTargetPercent = Mathf.Clamp(oceanCoverageTargetPercent, 50f, 80f);
+            if (float.IsNaN(oceanCoverageTargetPercent) || float.IsInfinity(oceanCoverageTargetPercent))
+                oceanCoverageTargetPercent = 65f;
+            oceanCoverageTargetPercent = Mathf.Clamp(oceanCoverageTargetPercent, 1f, 99f);
             moistureDistanceScaleRadiusMultiplier = Mathf.Max(0.01f, moistureDistanceScaleRadiusMultiplier);
             moistureTemperatureEvaporation = Mathf.Clamp01(moistureTemperatureEvaporation);
             moistureSlopeLoss = Mathf.Clamp01(moistureSlopeLoss);

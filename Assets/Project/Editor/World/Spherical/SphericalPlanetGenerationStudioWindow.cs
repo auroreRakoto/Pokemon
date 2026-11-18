@@ -69,7 +69,12 @@ namespace Pokemon.Project.Editor.World.Spherical
         private void DrawPlanetSettings()
         {
             EditorGUILayout.LabelField("Planet definition", EditorStyles.boldLabel);
-            settings.radiusMeters = EditorGUILayout.FloatField("Radius (m)", settings.radiusMeters);
+            float radiusKilometres = settings.radiusMeters / 1000f;
+            radiusKilometres = EditorGUILayout.FloatField("Planet radius (km)", radiusKilometres);
+            settings.radiusMeters = radiusKilometres * 1000f;
+            EditorGUILayout.HelpBox(
+                "Choose the physical size of this playable world. Terrain relief, player dimensions, movement speed and gravity remain independently configurable.",
+                MessageType.Info);
             settings.seed = EditorGUILayout.IntField("Seed", settings.seed);
             settings.faceResolution = EditorGUILayout.IntSlider("Globe resolution", settings.faceResolution, 8, 256);
             settings.planisphereWidth = EditorGUILayout.IntSlider("Planisphere width", settings.planisphereWidth, 64, 1024);
@@ -211,7 +216,7 @@ namespace Pokemon.Project.Editor.World.Spherical
         private void DrawOceanAndBiomeSettings()
         {
             EditorGUILayout.LabelField("WORLD-002 — Oceans and Biomes", EditorStyles.boldLabel);
-            settings.oceanCoverageTargetPercent = EditorGUILayout.Slider("Ocean coverage (%)", settings.oceanCoverageTargetPercent, 50f, 80f);
+            settings.oceanCoverageTargetPercent = EditorGUILayout.Slider("Ocean coverage (%)", settings.oceanCoverageTargetPercent, 1f, 99f);
             settings.moistureDistanceScaleRadiusMultiplier = EditorGUILayout.Slider("Moisture distance / radius", settings.moistureDistanceScaleRadiusMultiplier, 0.05f, 0.5f);
             settings.moistureTemperatureEvaporation = EditorGUILayout.Slider("Temperature evaporation", settings.moistureTemperatureEvaporation, 0f, 1f);
             settings.moistureSlopeLoss = EditorGUILayout.Slider("Slope moisture loss", settings.moistureSlopeLoss, 0f, 1f);

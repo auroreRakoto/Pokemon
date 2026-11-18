@@ -281,6 +281,68 @@ namespace Pokemon.Project.Tests.EditMode.World.Spherical
             finally { Object.DestroyImmediate(settings); }
         }
 
+
+        [TestCase(5000f)]
+        [TestCase(50000f)]
+        [TestCase(1000000f)]
+        public void Generate_UsesConfiguredPlanetRadiusAcrossWorldSizes(float radiusMeters)
+        {
+            var settings = CreateSettings();
+            try
+            {
+                settings.radiusMeters = radiusMeters;
+                var fields = SphericalGeographicFieldGenerator.Generate(settings);
+                Assert.AreEqual(radiusMeters, fields.PlanetRadiusMeters);
+                Assert.IsFalse(float.IsNaN(fields.DerivedSeaLevelMeters));
+                Assert.IsFalse(float.IsInfinity(fields.DerivedSeaLevelMeters));
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
+        [TestCase(1f)]
+        [TestCase(35f)]
+        [TestCase(65f)]
+        [TestCase(99f)]
+        public void Generate_OceanCoverageSupportsLowDefaultAndHighTargets(float targetPercent)
+        {
+            var settings = CreateSettings();
+            try
+            {
+                settings.oceanCoverageTargetPercent = targetPercent;
+                var fields = SphericalGeographicFieldGenerator.Generate(settings);
+                Assert.AreEqual(targetPercent, fields.OceanCoverageTargetPercent);
+                Assert.That(Mathf.Abs(fields.ActualOceanCoveragePercent - targetPercent),
+                    Is.LessThanOrEqualTo(fields.OceanCoverageQuantizationTolerancePercent + 0.001f));
+                Assert.IsFalse(float.IsNaN(fields.DerivedSeaLevelMeters));
+                Assert.IsFalse(float.IsInfinity(fields.DerivedSeaLevelMeters));
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
+        [Test]
+        public void Generate_ChangingPlanetRadiusDoesNotRescaleTerrainReliefSettings()
+        {
+            var settings = CreateSettings();
+            try
+            {
+                settings.layer1AmplitudeMeters = 1800f;
+                settings.layer2AmplitudeMeters = 450f;
+                settings.layer3AmplitudeMeters = 65f;
+                Vector3 direction = new Vector3(0.31f, 0.72f, -0.44f).normalized;
+                settings.radiusMeters = 5000f;
+                float smallWorldHeight = SphericalPlanetStudioGenerator.SamplePreviewHeight(
+                    direction, settings, SphericalPlanetStudioPreviewStage.Final);
+                settings.radiusMeters = 50000f;
+                float largeWorldHeight = SphericalPlanetStudioGenerator.SamplePreviewHeight(
+                    direction, settings, SphericalPlanetStudioPreviewStage.Final);
+                Assert.AreEqual(smallWorldHeight, largeWorldHeight);
+                Assert.AreEqual(1800f, settings.layer1AmplitudeMeters);
+                Assert.AreEqual(450f, settings.layer2AmplitudeMeters);
+                Assert.AreEqual(65f, settings.layer3AmplitudeMeters);
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
         private static float FindDistanceAtNode(SphericalGeographicFieldSet fields,
             SphericalNeighbourGraph graph, int targetNode)
         {

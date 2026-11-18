@@ -118,3 +118,11 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Recorded DEC-045: small and large planets use one playable generation system; no test/production scale modes or automatic scaling of terrain/gameplay settings.
 - Added the WORLD-007 plan to expose radius in kilometres while retaining metres internally and expand ocean coverage to 1–99%, preserving the 65% default.
 - Documented current implementation findings, expected code targets, automated tests, manual Unity acceptance and the mandatory plan-push gate.
+
+
+## 2026-11-18 — WORLD-007 implementation checkpoint
+
+- Added the configurable planet-radius UI in kilometres while retaining metres internally.
+- Expanded ocean coverage validation and Planet Studio slider to 1–99%, preserving the 65% default.
+- Added EditMode regression coverage for configurable radii, independent relief settings, ocean endpoints and invalid numeric values.
+- Recorded Unity compilation, test execution and manual Play Mode checks as pending validation gates.

@@ -7,11 +7,13 @@ namespace Pokemon.Project.Tests.World.Spherical
 {
     public sealed class SphericalPlanetStudioTests
     {
-        [Test]
-        public void DisabledLayersProducePerfectBaseSphere()
+        [TestCase(1000f)]
+        [TestCase(5000f)]
+        [TestCase(50000f)]
+        public void DisabledLayersProducePerfectBaseSphereAtConfiguredRadius(float radiusMeters)
         {
             SphericalPlanetStudioSettings settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
-            settings.radiusMeters = 1000f;
+            settings.radiusMeters = radiusMeters;
             settings.layer1Enabled = false;
             settings.layer2Enabled = false;
             settings.layer3Enabled = false;
@@ -22,7 +24,7 @@ namespace Pokemon.Project.Tests.World.Spherical
                 {
                     foreach (Mesh mesh in meshes)
                         foreach (Vector3 vertex in mesh.vertices)
-                            Assert.That(vertex.magnitude, Is.EqualTo(settings.radiusMeters).Within(0.02f));
+                            Assert.That(vertex.magnitude, Is.EqualTo(radiusMeters).Within(0.02f));
                 }
                 finally { foreach (Mesh mesh in meshes) Object.DestroyImmediate(mesh); }
             }
@@ -202,5 +204,89 @@ namespace Pokemon.Project.Tests.World.Spherical
             }
             finally { Object.DestroyImmediate(settings); }
         }
+
+        [TestCase(100f)]
+        [TestCase(5000f)]
+        [TestCase(50000f)]
+        [TestCase(1000000f)]
+        public void SettingsValidationPreservesFiniteConfigurablePlanetRadii(float radiusMeters)
+        {
+            SphericalPlanetStudioSettings settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
+            try
+            {
+                settings.radiusMeters = radiusMeters;
+                settings.Validate();
+                Assert.AreEqual(radiusMeters, settings.radiusMeters);
+                Assert.IsFalse(float.IsNaN(settings.radiusMeters));
+                Assert.IsFalse(float.IsInfinity(settings.radiusMeters));
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
+        [TestCase(float.NaN)]
+        [TestCase(float.PositiveInfinity)]
+        [TestCase(float.NegativeInfinity)]
+        public void SettingsValidationRecoversInvalidPlanetRadius(float invalidRadius)
+        {
+            SphericalPlanetStudioSettings settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
+            try
+            {
+                settings.radiusMeters = invalidRadius;
+                settings.Validate();
+                Assert.AreEqual(50000f, settings.radiusMeters);
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
+        [TestCase(1f)]
+        [TestCase(25f)]
+        [TestCase(49f)]
+        [TestCase(50f)]
+        [TestCase(65f)]
+        [TestCase(80f)]
+        [TestCase(99f)]
+        public void SettingsValidationPreservesOceanCoverageTargetsInApprovedRange(float targetPercent)
+        {
+            SphericalPlanetStudioSettings settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
+            try
+            {
+                settings.oceanCoverageTargetPercent = targetPercent;
+                settings.Validate();
+                Assert.AreEqual(targetPercent, settings.oceanCoverageTargetPercent);
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
+        [Test]
+        public void SettingsValidationClampsOceanCoverageToOneThroughNinetyNinePercent()
+        {
+            SphericalPlanetStudioSettings settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
+            try
+            {
+                settings.oceanCoverageTargetPercent = -10f;
+                settings.Validate();
+                Assert.AreEqual(1f, settings.oceanCoverageTargetPercent);
+                settings.oceanCoverageTargetPercent = 120f;
+                settings.Validate();
+                Assert.AreEqual(99f, settings.oceanCoverageTargetPercent);
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
+        [TestCase(float.NaN)]
+        [TestCase(float.PositiveInfinity)]
+        [TestCase(float.NegativeInfinity)]
+        public void SettingsValidationRestoresDefaultOceanTargetForNonFiniteValues(float invalidTarget)
+        {
+            SphericalPlanetStudioSettings settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
+            try
+            {
+                settings.oceanCoverageTargetPercent = invalidTarget;
+                settings.Validate();
+                Assert.AreEqual(65f, settings.oceanCoverageTargetPercent);
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
     }
 }

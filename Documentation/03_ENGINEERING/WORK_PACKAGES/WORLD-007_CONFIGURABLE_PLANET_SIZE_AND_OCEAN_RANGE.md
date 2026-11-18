@@ -2,7 +2,7 @@
 
 - **Work package:** WORLD-007
 - **Agent:** WORLD
-- **Status:** PLAN MILESTONE — owner-approved scope; implementation is gated on this plan being committed and pushed
+- **Status:** IMPLEMENTATION IN PROGRESS — plan approved and pushed; source changes prepared, Unity validation pending
 - **Depends on:** WORLD-001 Planet Studio settings and spherical mesh generation; WORLD-002 geographic field generation; WORLD-003 playable biome inspection
 - **Related decisions:** DEC-036, DEC-043, DEC-045
 
@@ -145,3 +145,34 @@ Record Unity version, seed, radius, face resolution, target ocean percentage, ac
 ## 11. Workflow gate
 
 Per `GIT_WORKFLOW.md` and DEC-016, this plan must be committed and pushed to the working branch before implementation starts. The supplied project archive has no Git metadata, so this deliverable prepares the plan but does not claim a commit or push. Implementation must begin only after the owner has committed and pushed this plan milestone.
+
+
+## 12. Implementation checkpoint — 2026-11-18
+
+Implemented in the current source checkpoint:
+- Planet Studio now displays the configured planet radius in kilometres while preserving metres in the serialized settings and runtime contracts.
+- Settings validation now recovers non-finite radii to the existing 50 km default and preserves finite radii at or above 100 m.
+- Ocean coverage is now exposed and clamped to 1–99%; non-finite values recover to the approved 65% default.
+- EditMode regression tests were added for multiple radii, independent terrain amplitudes, ocean targets below 50% and at the 1%/99% boundaries, and invalid numeric settings.
+
+Not yet verified:
+- Unity compilation.
+- EditMode test execution and actual ocean quantization at 1%, 35%, 65%, and 99%.
+- Manual Planet Studio interaction and playable-world validation at small and large radii.
+
+The feature must remain IN PROGRESS until those checks are performed and recorded. Do not claim the implementation is complete based on source inspection alone.
+
+
+## 13. Checkpoint commit message (Unity validation pending)
+
+```text
+feat(world): expose configurable planet radius and ocean coverage
+
+Display planet radius in kilometres while retaining metres internally.
+Allow ocean coverage targets from 1% to 99% and add EditMode regression tests
+for multiple radii, independent relief settings, and ocean coverage boundaries.
+Unity compilation, EditMode execution, and manual Play Mode validation remain pending.
+
+Work-Package: WORLD-007
+Agent: WORLD
+```
