@@ -86,6 +86,38 @@ namespace Pokemon.Project.Tests.EditMode.World.Spherical
             finally { Object.DestroyImmediate(settings); }
         }
 
+
+        [Test]
+        public void TinyWorldProfile_UsesOneKilometreRadius()
+        {
+            var settings = ScriptableObject.CreateInstance<SphericalPlanetStudioSettings>();
+            try
+            {
+                var profile = new SphericalWorldProfile
+                {
+                    schemaVersion = 1,
+                    radiusKilometres = 1f,
+                    faceResolution = 128,
+                    layer1AmplitudeMeters = 35f,
+                    layer2AmplitudeMeters = 8f,
+                    layer3AmplitudeMeters = 1.5f,
+                    mountainElevationThresholdMeters = 20f,
+                    mountainSlopeThresholdDegrees = 32f,
+                    oceanCoverageTargetPercent = 65f
+                };
+                profile.ApplyTo(settings);
+                Assert.AreEqual(1000f, settings.radiusMeters);
+                Assert.AreEqual(128, settings.faceResolution);
+                Assert.AreEqual(35f, settings.layer1AmplitudeMeters);
+                Assert.AreEqual(8f, settings.layer2AmplitudeMeters);
+                Assert.AreEqual(1.5f, settings.layer3AmplitudeMeters);
+                Assert.AreEqual(20f, settings.mountainElevationThresholdMeters);
+                Assert.AreEqual(32f, settings.mountainSlopeThresholdDegrees);
+                Assert.AreEqual(65f, settings.oceanCoverageTargetPercent);
+            }
+            finally { Object.DestroyImmediate(settings); }
+        }
+
         [Test]
         public void ApplyTo_RejectsUnsupportedSchemaVersion()
         {

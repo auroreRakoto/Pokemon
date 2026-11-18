@@ -29,6 +29,7 @@ Runtime settings continue to store radius in metres. The JSON profile expresses 
 3. Archipelago — 25 km, 82% ocean.
 4. Arid — 40 km, 30% ocean.
 5. Rugged Highlands — 60 km, 55% ocean.
+6. Tiny World — 2 km diameter (1 km radius), 65% ocean.
 
 These are parameter presets for the currently implemented plains, forest, desert and mountains classification. They do not claim to add snow, tundra, biome-specific assets, vegetation, hydrology or weather systems.
 
@@ -51,7 +52,8 @@ These are parameter presets for the currently implemented plains, forest, desert
 
 ## Acceptance criteria
 
-- All five supplied JSON files parse with Unity `JsonUtility`.
+- All six supplied JSON files parse with Unity `JsonUtility`.
+- Tiny World loads with a 1,000 m runtime radius (2 km diameter) and uses the same generation pipeline as larger profiles.
 - Profile load applies all declared world-generation fields to the settings asset.
 - Profile save produces a new JSON file in the approved data directory.
 - Applying a profile leaves preview-only and drainage-only settings unchanged.
@@ -59,3 +61,18 @@ These are parameter presets for the currently implemented plains, forest, desert
 - Ocean targets below 50% and above 80% survive profile load and settings validation.
 - Unknown schema versions are rejected with a clear error.
 - Unity compilation and EditMode tests pass; Planet Studio can load each profile and generate its world.
+
+
+## Tiny World terrain tuning
+
+The Tiny World profile is a 2 km diameter planet (1 km radius). Its terrain amplitudes are intentionally much smaller than those of the 50 km reference world:
+- Layer 1 macro relief: 35 m
+- Layer 2 regional relief: 8 m
+- Layer 3 fine details: 1.5 m
+- Mountain elevation threshold: 20 m
+- Mountain slope threshold: 32 degrees
+- Face resolution: 128
+
+These are profile-specific authored values, not an automatic scaling rule. The generator's layer-1 shaping limits its positive contribution to approximately 0.62 times its configured amplitude; therefore the mountain elevation threshold is set below the theoretical combined positive terrain maximum. Slope-based mountain classification remains active.
+
+The profile must still be visually inspected in Unity. The values are an initial tuned preset, not a claim that the final landform distribution is approved.
