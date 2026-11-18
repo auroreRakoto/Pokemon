@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.IO;
 using Pokemon.Project.World.Spherical;
 using Pokemon.Project.World.Spherical.Studio;
 using Pokemon.Project.World.Spherical.Geography;
@@ -14,6 +15,10 @@ namespace Pokemon.Project.Editor.World.Spherical
     {
         private const string SettingsPath = "Assets/Project/Content/World/PlanetStudio/SphericalPlanetStudioSettings.asset";
         private const string PreviewRootName = "WORLD-001_PlanetStudioPreview";
+        private const string WorldProfilesFolder = "Assets/Project/Data/WorldProfiles";
+        private string[] worldProfilePaths = Array.Empty<string>();
+        private string[] worldProfileLabels = Array.Empty<string>();
+        private int selectedWorldProfileIndex;
         private SphericalPlanetStudioSettings settings;
         private Vector2 scroll;
         private bool showLayer1 = true;
@@ -40,6 +45,8 @@ namespace Pokemon.Project.Editor.World.Spherical
             EditorGUILayout.LabelField("WORLD-001 — Layered Planet Studio", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox("Build the same spherical data progressively. Layer visibility is non-destructive; switching views only changes presentation.", MessageType.Info);
             EditorGUI.BeginChangeCheck();
+            DrawWorldProfiles();
+            EditorGUILayout.Space(8);
             DrawPlanetSettings();
             EditorGUILayout.Space(8);
             DrawTerrainLayers();
@@ -66,6 +73,115 @@ namespace Pokemon.Project.Editor.World.Spherical
             EditorGUILayout.EndScrollView();
         }
 
+
+        private void DrawWorldProfiles()
+        {
+            EditorGUILayout.LabelField("World profiles", EditorStyles.boldLabel);
+            RefreshWorldProfiles();
+            if (worldProfilePaths.Length == 0)
+            {
+                EditorGUILayout.HelpBox("No JSON world profiles found in Assets/Project/Data/WorldProfiles.", MessageType.Warning);
+            }
+            else
+            {
+                selectedWorldProfileIndex = Mathf.Clamp(selectedWorldProfileIndex, 0, worldProfileLabels.Length - 1);
+                selectedWorldProfileIndex = EditorGUILayout.Popup("Preset", selectedWorldProfileIndex, worldProfileLabels);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Load profile"))
+                        LoadSelectedWorldProfile();
+                    if (GUILayout.Button("Refresh list"))
+                        RefreshWorldProfiles(force: true);
+                }
+            }
+
+            if (GUILayout.Button("Save current settings as new profile"))
+                SaveCurrentSettingsAsWorldProfile();
+            EditorGUILayout.HelpBox(
+                "A profile captures planet size, seed, terrain layers, ocean target and biome/climate parameters. It does not change player size, movement, gravity, camera, preview mode or experimental drainage controls.",
+                MessageType.None);
+        }
+
+        private void RefreshWorldProfiles(bool force = false)
+        {
+            if (!force && worldProfilePaths.Length > 0) return;
+            string absoluteFolder = Path.GetFullPath(WorldProfilesFolder);
+            if (!Directory.Exists(absoluteFolder))
+            {
+                worldProfilePaths = Array.Empty<string>();
+                worldProfileLabels = Array.Empty<string>();
+                return;
+            }
+
+            string[] files = Directory.GetFiles(absoluteFolder, "*.json", SearchOption.TopDirectoryOnly);
+            Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+            var validPaths = new System.Collections.Generic.List<string>();
+            var labels = new System.Collections.Generic.List<string>();
+            foreach (string file in files)
+            {
+                try
+                {
+                    SphericalWorldProfile profile = JsonUtility.FromJson<SphericalWorldProfile>(File.ReadAllText(file));
+                    if (profile == null || profile.schemaVersion != 1) continue;
+                    validPaths.Add(file);
+                    labels.Add(string.IsNullOrWhiteSpace(profile.displayName)
+                        ? Path.GetFileNameWithoutExtension(file)
+                        : profile.displayName);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogWarning($"Skipping invalid world profile '{file}': {exception.Message}");
+                }
+            }
+            worldProfilePaths = validPaths.ToArray();
+            worldProfileLabels = labels.ToArray();
+            selectedWorldProfileIndex = Mathf.Clamp(selectedWorldProfileIndex, 0, Mathf.Max(0, worldProfilePaths.Length - 1));
+        }
+
+        private void LoadSelectedWorldProfile()
+        {
+            if (worldProfilePaths.Length == 0 || selectedWorldProfileIndex >= worldProfilePaths.Length) return;
+            try
+            {
+                SphericalWorldProfile profile = JsonUtility.FromJson<SphericalWorldProfile>(
+                    File.ReadAllText(worldProfilePaths[selectedWorldProfileIndex]));
+                if (profile == null) throw new InvalidDataException("The selected profile contains no data.");
+                profile.ApplyTo(settings);
+                EditorUtility.SetDirty(settings);
+                AssetDatabase.SaveAssets();
+                Debug.Log($"Loaded world profile '{profile.displayName}' (radius={settings.radiusMeters / 1000f:0.###} km, ocean={settings.oceanCoverageTargetPercent:0.##}%).");
+            }
+            catch (Exception exception)
+            {
+                EditorUtility.DisplayDialog("World profile", $"Could not load profile:\n{exception.Message}", "OK");
+            }
+        }
+
+        private void SaveCurrentSettingsAsWorldProfile()
+        {
+            string assetPath = EditorUtility.SaveFilePanelInProject(
+                "Save world profile", "MyWorld", "json", "Choose a name for this world profile.", WorldProfilesFolder);
+            if (string.IsNullOrEmpty(assetPath)) return;
+
+            try
+            {
+                string absoluteFolder = Path.GetDirectoryName(Path.GetFullPath(assetPath));
+                Directory.CreateDirectory(absoluteFolder);
+                string fileName = Path.GetFileNameWithoutExtension(assetPath);
+                string displayName = ObjectNames.NicifyVariableName(fileName);
+                SphericalWorldProfile profile = SphericalWorldProfile.FromSettings(
+                    settings, fileName, displayName, "User-created world profile.");
+                File.WriteAllText(Path.GetFullPath(assetPath), JsonUtility.ToJson(profile, true));
+                AssetDatabase.Refresh();
+                RefreshWorldProfiles(force: true);
+                Debug.Log($"Saved world profile '{displayName}' to {assetPath}.");
+            }
+            catch (Exception exception)
+            {
+                EditorUtility.DisplayDialog("World profile", $"Could not save profile:\n{exception.Message}", "OK");
+            }
+        }
+
         private void DrawPlanetSettings()
         {
             EditorGUILayout.LabelField("Planet definition", EditorStyles.boldLabel);
@@ -73,7 +189,7 @@ namespace Pokemon.Project.Editor.World.Spherical
             radiusKilometres = EditorGUILayout.FloatField("Planet radius (km)", radiusKilometres);
             settings.radiusMeters = radiusKilometres * 1000f;
             EditorGUILayout.HelpBox(
-                "Choose the physical size of this playable world. Terrain relief, player dimensions, movement speed and gravity remain independently configurable.",
+                "Planet size is independent from terrain relief and gameplay scale. Profiles store these characteristics together without automatically resizing the player.",
                 MessageType.Info);
             settings.seed = EditorGUILayout.IntField("Seed", settings.seed);
             settings.faceResolution = EditorGUILayout.IntSlider("Globe resolution", settings.faceResolution, 8, 256);

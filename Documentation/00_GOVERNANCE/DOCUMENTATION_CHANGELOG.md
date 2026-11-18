@@ -113,16 +113,14 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Status remains implementation-in-progress until Unity compilation, tests and manual Play Mode checks are reported passing.
 
 
+## 2026-11-18 — WORLD-008 JSON world profiles
+
+- Added versioned JSON world profiles under `Assets/Project/Data/WorldProfiles` and a Planet Studio workflow to load and save profiles.
+- Added five initial profiles covering temperate, continental, archipelago, arid and rugged-highland parameter combinations.
+- Added a serializable profile contract and EditMode round-trip/isolation tests.
+- Recorded DEC-046 and the WORLD-008 work package. Unity compilation and runtime validation remain pending.
+
 ## 2026-11-18 — WORLD-007 configurable planet size and ocean range plan
 
 - Recorded DEC-045: small and large planets use one playable generation system; no test/production scale modes or automatic scaling of terrain/gameplay settings.
-- Added the WORLD-007 plan to expose radius in kilometres while retaining metres internally and expand ocean coverage to 1–99%, preserving the 65% default.
-- Documented current implementation findings, expected code targets, automated tests, manual Unity acceptance and the mandatory plan-push gate.
-
-
-## 2026-11-18 — WORLD-007 implementation checkpoint
-
-- Added the configurable planet-radius UI in kilometres while retaining metres internally.
-- Expanded ocean coverage validation and Planet Studio slider to 1–99%, preserving the 65% default.
-- Added EditMode regression coverage for configurable radii, independent relief settings, ocean endpoints and invalid numeric values.
-- Recorded Unity compilation, test execution and manual Play Mode checks as pending validation gates.
+- Added configurable radius in kilometres while retaining metres internally and expanded ocean coverage to 1–99%, preserving the 65% default.

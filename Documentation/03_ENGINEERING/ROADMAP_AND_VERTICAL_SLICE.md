@@ -10,8 +10,6 @@ This is a sequencing guide, not a promise of dates.
 - architecture decisions needed for prototype.
 
 ## Phase 1 — Visual and world prototype
-- one playable spherical world with owner-configurable planet radius (small or large; no separate test/production modes; see WORLD-007);
-- ocean coverage target configurable from 1% to 99%, with 65% default;
 - one small test area;
 - one terrain approach prototype;
 - a small material/texture library;
@@ -61,3 +59,9 @@ This is a sequencing guide, not a promise of dates.
 - optimization and deployment hardening.
 
 Reorder based on technical dependencies and risk. Do not build broad content before proving the core loop.
+
+
+## World authoring — configurable planet profiles
+- Select a named JSON world profile in Planet Studio.
+- Tune and save custom profiles without changing the shared spherical generation pipeline.
+- Validate small and large radii and ocean targets below and above 50%.

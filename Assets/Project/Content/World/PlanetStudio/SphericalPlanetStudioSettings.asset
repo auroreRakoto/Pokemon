@@ -12,29 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f4f780d7aa54b518d9acba91b1d190c, type: 3}
   m_Name: SphericalPlanetStudioSettings
   m_EditorClassIdentifier: Pokemon.Project.World.Spherical::Pokemon.Project.World.Spherical.Studio.SphericalPlanetStudioSettings
-  radiusMeters: 50000
+  radiusMeters: 80000
   faceResolution: 96
   planisphereWidth: 512
   planisphereHeight: 256
-  seed: 481516
+  seed: 824631
   layer1Enabled: 1
   layer2Enabled: 1
   layer3Enabled: 1
-  layer1AmplitudeMeters: 1800
-  layer1Frequency: 2.2
-  continentThreshold: 0.47
+  layer1AmplitudeMeters: 2400
+  layer1Frequency: 1.8
+  continentThreshold: 0.42
   layer2AmplitudeMeters: 450
   layer2Frequency: 9
   layer3AmplitudeMeters: 65
   layer3Frequency: 34
   previewStage: 4
   view: 0
-  map: 0
+  map: 5
   temperatureLatitudeInfluence: 0.75
   temperatureNoiseInfluence: 0.25
   geographicSettingsVersion: 1
-  oceanCoverageTargetPercent: 65
-  moistureDistanceScaleRadiusMultiplier: 0.18
+  oceanCoverageTargetPercent: 35
+  moistureDistanceScaleRadiusMultiplier: 0.24
   moistureTemperatureEvaporation: 0.35
   moistureSlopeLoss: 0.2
   mountainElevationThresholdMeters: 1800
