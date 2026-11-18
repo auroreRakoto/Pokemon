@@ -112,6 +112,22 @@ namespace Pokemon.Project.Tests.World.Spherical.EditMode
         }
 
         [Test]
+        public void Generate_ForestContainsVisibleFloorDetail()
+        {
+            const int resolution = 128;
+            Color32[] pixels = SphericalBiomeTextureGenerator.Generate(SphericalBiome.Forest, resolution, 481516);
+            int variedPixels = 0;
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                int spread = Mathf.Max(pixels[i].r, Mathf.Max(pixels[i].g, pixels[i].b))
+                    - Mathf.Min(pixels[i].r, Mathf.Min(pixels[i].g, pixels[i].b));
+                if (spread > 24) variedPixels++;
+            }
+
+            Assert.That(variedPixels, Is.GreaterThan(pixels.Length / 100));
+        }
+
+        [Test]
         public void Generate_RejectsWaterAsGroundTexture()
         {
             Assert.Throws<System.ArgumentOutOfRangeException>(() =>

@@ -136,3 +136,11 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Brightened the Plains material tint to improve the green read in gameplay.
 - Added a focused Plains texture variation regression test.
 - Unity compilation, generated texture refresh and visual validation remain pending; do not mark WORLD-010-A/B complete yet.
+
+
+## 2026-11-19 — WORLD-010 Forest texture and selectable spawn biome
+
+- Added tileable Forest floor details with moss/ground-cover patches and warm leaf-litter flecks.
+- Exposed the desired spawn biome in the playable inspection bootstrap Inspector (Plains default; Forest, Desert and Mountains selectable).
+- Spawn selection now searches dry land in the requested biome, prefers low-slope interior cells and falls back to the flattest available cell when necessary.
+- Added a Forest texture detail regression test. Unity compilation, EditMode execution and visual validation remain pending.

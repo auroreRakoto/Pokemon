@@ -113,3 +113,27 @@ The first production texture was technically connected but read as broad green/b
 - Check the same profile at 2 km and a larger world radius; physical texture scale must remain unchanged.
 
 Status: implementation checkpoint; Unity compilation, texture regeneration and visual validation are pending.
+
+
+## WORLD-010-C — Forest floor texture
+
+- Add deterministic, tileable moss/ground-cover patches.
+- Add small warm leaf-litter details to distinguish Forest from Plains.
+- Preserve the shared opaque triplanar material pipeline and physical world-space scale.
+- No tree or large vegetation meshes are introduced in this pass.
+
+## Playable inspection — selectable spawn biome
+
+The `SphericalBiomeInspectionBootstrap` now exposes `Spawn Biome` in the Inspector, with Plains as the default. The four supported choices are Plains, Forest, Desert and Mountains.
+
+Spawn selection searches dry-land cells belonging to the selected biome. It prefers a low-slope location away from biome boundaries. If no cell meets the preferred slope limit, it falls back to the flattest available dry-land cell in that biome and logs a warning. If the selected biome has no dry-land cells, generation fails with an actionable error instead of silently spawning in Plains.
+
+### Validation
+- Change Spawn Biome in the bootstrap Inspector before Play Mode.
+- Confirm the log's RequestedSpawnBiome and ActualSpawnBiome match.
+- Test all four biomes on at least one profile where each biome exists.
+- Confirm a selected biome absent from the generated world produces the clear error.
+- Confirm Forest texture has visibly different moss/leaf detail from Plains.
+- Re-run the existing texture EditMode tests.
+
+Status: implementation checkpoint; Unity compilation, EditMode tests and visual Play Mode validation pending.

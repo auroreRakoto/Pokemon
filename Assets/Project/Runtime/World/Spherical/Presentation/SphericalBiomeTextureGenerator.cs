@@ -90,8 +90,77 @@ namespace Pokemon.Project.World.Spherical.Presentation
 
             if (biome == SphericalBiome.Plains)
                 DrawPlainsGrassBlades(pixels, resolution, biomeSeed);
+            else if (biome == SphericalBiome.Forest)
+                DrawForestFloorDetails(pixels, resolution, biomeSeed);
 
             return pixels;
+        }
+
+        /// <summary>
+        /// Draws a dense, tileable forest floor: mossy ground-cover strokes and small
+        /// warm leaf-litter shapes. All placements wrap across the texture borders.
+        /// </summary>
+        private static void DrawForestFloorDetails(Color32[] pixels, int resolution, int seed)
+        {
+            const int cells = 24;
+            float cellSize = (float)resolution / cells;
+
+            for (int cy = 0; cy < cells; cy++)
+            for (int cx = 0; cx < cells; cx++)
+            {
+                int cellSeed = unchecked(seed + cx * 73856093 + cy * 19349663);
+                float cluster = Hash01(cx, cy, cellSeed + 31);
+                int detailCount = cluster > 0.58f ? 4 : 1;
+
+                for (int i = 0; i < detailCount; i++)
+                {
+                    int detailSeed = cellSeed + i * 83492791;
+                    float centerX = (cx + Hash01(cx, cy, detailSeed + 1)) * cellSize;
+                    float centerY = (cy + Hash01(cx, cy, detailSeed + 2)) * cellSize;
+                    float radiusX = Mathf.Lerp(1.2f, 3.8f, Hash01(cx, cy, detailSeed + 3));
+                    float radiusY = Mathf.Lerp(1.0f, 2.8f, Hash01(cx, cy, detailSeed + 4));
+                    float angle = Hash01(cx, cy, detailSeed + 5) * Mathf.PI;
+                    bool leaf = Hash01(cx, cy, detailSeed + 6) > 0.62f;
+
+                    DrawForestDetailShape(
+                        pixels, resolution, centerX, centerY, radiusX, radiusY, angle,
+                        leaf ? new Vector3(0.91f, 0.69f, 0.48f) : new Vector3(0.68f, 0.91f, 0.67f),
+                        leaf ? 0.72f : 0.66f);
+                }
+            }
+        }
+
+        private static void DrawForestDetailShape(
+            Color32[] pixels, int resolution, float centerX, float centerY,
+            float radiusX, float radiusY, float angle, Vector3 multiplier, float opacity)
+        {
+            int reach = Mathf.CeilToInt(Mathf.Max(radiusX, radiusY) + 1f);
+            float cos = Mathf.Cos(angle);
+            float sin = Mathf.Sin(angle);
+
+            for (int oy = -reach; oy <= reach; oy++)
+            for (int ox = -reach; ox <= reach; ox++)
+            {
+                float dx = ox + 0.5f;
+                float dy = oy + 0.5f;
+                float localX = (dx * cos + dy * sin) / radiusX;
+                float localY = (-dx * sin + dy * cos) / radiusY;
+                float distance = localX * localX + localY * localY;
+                if (distance > 1f) continue;
+
+                float coverage = Mathf.Clamp01((1f - distance) * 5f);
+                float blend = opacity * coverage;
+                int x = Wrap(Mathf.FloorToInt(centerX + ox), resolution);
+                int y = Wrap(Mathf.FloorToInt(centerY + oy), resolution);
+                int index = y * resolution + x;
+                Color32 current = pixels[index];
+
+                pixels[index] = new Color32(
+                    ToByte(Mathf.Lerp(current.r / 255f, multiplier.x, blend)),
+                    ToByte(Mathf.Lerp(current.g / 255f, multiplier.y, blend)),
+                    ToByte(Mathf.Lerp(current.b / 255f, multiplier.z, blend)),
+                    255);
+            }
         }
 
         /// <summary>

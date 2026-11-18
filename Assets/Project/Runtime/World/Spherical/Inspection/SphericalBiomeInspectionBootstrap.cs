@@ -17,6 +17,11 @@ namespace Pokemon.Project.World.Spherical.Inspection
     {
         [SerializeField] private SphericalPlanetStudioSettings settings;
         [SerializeField, Min(0.1f)] private float capsuleHeightMeters = 1.8f;
+
+        [Header("Spawn")]
+        [SerializeField] private SphericalBiome spawnBiome = SphericalBiome.Plains;
+        [SerializeField, Range(0f, 45f)] private float preferredMaximumSpawnSlope = 18f;
+
         [SerializeField] private Material biomeMaterial;
         [SerializeField] private SphericalBiomeMaterialMapping biomeMaterialMapping;
         [SerializeField] private bool generateOnPlay = true;
@@ -74,13 +79,14 @@ namespace Pokemon.Project.World.Spherical.Inspection
             _generatedRoot.SetParent(transform, false);
 
             BuildPlanet();
-            Vector3 spawnDirection = FindSpawnDirection();
+            Vector3 spawnDirection = FindSpawnDirection(spawnBiome);
             CreatePlayerAndCamera(spawnDirection);
             CreateLighting();
 
             Debug.Log(
                 $"Playable biome inspection generated. Seed={settings.seed}, Resolution={settings.faceResolution}, " +
-                $"Ocean={_fields.ActualOceanCoveragePercent:F2}%, SpawnBiome={_fields.SampleBiome(spawnDirection)}.", this);
+                $"Ocean={_fields.ActualOceanCoveragePercent:F2}%, RequestedSpawnBiome={spawnBiome}, " +
+                $"ActualSpawnBiome={_fields.SampleBiome(spawnDirection)}.", this);
         }
 
         [ContextMenu("Clear Playable Biome Inspection")]
@@ -195,10 +201,16 @@ namespace Pokemon.Project.World.Spherical.Inspection
             overlay.Initialize(cameraRig, settings.seed, settings.radiusMeters);
         }
 
-        private Vector3 FindSpawnDirection()
+        private Vector3 FindSpawnDirection(SphericalBiome requestedBiome)
         {
-            Vector3 bestDirection = Vector3.up;
-            float bestScore = float.PositiveInfinity;
+            if (requestedBiome == SphericalBiome.None)
+                throw new InvalidOperationException("Spawn biome must be one of the four terrestrial biomes.");
+
+            Vector3 bestPreferredDirection = Vector3.zero;
+            float bestPreferredScore = float.PositiveInfinity;
+            Vector3 bestFallbackDirection = Vector3.zero;
+            float bestFallbackSlope = float.PositiveInfinity;
+
             int resolution = _fields.Resolution;
             float angularOffset = 1.5f / resolution;
 
@@ -207,14 +219,22 @@ namespace Pokemon.Project.World.Spherical.Inspection
             for (int x = 1; x < resolution; x++)
             {
                 CubeSphereFace face = (CubeSphereFace)faceIndex;
-                if (_fields.GetBiome(face, x, y) != SphericalBiome.Plains)
-                    continue;
-                if (_fields.GetWaterClass(face, x, y) != SphericalWaterClass.Land)
+                if (_fields.GetBiome(face, x, y) != requestedBiome ||
+                    _fields.GetWaterClass(face, x, y) != SphericalWaterClass.Land)
                     continue;
 
                 Vector3 direction = _fields.GetDirection(face, x, y);
                 float slope = _fields.GetValue(SphericalGeographicFieldType.SlopeDegrees, face, x, y);
-                if (slope > 18f)
+
+                // Always retain a fallback on the requested biome. This allows spawning
+                // in mountainous/desert worlds even when no cell meets the preferred slope.
+                if (slope < bestFallbackSlope)
+                {
+                    bestFallbackSlope = slope;
+                    bestFallbackDirection = direction;
+                }
+
+                if (slope > preferredMaximumSpawnSlope)
                     continue;
 
                 SphericalSurfaceQuery.GetTangentFrame(direction, out Vector3 tangentA, out Vector3 tangentB);
@@ -225,21 +245,33 @@ namespace Pokemon.Project.World.Spherical.Inspection
                     if (a == 0 && b == 0) continue;
                     Vector3 neighbour = (direction + (tangentA * a + tangentB * b) * angularOffset).normalized;
                     SphericalBiome neighbourBiome = _fields.SampleBiome(neighbour);
-                    if (neighbourBiome != SphericalBiome.Plains && neighbourBiome != SphericalBiome.None)
+                    if (neighbourBiome != requestedBiome && neighbourBiome != SphericalBiome.None)
                         nearBiomeTransition = true;
                 }
 
-                float score = slope + (nearBiomeTransition ? 0f : 10f);
-                if (score < bestScore)
+                float score = slope + (nearBiomeTransition ? 10f : 0f);
+                if (score < bestPreferredScore)
                 {
-                    bestScore = score;
-                    bestDirection = direction;
+                    bestPreferredScore = score;
+                    bestPreferredDirection = direction;
                 }
             }
 
-            if (float.IsPositiveInfinity(bestScore))
-                throw new InvalidOperationException("No suitable low-slope plains spawn point was found. Adjust the biome settings or regenerate the world.");
-            return bestDirection;
+            if (bestPreferredDirection != Vector3.zero)
+                return bestPreferredDirection;
+
+            if (bestFallbackDirection != Vector3.zero)
+            {
+                Debug.LogWarning(
+                    $"No {requestedBiome} spawn cell met the preferred slope limit of " +
+                    $"{preferredMaximumSpawnSlope:F1}°. Spawning at the flattest available {requestedBiome} land cell " +
+                    $"(slope {bestFallbackSlope:F1}°).", this);
+                return bestFallbackDirection;
+            }
+
+            throw new InvalidOperationException(
+                $"No dry-land spawn location exists in the requested biome '{requestedBiome}'. " +
+                "Choose another Spawn Biome or regenerate the planet with different biome/ocean settings.");
         }
 
         private void CreateLighting()
