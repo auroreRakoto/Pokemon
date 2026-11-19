@@ -66,3 +66,17 @@ Until then, use a checkpoint commit message that states the implementation is ad
 - It resolves the ten known IDs against the exact output paths from the environment prefab generator convention.
 - It creates/updates both ScriptableObject assets and assigns the JSON/catalog references automatically.
 - Unity execution is still required to validate the Editor API calls and actual asset paths.
+
+## WORLD-011-C — deterministic spherical placement implementation
+
+- Runtime generator: `Assets/Project/Runtime/World/Spherical/Environment/SphericalEnvironmentPlacementGenerator.cs`.
+- Integration: `SphericalBiomeInspectionBootstrap` invokes placement after the WORLD-002 planet surface is built.
+- The automatic Editor setup command also assigns the generated config to the open inspection bootstrap and marks its scene dirty; save the scene after running the command.
+- Uses the existing `SphericalGeographicFieldSet` for biome, water, altitude, slope, moisture and temperature queries. Geography is not regenerated.
+- Candidate density is evaluated per spherical cube-face cell using spherical quad area, target density, selection weight and global density multiplier, then deterministically jittered from world seed + global offset + face/cell/rule indices.
+- Only dry-land samples in the configured Plains/Forest biome pass. Slope and optional altitude/moisture/temperature filters are applied.
+- Instances are placed along the radial surface normal, oriented in the local tangent frame, with deterministic yaw and uniform scale.
+- Minimum spacing/exclusion checks apply within matching spacing groups. No blanket colliders are added.
+- All instances are parented under `WORLD-011_GeneratedEnvironment`, itself under the existing generated inspection root, so regeneration/cleanup removes them.
+- Important prototype limitation: spacing uses a linear scan of accepted instances; spatial acceleration and streaming are deferred. Density is one or more stochastic candidates per cell and should be tuned only after visual inspection.
+- Unity compilation, Play Mode behaviour and EditMode tests must be verified in the project. Do not mark WORLD-011-C validated until those checks pass.

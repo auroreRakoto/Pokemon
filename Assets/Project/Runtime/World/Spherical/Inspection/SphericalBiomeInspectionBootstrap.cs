@@ -3,6 +3,7 @@ using Pokemon.Project.World.Spherical.Geography;
 using Pokemon.Project.World.Spherical.Movement;
 using Pokemon.Project.World.Spherical.Presentation;
 using Pokemon.Project.World.Spherical.Studio;
+using Pokemon.Project.World.Spherical.Environment;
 using UnityEngine;
 
 namespace Pokemon.Project.World.Spherical.Inspection
@@ -22,18 +23,12 @@ namespace Pokemon.Project.World.Spherical.Inspection
         [SerializeField] private SphericalBiome spawnBiome = SphericalBiome.Plains;
         [SerializeField, Range(0f, 45f)] private float preferredMaximumSpawnSlope = 18f;
 
-        [Header("Forest Decoration")]
-        [Tooltip("Assign the imported SM_Tree_Deciduous and SM_Tree_Birch FBX model assets here.")]
-        [SerializeField] private GameObject[] forestTreePrefabs = new GameObject[2];
-        [SerializeField, Min(0)] private int forestTreeCount = 140;
-        [SerializeField, Min(0.1f)] private float forestTreeMinimumSpacingMeters = 8f;
-        [SerializeField, Range(0f, 60f)] private float forestTreeMaximumSlopeDegrees = 32f;
-        [SerializeField, Min(0f)] private float forestTreeSpawnExclusionRadiusMeters = 14f;
-        [SerializeField] private Vector2 forestTreeScaleRange = new Vector2(0.85f, 1.2f);
-
         [SerializeField] private Material biomeMaterial;
         [SerializeField] private SphericalBiomeMaterialMapping biomeMaterialMapping;
         [SerializeField] private bool generateOnPlay = true;
+
+        [Header("Procedural Environment (WORLD-011)")]
+        [SerializeField] private SphericalEnvironmentPlacementConfig environmentPlacementConfig;
 
         private Transform _generatedRoot;
         private SphericalGeographicFieldSet _fields;
@@ -88,9 +83,9 @@ namespace Pokemon.Project.World.Spherical.Inspection
             _generatedRoot.SetParent(transform, false);
 
             BuildPlanet();
+            GenerateEnvironmentPlacement();
             Vector3 spawnDirection = FindSpawnDirection(spawnBiome);
             CreatePlayerAndCamera(spawnDirection);
-            SpawnForestTrees(spawnDirection);
             CreateLighting();
 
             Debug.Log(
@@ -148,6 +143,36 @@ namespace Pokemon.Project.World.Spherical.Inspection
                     if (mesh != null) DestroyOwnedObject(mesh);
                 throw;
             }
+        }
+
+        private void GenerateEnvironmentPlacement()
+        {
+            if (environmentPlacementConfig == null)
+            {
+                Debug.LogWarning(
+                    "[WORLD-011] No environment placement config assigned. Skipping procedural environment placement.", this);
+                return;
+            }
+
+            if (!environmentPlacementConfig.TryLoad(
+                    out SphericalEnvironmentPlacementJson.ResolvedDocument resolved,
+                    out System.Collections.Generic.List<string> issues))
+            {
+                throw new InvalidOperationException(
+                    "WORLD-011 environment placement configuration is invalid: " + string.Join(" | ", issues));
+            }
+
+            Transform environmentRoot = new GameObject("WORLD-011_GeneratedEnvironment").transform;
+            environmentRoot.SetParent(_generatedRoot, false);
+
+            SphericalEnvironmentPlacementGenerator.Result result =
+                SphericalEnvironmentPlacementGenerator.Generate(_fields, resolved, environmentRoot, Vector3.zero);
+
+            Debug.Log(
+                $"[WORLD-011] Environment placement complete. Candidates={result.CandidateCount}, " +
+                $"Placed={result.PlacedCount}, Biome/WaterRejected={result.RejectedByBiomeOrWater}, " +
+                $"FiltersRejected={result.RejectedByFilters}, SpacingRejected={result.RejectedBySpacing}, " +
+                $"GlobalLimitRejected={result.RejectedByGlobalLimit}.", this);
         }
 
         private Material ResolveBiomeMaterial()
@@ -282,92 +307,6 @@ namespace Pokemon.Project.World.Spherical.Inspection
             throw new InvalidOperationException(
                 $"No dry-land spawn location exists in the requested biome '{requestedBiome}'. " +
                 "Choose another Spawn Biome or regenerate the planet with different biome/ocean settings.");
-        }
-
-        private void SpawnForestTrees(Vector3 spawnDirection)
-        {
-            if (forestTreePrefabs == null || forestTreePrefabs.Length == 0 || forestTreeCount <= 0)
-                return;
-
-            var validPrefabs = new System.Collections.Generic.List<GameObject>(forestTreePrefabs.Length);
-            for (int i = 0; i < forestTreePrefabs.Length; i++)
-                if (forestTreePrefabs[i] != null) validPrefabs.Add(forestTreePrefabs[i]);
-
-            if (validPrefabs.Count == 0)
-            {
-                Debug.LogWarning(
-                    "[WORLD-010] No forest tree prefabs assigned. Import the Blender tree FBXs and assign " +
-                    "SM_Tree_Deciduous / SM_Tree_Birch to Forest Tree Prefabs.", this);
-                return;
-            }
-
-            int seed = unchecked(settings.seed * 486187739 + 7919);
-            System.Random random = new System.Random(seed);
-            var placedDirections = new System.Collections.Generic.List<Vector3>(forestTreeCount);
-            int attempts = Mathf.Max(forestTreeCount * 35, 100);
-            int spawned = 0;
-            float minimumSpacingSquared = forestTreeMinimumSpacingMeters * forestTreeMinimumSpacingMeters;
-            float exclusionAngle = forestTreeSpawnExclusionRadiusMeters / Mathf.Max(1f, settings.radiusMeters);
-            float exclusionDot = Mathf.Cos(exclusionAngle);
-
-            for (int attempt = 0; attempt < attempts && spawned < forestTreeCount; attempt++)
-            {
-                // Uniform random point on the sphere, independent of cube-face seams.
-                float y = (float)(random.NextDouble() * 2.0 - 1.0);
-                float azimuth = (float)(random.NextDouble() * Math.PI * 2.0);
-                float horizontal = Mathf.Sqrt(Mathf.Max(0f, 1f - y * y));
-                Vector3 direction = new Vector3(
-                    horizontal * Mathf.Cos(azimuth), y, horizontal * Mathf.Sin(azimuth));
-
-                if (_fields.SampleWaterClass(direction) != SphericalWaterClass.Land ||
-                    _fields.SampleBiome(direction) != SphericalBiome.Forest)
-                    continue;
-
-                if (_fields.Sample(SphericalGeographicFieldType.SlopeDegrees, direction) >
-                    forestTreeMaximumSlopeDegrees)
-                    continue;
-
-                // Keep the immediate player start area clear.
-                if (Vector3.Dot(direction, spawnDirection) > exclusionDot)
-                    continue;
-
-                bool tooClose = false;
-                for (int i = 0; i < placedDirections.Count; i++)
-                {
-                    float chordDistance = (direction - placedDirections[i]).magnitude * settings.radiusMeters;
-                    if (chordDistance * chordDistance < minimumSpacingSquared)
-                    {
-                        tooClose = true;
-                        break;
-                    }
-                }
-                if (tooClose) continue;
-
-                GameObject prefab = validPrefabs[random.Next(validPrefabs.Count)];
-
-                float altitude = _fields.Sample(SphericalGeographicFieldType.AltitudeMeters, direction);
-                Vector3 localPosition = direction * (settings.radiusMeters + altitude + 0.03f);
-                Quaternion alignToSurface = Quaternion.FromToRotation(Vector3.up, direction);
-                Quaternion randomYaw = Quaternion.AngleAxis((float)random.NextDouble() * 360f, Vector3.up);
-
-                GameObject tree = Instantiate(prefab, _generatedRoot);
-                tree.name = $"{prefab.name}_{spawned + 1:000}";
-                tree.transform.localPosition = localPosition;
-                tree.transform.localRotation = alignToSurface * randomYaw;
-                float scale = Mathf.Lerp(
-                    forestTreeScaleRange.x,
-                    forestTreeScaleRange.y,
-                    (float)random.NextDouble());
-                tree.transform.localScale = Vector3.one * scale;
-
-                placedDirections.Add(direction);
-                spawned++;
-            }
-
-            Debug.Log(
-                $"[WORLD-010] Forest decoration: {spawned}/{forestTreeCount} trees placed " +
-                $"(seed={seed}, slope<={forestTreeMaximumSlopeDegrees:F1}°, " +
-                $"spacing>={forestTreeMinimumSpacingMeters:F1}m).", this);
         }
 
         private void CreateLighting()

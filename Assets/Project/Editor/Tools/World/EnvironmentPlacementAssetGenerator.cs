@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Pokemon.Project.World.Spherical.Environment;
 using UnityEditor;
+using UnityEditor.SceneManagement;
+using Pokemon.Project.World.Spherical.Inspection;
 using UnityEngine;
 
 /// <summary>
@@ -94,6 +96,24 @@ public static class EnvironmentPlacementAssetGenerator
         serializedConfig.FindProperty("prefabCatalog").objectReferenceValue = catalog;
         serializedConfig.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(config);
+
+        // Wire the generated config into the inspection bootstrap in the open scene.
+        SphericalBiomeInspectionBootstrap[] bootstraps =
+            Resources.FindObjectsOfTypeAll<SphericalBiomeInspectionBootstrap>();
+        for (int i = 0; i < bootstraps.Length; i++)
+        {
+            if (bootstraps[i] == null || !bootstraps[i].gameObject.scene.IsValid())
+                continue;
+            var bootstrapObject = new SerializedObject(bootstraps[i]);
+            SerializedProperty configProperty =
+                bootstrapObject.FindProperty("environmentPlacementConfig");
+            if (configProperty != null)
+            {
+                configProperty.objectReferenceValue = config;
+                bootstrapObject.ApplyModifiedProperties();
+                EditorSceneManager.MarkSceneDirty(bootstraps[i].gameObject.scene);
+            }
+        }
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
