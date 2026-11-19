@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "globalSeedOffset": 0,
+  "globalDensityMultiplier": 1.0,
+  "maxInstances": 10000,
+  "defaultSurfaceOffsetMeters": 0.05,
+  "biomes": [
+    {
+      "name": "Plains",
+      "enabled": true,
+      "rules": [
+        { "id": "grass_short", "enabled": false, "selectionWeight": 1.0, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "small_vegetation", "minimumScale": 0.8, "maximumScale": 1.2, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 20.0 },
+        { "id": "grass_wild", "enabled": false, "selectionWeight": 1.0, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "small_vegetation", "minimumScale": 0.8, "maximumScale": 1.2, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 25.0 },
+        { "id": "grass_tall", "enabled": false, "selectionWeight": 0.5, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "tall_vegetation", "minimumScale": 0.85, "maximumScale": 1.15, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 15.0 },
+        { "id": "stone_cluster_small", "enabled": false, "selectionWeight": 0.2, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "rocks", "minimumScale": 0.9, "maximumScale": 1.1, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 30.0 },
+        { "id": "stone_cluster_large", "enabled": false, "selectionWeight": 0.05, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "large_rocks", "minimumScale": 0.9, "maximumScale": 1.1, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 25.0 },
+        { "id": "reed_clump", "enabled": false, "selectionWeight": 0.1, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "wetland_vegetation", "minimumScale": 0.9, "maximumScale": 1.1, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 10.0, "useMoistureRange": true, "minimumMoisture": 0.65, "maximumMoisture": 1.0 }
+      ]
+    },
+    {
+      "name": "Forest",
+      "enabled": true,
+      "rules": [
+        { "id": "grass_wild", "enabled": false, "selectionWeight": 0.7, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "small_vegetation", "minimumScale": 0.8, "maximumScale": 1.2, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 25.0, "useMoistureRange": true, "minimumMoisture": 0.35, "maximumMoisture": 1.0 },
+        { "id": "grass_tall", "enabled": false, "selectionWeight": 0.4, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "tall_vegetation", "minimumScale": 0.85, "maximumScale": 1.15, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 20.0 },
+        { "id": "leaf_litter", "enabled": false, "selectionWeight": 1.0, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "forest_floor", "minimumScale": 0.9, "maximumScale": 1.1, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 25.0 },
+        { "id": "mushroom_red", "enabled": false, "selectionWeight": 0.2, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "small_natural_features", "minimumScale": 0.9, "maximumScale": 1.1, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 15.0, "useMoistureRange": true, "minimumMoisture": 0.55, "maximumMoisture": 1.0 },
+        { "id": "fallen_log", "enabled": false, "selectionWeight": 0.15, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "large_natural_features", "minimumScale": 0.9, "maximumScale": 1.1, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 15.0 },
+        { "id": "tree_stump", "enabled": false, "selectionWeight": 0.15, "targetDensityPerSquareKilometre": 0.0, "minimumSpacingMeters": 0.0, "spacingGroup": "large_natural_features", "minimumScale": 0.9, "maximumScale": 1.1, "minimumYawDegrees": 0.0, "maximumYawDegrees": 360.0, "surfaceOffsetMeters": 0.0, "exclusionRadiusMeters": 0.0, "maximumSlopeDegrees": 15.0 }
+      ]
+    }
+  ]
+}

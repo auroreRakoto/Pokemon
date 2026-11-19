@@ -11,6 +11,7 @@
 - `CHANGE_PROPOSAL_TEMPLATE.md` — cross-domain RFC template.
 
 ## Architecture
+- `PROJECT_FILE_AND_FEATURE_INDEX.md` — canonical repository path and feature lookup: folders, files, responsibilities, asset pipeline, data, tests and documentation.
 - `SYSTEM_ARCHITECTURE.md` — high-level modules and dependencies.
 - `MODULE_BOUNDARIES.md` — ownership and dependency direction.
 - `INTERFACE_CONTRACTS.md` — cross-domain contracts.
@@ -19,6 +20,8 @@
 - `WORLD_ARCHITECTURE.md` — world/session/terrain/biome design.
 - `SPHERICAL_WORLD_ARCHITECTURE_PROPOSAL.md` — proposed Cube-Sphere topology, subtle-curvature requirement, adaptive terrain tiles, spherical fields, gravity and validation phases.
 - `UNITY_ARCHITECTURE.md` — Unity project and runtime/editor split.
+
+- `../03_ENGINEERING/WORK_PACKAGES/WORLD-011-B_JSON_CONFIGURATION.md` — JSON + prefab catalog configuration for procedural environment placement.
 
 ## Domains
 - `POKEMON_SIMULATION.md`
