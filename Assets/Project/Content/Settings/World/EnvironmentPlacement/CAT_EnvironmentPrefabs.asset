@@ -12,4 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b6f99315de7cff48a599700d8fd1ede, type: 3}
   m_Name: CAT_EnvironmentPrefabs
   m_EditorClassIdentifier: Pokemon.Project.World.Spherical::Pokemon.Project.World.Spherical.Environment.SphericalEnvironmentPrefabCatalog
-  entries: []
+  entries:
+  - id: grass_short
+    prefab: {fileID: 756834341523531223, guid: b883271851d2e6e43aacdbd77aa14169, type: 3}
+  - id: grass_wild
+    prefab: {fileID: 7308508974287734414, guid: 2d438d3e3ee8eea4d97b5a01c2c1cfad, type: 3}
+  - id: grass_tall
+    prefab: {fileID: 1396457010648468248, guid: 98524d0eb51261d47920261169dee6f3, type: 3}
+  - id: reed_clump
+    prefab: {fileID: 6243693346803119985, guid: 5fa32b694e64a97478ee08912816258e, type: 3}
+  - id: leaf_litter
+    prefab: {fileID: 7427092699379120190, guid: 6d67660b9ca441e4c9d674f0ea178f07, type: 3}
+  - id: mushroom_red
+    prefab: {fileID: 8368005598466949992, guid: 2fe160698d69fd5438d94729da190a9c, type: 3}
+  - id: fallen_log
+    prefab: {fileID: 4501351737397525834, guid: e7fc46952ba412b4fa315249f735fbae, type: 3}
+  - id: tree_stump
+    prefab: {fileID: 8371528676195623822, guid: 3c6d1182260885d42859647d82a8ee9b, type: 3}
+  - id: stone_cluster_small
+    prefab: {fileID: 5714630660344827774, guid: 73de47a84934a384d9a52bab6aceb3af, type: 3}
+  - id: stone_cluster_large
+    prefab: {fileID: 3242150231800266761, guid: 48693bb79c95ef344b7021120c3f3014, type: 3}

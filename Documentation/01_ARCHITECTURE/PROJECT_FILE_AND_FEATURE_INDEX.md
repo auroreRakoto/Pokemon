@@ -1084,3 +1084,8 @@ Tools/
 | EditMode tests | `Assets/Project/Tests/EditMode/World/Spherical/Environment/SphericalEnvironmentPlacementSettingsTests.cs` | JSON loading and validation tests |
 
 The prefab catalog is populated in Unity because generated prefab assets are not present in the inspected source snapshot. Do not hardcode inferred prefab paths into the JSON.
+
+
+## WORLD-011 automatic placement asset setup
+
+- `Assets/Project/Editor/Tools/World/EnvironmentPlacementAssetGenerator.cs` — creates/refreshes the environment prefab catalog and placement config from the JSON and generated prefab paths. Menu: `Tools/World/Generate Environment Placement Assets`.

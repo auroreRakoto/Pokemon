@@ -32,14 +32,16 @@ All sample rules in the JSON are deliberately `enabled: false` and have `targetD
 
 The runtime loader only requires a prefab reference for an enabled rule. Disabled rules can be configured before their prefab is assigned.
 
-## 5. Unity setup
+## 5. Unity setup — automatic
 
-1. Import the files preserving their paths and let Unity generate `.meta` files.
-2. In the Project window, create `CAT_EnvironmentPrefabs` using **Create → Pokemon → World → Environment Prefab Catalog**. Store it beside the JSON under `Content/Settings/World/EnvironmentPlacement/`.
-3. Add one catalog entry for each required logical ID, then assign the matching generated prefab. Do not enable JSON rules yet.
-4. Create `CFG_EnvironmentPlacement` using **Create → Pokemon → World → Environment Placement Config**.
-5. Assign the JSON TextAsset and catalog to this config asset.
+1. Import the files preserving their paths and let Unity compile.
+2. Ensure the generated environment prefabs exist under `Assets/Project/Content/Prefabs/Environment/`, using the folder/name convention created by `EnvironmentPrefabGeneratorWindow`.
+3. Run **Tools → World → Generate Environment Placement Assets**.
+4. The tool creates or refreshes `CAT_EnvironmentPrefabs.asset` and `CFG_EnvironmentPlacement.asset` beside the JSON, then assigns every matching prefab reference automatically.
+5. Review the completion dialog. Missing prefabs are listed with their expected paths and their catalog entries remain empty.
 6. Keep all rules disabled until prefab audit and placement tuning are complete.
+
+The generator is idempotent: running it again refreshes the catalog references and config links without requiring manual Inspector work. It does not overwrite the JSON rule values.
 
 ## 6. Migration from the previous B implementation
 
@@ -56,3 +58,11 @@ After Unity compilation and all included tests pass:
 `feat(world): load environment placement rules from JSON`
 
 Until then, use a checkpoint commit message that states the implementation is added but Unity validation is pending.
+
+## 9. Automatic asset setup tool
+
+- Editor tool: `Assets/Project/Editor/Tools/World/EnvironmentPlacementAssetGenerator.cs`
+- Menu: `Tools/World/Generate Environment Placement Assets`
+- It resolves the ten known IDs against the exact output paths from the environment prefab generator convention.
+- It creates/updates both ScriptableObject assets and assigns the JSON/catalog references automatically.
+- Unity execution is still required to validate the Editor API calls and actual asset paths.
