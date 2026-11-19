@@ -45,9 +45,7 @@
 ## Audit
 - `../06_AUDIT/REPOSITORY_AUDIT_REPORT.md` — static audit of the supplied Unity repository snapshot.
 - `../06_AUDIT/REPOSITORY_ACTION_REGISTER.md` — prioritized findings and recommended follow-up work.
-- `../06_AUDIT/CODE_FUNCTION_OWNERSHIP_INVENTORY.md` — inventory of all 59 C# files and 196 declared methods after the refactor. **Historical snapshot only; not current source evidence.**
-- `../06_AUDIT/CURRENT_SOURCE_INVENTORY_2026-11-19.md` — exact C# file inventory for the latest owner-supplied spherical project archive.
-- `../06_AUDIT/POK-AGENT-001_CURRENT_SOURCE_RECONCILIATION.md` — current status of the archived Pokémon cleanup plan against the latest project snapshot.
+- `../06_AUDIT/CODE_FUNCTION_OWNERSHIP_INVENTORY.md` — inventory of all 59 C# files and 196 declared methods after the refactor.
 - `../../CODE_ARCHITECTURE_COMPLIANCE_REPORT.md` — implementation results, static checks and remaining Unity validation gaps.
 
 ## AI instructions
@@ -74,3 +72,7 @@
 
 | `WORLD-002_EXHAUSTIVE_VISUAL_ASSET_CATALOG.md` | Exhaustive scoped visual asset inventory, Blender batch set and owner approval register for WORLD-002. |
 \n\n## WORLD-010\n- `03_ENGINEERING/WORK_PACKAGES/WORLD-010A_BIOME_TEXTURE_RENDERING_AND_PLAINS_FOREST.md` — integrate the existing spherical biome-weight renderer and world-space triplanar shader; author initial Plains and Forest detail textures.\n
+
+## MOD-001 — Optional world modules
+- `../03_ENGINEERING/WORK_PACKAGES/MOD-001_OPTIONAL_WORLD_MODULE_COMPOSITION.md` — approved/pushed architecture plan for independently selected world capabilities.
+- `../06_AUDIT/MOD-001-A_IMPLEMENTATION_REPORT.md` — profile module configuration implementation, migration and owner validation status.

@@ -46,6 +46,9 @@ namespace Pokemon.Project.World.Spherical.Studio
     [CreateAssetMenu(menuName = "Pokemon/World/Spherical Planet Studio Settings", fileName = "SphericalPlanetStudioSettings")]
     public sealed class SphericalPlanetStudioSettings : ScriptableObject
     {
+        [Header("World modules")]
+        public SphericalWorldModuleOptions modules = new SphericalWorldModuleOptions();
+
         [Header("Planet")]
         [Min(100f)] public float radiusMeters = 50000f;
         [Min(2)] public int faceResolution = 96;
@@ -100,8 +103,13 @@ namespace Pokemon.Project.World.Spherical.Studio
         public SphericalDrainagePreviewMode drainagePreviewMode = SphericalDrainagePreviewMode.RiverCandidates;
         [Range(1, 64)] public int flowDirectionStride = 12;
 
+        /// <summary>
+        /// Clamps serialized generation settings to their supported ranges.
+        /// </summary>
         public void Validate()
         {
+            if (modules == null)
+                modules = new SphericalWorldModuleOptions();
             // Existing serialized settings assets predate WORLD-002. A versioned migration
             // preserves the approved 65% default instead of interpreting missing fields as zero.
             if (geographicSettingsVersion < 1)

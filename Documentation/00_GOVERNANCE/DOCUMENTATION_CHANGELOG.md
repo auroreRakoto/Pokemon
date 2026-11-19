@@ -146,11 +146,10 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Added a Forest texture detail regression test. Unity compilation, EditMode execution and visual validation remain pending.
 
 
-## 2026-11-19 — Current spherical project source reconciliation
+## 2026-11-19 — MOD-001-A profile module configuration
 
-- Re-audited the owner-supplied `Pokemon-clean.zip` snapshot (SHA-256 recorded in the current source inventory).
-- Corrected `POKEMON_SIMULATION.md`: the domain design remains the intended target, but the prior claimed Pokémon Runtime implementation is absent from this snapshot.
-- Marked the 2026-11-17 Pokémon code/function inventories as historical rather than current.
-- Added a current 56-file C# inventory and a POK-AGENT-001 reconciliation addendum; the former PokemonAgent regression tests are blocked because their target types are absent.
-- Updated the development queue: the previous WORLD-004 CS7036 note is stale against the current static call-site audit; the owner's zero-error Console screenshot is recorded, while PlayMode traversal remains unverified.
-- No Runtime source, scenes, prefabs, ScriptableObjects or Unity `.meta` files were changed.
+- Added versioned module options to spherical world profiles.
+- Added an Editor window for configuring terrain presentation, biome classification/presentation, environment assets, player and future Pokémon capabilities.
+- Added compatibility defaults for profiles created before the module section existed.
+- Added EditMode tests for defaults, JSON round-trip and unsupported/missing module configuration.
+- Runtime activation/deactivation is explicitly deferred to MOD-001-B and later increments.

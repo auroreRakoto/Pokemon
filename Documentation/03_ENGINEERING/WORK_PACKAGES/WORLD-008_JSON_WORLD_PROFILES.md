@@ -18,7 +18,8 @@ Each profile is schema-versioned (`schemaVersion: 1`) and includes:
 - identity: `id`, `displayName`, `description`;
 - planet: radius in kilometres, seed, face resolution and planisphere dimensions;
 - terrain: enabled layers, amplitudes, frequencies and continent threshold;
-- climate/biomes: temperature influences, ocean target, moisture model parameters, mountain classification and existing desert/forest thresholds.
+- climate/biomes: temperature influences, ocean target, moisture model parameters, mountain classification and existing desert/forest thresholds;
+- module selection: a separately versioned `moduleConfigurationVersion` sub-schema with optional capability flags.
 
 Runtime settings continue to store radius in metres. The JSON profile expresses it in kilometres for readability; applying a profile converts at the boundary.
 
@@ -32,6 +33,22 @@ Runtime settings continue to store radius in metres. The JSON profile expresses 
 6. Tiny World — 2 km diameter (1 km radius), 65% ocean.
 
 These are parameter presets for the currently implemented plains, forest, desert and mountains classification. They do not claim to add snow, tundra, biome-specific assets, vegetation, hydrology or weather systems.
+
+## Optional world modules (MOD-001-A)
+
+The profile also stores a versioned module-selection section. Its first supported sub-schema is `moduleConfigurationVersion: 1` and contains:
+- `terrainPresentationEnabled`;
+- `biomeClassificationEnabled`;
+- `biomeGroundPresentationEnabled`;
+- `environmentAssetsEnabled`;
+- `playerEnabled`;
+- `pokemonEnabled`.
+
+The required World Core is not a toggle. Initial profile defaults preserve the current inspected composition: terrain presentation, biome classification, biome ground presentation and player enabled; environment assets and Pokémon disabled.
+
+Use `Tools > World > Configure World Modules` to edit these options on an existing JSON world profile. Module selection is made before world creation and remains fixed for that session. These options are currently persisted profile metadata; runtime activation is implemented in subsequent MOD-001 increments, not by this first configuration increment.
+
+Legacy profiles without the module sub-schema migrate to the compatibility defaults when loaded/applied. Unsupported module sub-schema versions are rejected. The main profile schema remains version 1 so the existing profile browser remains compatible.
 
 ## Planet Studio workflow
 
@@ -76,3 +93,8 @@ The Tiny World profile is a 2 km diameter planet (1 km radius). Its terrain ampl
 These are profile-specific authored values, not an automatic scaling rule. The generator's layer-1 shaping limits its positive contribution to approximately 0.62 times its configured amplitude; therefore the mountain elevation threshold is set below the theoretical combined positive terrain maximum. Slope-based mountain classification remains active.
 
 The profile must still be visually inspected in Unity. The values are an initial tuned preset, not a claim that the final landform distribution is approved.
+
+
+## MOD-001-A implementation status
+
+The module profile data model, profile migration, Editor configuration window and EditMode test source have been added. Unity compilation, EditMode execution and Editor-window validation remain owner-run checks. See `Documentation/06_AUDIT/MOD-001-A_IMPLEMENTATION_REPORT.md`.

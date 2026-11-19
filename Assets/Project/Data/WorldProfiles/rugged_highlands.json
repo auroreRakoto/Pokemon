@@ -30,5 +30,14 @@
   "desertMinimumTemperature": 0.3,
   "forestMoistureThreshold": 0.48,
   "forestMinimumTemperature": 0.18,
-  "forestMaximumTemperature": 0.9
+  "forestMaximumTemperature": 0.9,
+  "moduleConfigurationVersion": 1,
+  "modules": {
+    "terrainPresentationEnabled": true,
+    "biomeClassificationEnabled": true,
+    "biomeGroundPresentationEnabled": true,
+    "environmentAssetsEnabled": false,
+    "playerEnabled": true,
+    "pokemonEnabled": false
+  }
 }

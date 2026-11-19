@@ -4,14 +4,14 @@ using UnityEngine;
 namespace Pokemon.Project.World.Spherical.Studio
 {
     /// <summary>
-    /// Serializable, versioned description of a generated planet.
-    /// JSON profiles contain world-generation characteristics only; editor preview and
-    /// experimental drainage controls remain local to the Planet Studio settings asset.
+    /// Serializable, versioned description of a generated planet and its selected modules.
     /// </summary>
     [Serializable]
     public sealed class SphericalWorldProfile
     {
         public int schemaVersion = 1;
+        public int moduleConfigurationVersion = 1;
+        public SphericalWorldModuleOptions modules = new SphericalWorldModuleOptions();
         public string id = "custom_world";
         public string displayName = "Custom World";
         public string description = string.Empty;
@@ -50,87 +50,147 @@ namespace Pokemon.Project.World.Spherical.Studio
         public float forestMinimumTemperature = 0.18f;
         public float forestMaximumTemperature = 0.9f;
 
+        /// <summary>
+        /// Creates a profile from the current Planet Studio generation settings.
+        /// </summary>
         public static SphericalWorldProfile FromSettings(
             SphericalPlanetStudioSettings settings, string profileId, string name, string profileDescription)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            return new SphericalWorldProfile
+            SphericalWorldProfile profile = new SphericalWorldProfile
             {
                 schemaVersion = 1,
+                moduleConfigurationVersion = 1,
+                modules = settings.modules == null ? new SphericalWorldModuleOptions() : settings.modules.Copy(),
                 id = string.IsNullOrWhiteSpace(profileId) ? "custom_world" : profileId,
                 displayName = string.IsNullOrWhiteSpace(name) ? "Custom World" : name,
-                description = profileDescription ?? string.Empty,
-                radiusKilometres = settings.radiusMeters / 1000f,
-                seed = settings.seed,
-                faceResolution = settings.faceResolution,
-                planisphereWidth = settings.planisphereWidth,
-                planisphereHeight = settings.planisphereHeight,
-                layer1Enabled = settings.layer1Enabled,
-                layer1AmplitudeMeters = settings.layer1AmplitudeMeters,
-                layer1Frequency = settings.layer1Frequency,
-                continentThreshold = settings.continentThreshold,
-                layer2Enabled = settings.layer2Enabled,
-                layer2AmplitudeMeters = settings.layer2AmplitudeMeters,
-                layer2Frequency = settings.layer2Frequency,
-                layer3Enabled = settings.layer3Enabled,
-                layer3AmplitudeMeters = settings.layer3AmplitudeMeters,
-                layer3Frequency = settings.layer3Frequency,
-                temperatureLatitudeInfluence = settings.temperatureLatitudeInfluence,
-                temperatureNoiseInfluence = settings.temperatureNoiseInfluence,
-                oceanCoverageTargetPercent = settings.oceanCoverageTargetPercent,
-                moistureDistanceScaleRadiusMultiplier = settings.moistureDistanceScaleRadiusMultiplier,
-                moistureTemperatureEvaporation = settings.moistureTemperatureEvaporation,
-                moistureSlopeLoss = settings.moistureSlopeLoss,
-                mountainElevationThresholdMeters = settings.mountainElevationThresholdMeters,
-                mountainSlopeThresholdDegrees = settings.mountainSlopeThresholdDegrees,
-                desertMoistureThreshold = settings.desertMoistureThreshold,
-                desertMinimumTemperature = settings.desertMinimumTemperature,
-                forestMoistureThreshold = settings.forestMoistureThreshold,
-                forestMinimumTemperature = settings.forestMinimumTemperature,
-                forestMaximumTemperature = settings.forestMaximumTemperature
+                description = profileDescription ?? string.Empty
             };
+            CopyPlanetAndTerrainFromSettings(profile, settings);
+            CopyClimateFromSettings(profile, settings);
+            return profile;
         }
 
+        /// <summary>
+        /// Applies profile generation values while preserving preview-only settings.
+        /// </summary>
         public void ApplyTo(SphericalPlanetStudioSettings settings)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (schemaVersion != 1)
                 throw new InvalidOperationException($"Unsupported world profile schema version: {schemaVersion}");
-
-            settings.radiusMeters = radiusKilometres * 1000f;
-            settings.seed = seed;
-            settings.faceResolution = faceResolution;
-            settings.planisphereWidth = planisphereWidth;
-            settings.planisphereHeight = planisphereHeight;
-            settings.layer1Enabled = layer1Enabled;
-            settings.layer1AmplitudeMeters = layer1AmplitudeMeters;
-            settings.layer1Frequency = layer1Frequency;
-            settings.continentThreshold = continentThreshold;
-            settings.layer2Enabled = layer2Enabled;
-            settings.layer2AmplitudeMeters = layer2AmplitudeMeters;
-            settings.layer2Frequency = layer2Frequency;
-            settings.layer3Enabled = layer3Enabled;
-            settings.layer3AmplitudeMeters = layer3AmplitudeMeters;
-            settings.layer3Frequency = layer3Frequency;
-            settings.temperatureLatitudeInfluence = temperatureLatitudeInfluence;
-            settings.temperatureNoiseInfluence = temperatureNoiseInfluence;
-            settings.oceanCoverageTargetPercent = oceanCoverageTargetPercent;
-            settings.moistureDistanceScaleRadiusMultiplier = moistureDistanceScaleRadiusMultiplier;
-            settings.moistureTemperatureEvaporation = moistureTemperatureEvaporation;
-            settings.moistureSlopeLoss = moistureSlopeLoss;
-            settings.mountainElevationThresholdMeters = mountainElevationThresholdMeters;
-            settings.mountainSlopeThresholdDegrees = mountainSlopeThresholdDegrees;
-            settings.desertMoistureThreshold = desertMoistureThreshold;
-            settings.desertMinimumTemperature = desertMinimumTemperature;
-            settings.forestMoistureThreshold = forestMoistureThreshold;
-            settings.forestMinimumTemperature = forestMinimumTemperature;
-            settings.forestMaximumTemperature = forestMaximumTemperature;
-            // The profile is the authoritative source for these values. Mark the geographic
-            // schema current before validation so a legacy-settings migration cannot overwrite
-            // the profile's selected ocean target with the historical default.
-            settings.geographicSettingsVersion = 1;
+            NormalizeModuleConfiguration();
+            settings.modules = modules.Copy();
+            CopyPlanetAndTerrainToSettings(this, settings);
+            CopyClimateToSettings(this, settings);
             settings.Validate();
+        }
+
+        /// <summary>
+        /// Migrates profiles created before the optional module section existed.
+        /// </summary>
+        public void NormalizeModuleConfiguration()
+        {
+            if (moduleConfigurationVersion == 0)
+            {
+                modules = new SphericalWorldModuleOptions();
+                moduleConfigurationVersion = 1;
+                return;
+            }
+            if (moduleConfigurationVersion != 1)
+                throw new InvalidOperationException(
+                    $"Unsupported module configuration version: {moduleConfigurationVersion}");
+            if (modules == null)
+                throw new InvalidOperationException("The world profile module configuration is missing.");
+        }
+
+        /// <summary>
+        /// Copies planet dimensions and terrain-layer values from Studio settings.
+        /// </summary>
+        private static void CopyPlanetAndTerrainFromSettings(
+            SphericalWorldProfile profile, SphericalPlanetStudioSettings settings)
+        {
+            profile.radiusKilometres = settings.radiusMeters / 1000f;
+            profile.seed = settings.seed;
+            profile.faceResolution = settings.faceResolution;
+            profile.planisphereWidth = settings.planisphereWidth;
+            profile.planisphereHeight = settings.planisphereHeight;
+            profile.layer1Enabled = settings.layer1Enabled;
+            profile.layer1AmplitudeMeters = settings.layer1AmplitudeMeters;
+            profile.layer1Frequency = settings.layer1Frequency;
+            profile.continentThreshold = settings.continentThreshold;
+            profile.layer2Enabled = settings.layer2Enabled;
+            profile.layer2AmplitudeMeters = settings.layer2AmplitudeMeters;
+            profile.layer2Frequency = settings.layer2Frequency;
+            profile.layer3Enabled = settings.layer3Enabled;
+            profile.layer3AmplitudeMeters = settings.layer3AmplitudeMeters;
+            profile.layer3Frequency = settings.layer3Frequency;
+        }
+
+        /// <summary>
+        /// Copies climate and biome-generation values from Studio settings.
+        /// </summary>
+        private static void CopyClimateFromSettings(
+            SphericalWorldProfile profile, SphericalPlanetStudioSettings settings)
+        {
+            profile.temperatureLatitudeInfluence = settings.temperatureLatitudeInfluence;
+            profile.temperatureNoiseInfluence = settings.temperatureNoiseInfluence;
+            profile.oceanCoverageTargetPercent = settings.oceanCoverageTargetPercent;
+            profile.moistureDistanceScaleRadiusMultiplier = settings.moistureDistanceScaleRadiusMultiplier;
+            profile.moistureTemperatureEvaporation = settings.moistureTemperatureEvaporation;
+            profile.moistureSlopeLoss = settings.moistureSlopeLoss;
+            profile.mountainElevationThresholdMeters = settings.mountainElevationThresholdMeters;
+            profile.mountainSlopeThresholdDegrees = settings.mountainSlopeThresholdDegrees;
+            profile.desertMoistureThreshold = settings.desertMoistureThreshold;
+            profile.desertMinimumTemperature = settings.desertMinimumTemperature;
+            profile.forestMoistureThreshold = settings.forestMoistureThreshold;
+            profile.forestMinimumTemperature = settings.forestMinimumTemperature;
+            profile.forestMaximumTemperature = settings.forestMaximumTemperature;
+        }
+
+        /// <summary>
+        /// Applies planet dimensions and terrain-layer values to Studio settings.
+        /// </summary>
+        private static void CopyPlanetAndTerrainToSettings(
+            SphericalWorldProfile profile, SphericalPlanetStudioSettings settings)
+        {
+            settings.radiusMeters = profile.radiusKilometres * 1000f;
+            settings.seed = profile.seed;
+            settings.faceResolution = profile.faceResolution;
+            settings.planisphereWidth = profile.planisphereWidth;
+            settings.planisphereHeight = profile.planisphereHeight;
+            settings.layer1Enabled = profile.layer1Enabled;
+            settings.layer1AmplitudeMeters = profile.layer1AmplitudeMeters;
+            settings.layer1Frequency = profile.layer1Frequency;
+            settings.continentThreshold = profile.continentThreshold;
+            settings.layer2Enabled = profile.layer2Enabled;
+            settings.layer2AmplitudeMeters = profile.layer2AmplitudeMeters;
+            settings.layer2Frequency = profile.layer2Frequency;
+            settings.layer3Enabled = profile.layer3Enabled;
+            settings.layer3AmplitudeMeters = profile.layer3AmplitudeMeters;
+            settings.layer3Frequency = profile.layer3Frequency;
+        }
+
+        /// <summary>
+        /// Applies climate and biome-generation values without changing preview controls.
+        /// </summary>
+        private static void CopyClimateToSettings(
+            SphericalWorldProfile profile, SphericalPlanetStudioSettings settings)
+        {
+            settings.temperatureLatitudeInfluence = profile.temperatureLatitudeInfluence;
+            settings.temperatureNoiseInfluence = profile.temperatureNoiseInfluence;
+            settings.oceanCoverageTargetPercent = profile.oceanCoverageTargetPercent;
+            settings.moistureDistanceScaleRadiusMultiplier = profile.moistureDistanceScaleRadiusMultiplier;
+            settings.moistureTemperatureEvaporation = profile.moistureTemperatureEvaporation;
+            settings.moistureSlopeLoss = profile.moistureSlopeLoss;
+            settings.mountainElevationThresholdMeters = profile.mountainElevationThresholdMeters;
+            settings.mountainSlopeThresholdDegrees = profile.mountainSlopeThresholdDegrees;
+            settings.desertMoistureThreshold = profile.desertMoistureThreshold;
+            settings.desertMinimumTemperature = profile.desertMinimumTemperature;
+            settings.forestMoistureThreshold = profile.forestMoistureThreshold;
+            settings.forestMinimumTemperature = profile.forestMinimumTemperature;
+            settings.forestMaximumTemperature = profile.forestMaximumTemperature;
+            settings.geographicSettingsVersion = 1;
         }
     }
 }
