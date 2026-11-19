@@ -98,16 +98,45 @@ The simulation is individual-based, but this does not imply every subsystem must
 
 Consumes environment context and resource candidates from World/Ecology. Sends movement/interaction requests. Receives resource-consumed, damage, status and lifecycle events. Server owns authoritative state.
 
+## Current repository implementation status — 2026-11-19 snapshot
 
-## Current Unity implementation ownership
+**Status: NOT IMPLEMENTED IN THE CURRENT SPHERICAL PROJECT SNAPSHOT.**
 
-- `PokemonAgent` is a thin Unity composition adapter and update coordinator, not the owner of all behaviour rules. It depends on the Ecology-owned food service abstraction, not `FruitBushManager` directly.
-- `PokemonNeeds` owns satiety state; `PokemonDailyRoutine`, `PokemonMortalitySystem` and `PokemonReproductionSystem` own their respective individual processes.
-- `PokemonForagingBehaviour` owns the seek/eat action flow; `PokemonWanderBehaviour` owns exploration destination selection.
-- `PokemonIndividualId` provides a stable per-instance identifier. `PokemonSimulationEvent` carries completed facts to consumers.
-- Movement is expressed through `IWorldMovement`; the World `PokemonMovementController` is the only adapter that writes the Transform.
-- Population rules belong to `PokemonPopulationService`; prefab instantiation and movement-component wiring are delegated through `IPokemonFactory` to `PokemonUnityFactory` in Composition. Scene setup and concrete dependency wiring also belong to Composition.
+The latest owner-supplied archive (`Pokemon-clean.zip`, SHA-256
+`829ea7a6abec16886f0133825b376f91f2eece6092125b306fb3447aea3b7a57`)
+contains no Pokémon simulation runtime source files.
 
-The current vertical slice implements wandering, fruit foraging, day/night rest, starvation mortality and a simple reproduction request. Species food configuration is explicitly fruit-based (`eatsFruit` plus `preferredFood`); continuous vegetation biomass is not yet consumed by Pokémon. Other behaviours in the catalogue remain planned and must not be inferred as implemented.
+Static inventory of `Assets/Project` found:
+- 56 C# source files total: 33 Runtime, 8 Editor and 15 Tests.
+- No `Assets/Project/Runtime/Pokemon/` directory.
+- No declarations or usages of `PokemonAgent`, `PokemonNeeds`,
+  `PokemonDefinition`, `PokemonScheduleCalculator`, `PokemonIndividualId`,
+  `PokemonPopulationService`, `PokemonForagingBehaviour`,
+  `PokemonDailyRoutine` or `PokemonReproductionSystem`.
+- No Pokémon gameplay prefab/model/source file was identified by the filename
+  inventory. `PokemonData.meta` and the spherical-world assembly/test assembly
+  names are not Pokémon simulation implementations.
+- `Assets/Project/Runtime/Infrastructure/Diagnostics/EcosystemLogger.cs`
+  exists as an inert compatibility component. The archive has no matching
+  `.meta` file for it and no active telemetry collector/snapshot implementation.
 
-Population tuning is held by `PokemonPopulationProfile` assets, separate from `PokemonDefinition`: initial population and maximum population are scenario settings, not species biology.
+The sections above describe the **intended domain model and future ownership
+boundaries**, not currently implemented Unity behaviour. Do not treat the
+previous implementation description or the 2026-11-17 cleanup notes as proof
+that those systems remain in the current repository.
+
+### Reintroduction gate
+
+Before implementing Pokémon simulation in the spherical world:
+1. approve a bounded work package for the first visible Pokémon encounter;
+2. select one species and approve a model or explicit temporary placeholder;
+3. define an individual identity contract and a deterministic spherical spawn
+   query using the World-owned surface/geographic data;
+4. keep AI, needs, feeding, reproduction, capture, combat and population
+   simulation out of the initial placement increment unless separately approved;
+5. add tests against the actual new contracts and verify the independent spawn
+   preview before scene integration.
+
+Do not restore the archived `PokemonAgent` or the former Ecology/berry runtime
+as a shortcut. Chenipotte, Mystherbe and berries remain deferred until a later
+approved ecosystem work package.

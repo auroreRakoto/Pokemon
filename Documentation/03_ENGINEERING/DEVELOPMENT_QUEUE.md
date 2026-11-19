@@ -1,21 +1,32 @@
 # Development Queue — Spherical World Vertical Slice
 
-- **Updated:** 2026-11-18
+- **Updated:** 2026-11-19
 - **Current goal:** explore the spherical world on foot, see the four land biomes clearly, and optionally encounter one Pokémon.
 - **Status convention:** `BLOCKED` = a known issue prevents reliable progress; `NEXT` = highest-priority work; `READY` = scoped but waiting on dependencies; `PROPOSED` = scope requires owner confirmation before implementation.
 
 ## Queue
 
-### P0 — Unblock WORLD-004 integration
-**Status: BLOCKED — Unity CS7036 reported.**
+### P0 — WORLD-004 integration verification
+**Status: IN_PROGRESS — previous CS7036 report is stale against the 2026-11-19 source snapshot.**
 
-- [ ] Resolve the `SphericalPlayerController.Initialize` call in `SphericalWorldDemoBootstrap`.
-- [ ] Decide and document the correct composition root: WORLD-002 biome-inspection scene or an upgraded dedicated bootstrap.
-- [ ] Ensure the controller receives the authoritative `SphericalGeographicFieldSet`, planet centre, planet radius, camera rig and capsule height.
-- [ ] Search all call sites for stale signatures.
-- [ ] Recompile in Unity and attach/record Console evidence.
+Static inspection of `Pokemon-clean.zip` shows the current
+`SphericalPlayerController.Initialize(...)` declaration and its call in
+`SphericalBiomeInspectionBootstrap` agree on the five arguments. The current
+`SphericalWorldDemoBootstrap` has no `SphericalPlayerController.Initialize`
+call. The owner also supplied a Unity Console screenshot showing 0 errors and
+0 warnings after the diagnostics/test cleanup.
 
-**Done when:** zero compile errors; no dummy/null argument workaround; intended scene starts successfully.
+This clears the previously reported compile blocker as a current known issue,
+but does **not** prove that the intended playable scene starts or that
+movement is validated.
+
+- [x] Re-audit the current `SphericalPlayerController.Initialize` declaration and all C# call sites; the inspected call is in `SphericalBiomeInspectionBootstrap` and supplies the five declared arguments.
+- [ ] Confirm with the owner which scene is the intended traversal composition root.
+- [ ] Enter that scene in Play Mode and verify startup, spawn and movement.
+- [x] Owner supplied a Console screenshot with 0 errors and 0 warnings (compile evidence only; exact project state at screenshot time).
+- [ ] Record the actual scene name, Unity version, runtime result and any remaining issue.
+
+**Done when:** the intended scene starts successfully, the controller receives the authoritative fields/planet centre/radius/camera/capsule height, and basic traversal is manually verified. The current Console screenshot is recorded as compile evidence, not as PlayMode acceptance.
 
 ### P1 — Validate globe traversal
 **Status: NEXT after P0.**
@@ -52,7 +63,9 @@ These files are **candidates, not proof of runtime integration**. Verify import 
 **Done when:** all four biomes are visibly distinct in the playable scene, boundaries are coherent, water remains distinct, and the chosen rendering strategy is documented.
 
 ### P3 — WORLD-006: first Pokémon in the world (optional proof of life)
-**Status: PROPOSED — requires asset/species choice.**
+**Status: PROPOSED — no Pokémon simulation Runtime source is present in the 2026-11-19 snapshot; requires a new bounded implementation plan and asset/species choice.**
+
+The former Pokémon simulation sources are absent from the current spherical project. This task is a future first-encounter implementation, not a continuation/refactor of the archived `PokemonAgent`.
 
 - [ ] Inventory existing Pokémon models/prefabs; the current repository snapshot does not show an obvious Pokémon model in the inspected content paths.
 - [ ] Select one species and confirm whether to use an existing approved model or a temporary placeholder.

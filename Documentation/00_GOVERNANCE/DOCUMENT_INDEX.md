@@ -45,7 +45,9 @@
 ## Audit
 - `../06_AUDIT/REPOSITORY_AUDIT_REPORT.md` — static audit of the supplied Unity repository snapshot.
 - `../06_AUDIT/REPOSITORY_ACTION_REGISTER.md` — prioritized findings and recommended follow-up work.
-- `../06_AUDIT/CODE_FUNCTION_OWNERSHIP_INVENTORY.md` — inventory of all 59 C# files and 196 declared methods after the refactor.
+- `../06_AUDIT/CODE_FUNCTION_OWNERSHIP_INVENTORY.md` — inventory of all 59 C# files and 196 declared methods after the refactor. **Historical snapshot only; not current source evidence.**
+- `../06_AUDIT/CURRENT_SOURCE_INVENTORY_2026-11-19.md` — exact C# file inventory for the latest owner-supplied spherical project archive.
+- `../06_AUDIT/POK-AGENT-001_CURRENT_SOURCE_RECONCILIATION.md` — current status of the archived Pokémon cleanup plan against the latest project snapshot.
 - `../../CODE_ARCHITECTURE_COMPLIANCE_REPORT.md` — implementation results, static checks and remaining Unity validation gaps.
 
 ## AI instructions

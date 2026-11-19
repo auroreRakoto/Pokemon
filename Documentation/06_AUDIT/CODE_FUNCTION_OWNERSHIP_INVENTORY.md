@@ -1,3 +1,5 @@
+> **HISTORICAL — NOT THE CURRENT SOURCE INVENTORY.** This inventory describes the 2026-11-17 post-refactor snapshot (59 C# files / 196 method declarations). The owner-supplied `Pokemon-clean.zip` snapshot dated 2026-11-19 contains 56 C# files (33 Runtime / 8 Editor / 15 Tests) and no Pokémon simulation Runtime source. See `CURRENT_SOURCE_INVENTORY_2026-11-19.md` and `POK-AGENT-001_CURRENT_SOURCE_RECONCILIATION.md`.
+
 # C# Function Ownership Inventory
 
 Snapshot reviewed: 2026-11-17

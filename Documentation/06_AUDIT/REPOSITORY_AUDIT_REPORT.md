@@ -172,3 +172,41 @@ This section supersedes prior status statements where they conflict with the imp
 ### Verification limitation
 
 No Unity Editor executable was available, so this report does not claim a successful Unity compilation, asset import, build, Play Mode run or automated C# test run. See the root `CODE_ARCHITECTURE_COMPLIANCE_REPORT.md` for the detailed ownership map and exact remaining gaps.
+
+
+---
+
+## 2026-11-19 current-snapshot reconciliation addendum
+
+**Source:** owner-supplied `Pokemon-clean.zip`  
+**SHA-256:** `829ea7a6abec16886f0133825b376f91f2eece6092125b306fb3447aea3b7a57`
+
+This addendum supersedes earlier Pokémon implementation claims in this report
+for the 2026-11-19 snapshot only. Earlier sections remain historical records of
+the 2026-11-17 repository state and must not be read as current code evidence.
+
+Verified by static archive inspection:
+- 56 C# files under `Assets/Project`: 33 Runtime, 8 Editor, 15 Tests.
+- No Pokémon simulation Runtime folder or source files.
+- No C# declarations/usages for `PokemonAgent`, `PokemonNeeds`,
+  `PokemonDefinition`, `PokemonScheduleCalculator`, `PokemonIndividualId`,
+  `PokemonPopulationService`, `PokemonForagingBehaviour`,
+  `PokemonDailyRoutine` or `PokemonReproductionSystem`.
+- `EcosystemLogger.cs` is an inert component; the archive contains no matching
+  `.meta` file and no active `EcosystemDataCollector` or `EcosystemSnapshot`.
+- The owner supplied a Unity Console screenshot with 0 errors, 0 warnings and
+  one informational Blender Sync paused message after removing the invalid
+  legacy CSV writer and Pokémon baseline test files. This is owner-provided
+  Console evidence only; this report did not run Unity.
+
+Consequences:
+- The former `PokemonAgent` decomposition is not present in this snapshot.
+- POK-AGENT-001's proposed tests against `PokemonNeeds` and
+  `PokemonScheduleCalculator` cannot be implemented against the current source.
+- Do not restore the former Pokémon or Ecology runtime from an old archive.
+- The next Pokémon implementation must be planned as a new first-encounter
+  feature against the spherical World contracts. The old `PokemonAgent`
+  cleanup is BLOCKED because its target source is absent.
+
+For the exact file list and counts, see
+`CURRENT_SOURCE_INVENTORY_2026-11-19.md`.

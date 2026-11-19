@@ -1,3 +1,5 @@
+> **HISTORICAL SNAPSHOT AUDIT — NOT CURRENT IMPLEMENTATION EVIDENCE.** The findings below describe an earlier archive containing `PokemonAgent.cs`. The latest owner-supplied `Pokemon-clean.zip` contains no Pokémon simulation Runtime source. Do not use this report to authorize code edits or restore the old subsystem. See `POK-AGENT-001_CURRENT_SOURCE_RECONCILIATION.md`.
+
 # POK-AGENT-001 — Static audit of PokemonAgent
 
 - **Status:** PROPOSED

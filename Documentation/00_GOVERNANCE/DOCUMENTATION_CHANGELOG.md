@@ -144,3 +144,13 @@ Record meaningful documentation changes. Keep entries concise and link to propos
 - Exposed the desired spawn biome in the playable inspection bootstrap Inspector (Plains default; Forest, Desert and Mountains selectable).
 - Spawn selection now searches dry land in the requested biome, prefers low-slope interior cells and falls back to the flattest available cell when necessary.
 - Added a Forest texture detail regression test. Unity compilation, EditMode execution and visual validation remain pending.
+
+
+## 2026-11-19 — Current spherical project source reconciliation
+
+- Re-audited the owner-supplied `Pokemon-clean.zip` snapshot (SHA-256 recorded in the current source inventory).
+- Corrected `POKEMON_SIMULATION.md`: the domain design remains the intended target, but the prior claimed Pokémon Runtime implementation is absent from this snapshot.
+- Marked the 2026-11-17 Pokémon code/function inventories as historical rather than current.
+- Added a current 56-file C# inventory and a POK-AGENT-001 reconciliation addendum; the former PokemonAgent regression tests are blocked because their target types are absent.
+- Updated the development queue: the previous WORLD-004 CS7036 note is stale against the current static call-site audit; the owner's zero-error Console screenshot is recorded, while PlayMode traversal remains unverified.
+- No Runtime source, scenes, prefabs, ScriptableObjects or Unity `.meta` files were changed.
