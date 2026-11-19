@@ -13,7 +13,7 @@
           "id": "grass_short",
           "enabled": true,
           "selectionWeight": 1.0,
-          "targetDensityPerSquareKilometre": 5.0,
+          "targetDensityPerSquareKilometre": 500.0,
           "minimumSpacingMeters": 1.5,
           "spacingGroup": "small_vegetation",
           "minimumScale": 0.9,
@@ -206,5 +206,7 @@
         }
       ]
     }
-  ]
+  ],
+  "spawnFocusRadiusMeters": 80.0,
+  "spawnFocusDensityMultiplier": 20.0
 }

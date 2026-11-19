@@ -80,3 +80,12 @@ Until then, use a checkpoint commit message that states the implementation is ad
 - All instances are parented under `WORLD-011_GeneratedEnvironment`, itself under the existing generated inspection root, so regeneration/cleanup removes them.
 - Important prototype limitation: spacing uses a linear scan of accepted instances; spatial acceleration and streaming are deferred. Density is one or more stochastic candidates per cell and should be tuned only after visual inspection.
 - Unity compilation, Play Mode behaviour and EditMode tests must be verified in the project. Do not mark WORLD-011-C validated until those checks pass.
+
+## WORLD-011-D — Grass_Short density and spawn focus test
+
+- The first run confirmed the generator executed correctly but 5 instances/km² was too sparse for ground cover (26 placements across the entire generated planet).
+- Test JSON now enables only `Plains/grass_short` at 500 instances/km², with 1.5 m minimum spacing and 0.9–1.1 scale.
+- Added `spawnFocusRadiusMeters` (80 m) and `spawnFocusDensityMultiplier` (20x) to the JSON document. The density boost is applied to candidate cells near the selected biome spawn direction; it does not change biome/water/filter validation.
+- The bootstrap now determines the spawn direction before environment placement and passes that direction to the generator.
+- Other rules remain disabled and at zero density.
+- This is a visual tuning test, not a final vegetation density. Inspect count, frame time, overlap and local appearance before approving it.

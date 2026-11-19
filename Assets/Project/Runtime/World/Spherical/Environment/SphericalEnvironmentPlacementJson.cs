@@ -18,6 +18,8 @@ namespace Pokemon.Project.World.Spherical.Environment
             public float globalDensityMultiplier = 1f;
             public int maxInstances = 10000;
             public float defaultSurfaceOffsetMeters = 0.05f;
+            public float spawnFocusRadiusMeters = 80f;
+            public float spawnFocusDensityMultiplier = 20f;
             public Biome[] biomes = Array.Empty<Biome>();
         }
 
@@ -87,6 +89,8 @@ namespace Pokemon.Project.World.Spherical.Environment
             NonNegative(document.globalDensityMultiplier, "globalDensityMultiplier", issues);
             if (document.maxInstances < 1) issues.Add("maxInstances must be at least 1.");
             NonNegative(document.defaultSurfaceOffsetMeters, "defaultSurfaceOffsetMeters", issues);
+            NonNegative(document.spawnFocusRadiusMeters, "spawnFocusRadiusMeters", issues);
+            NonNegative(document.spawnFocusDensityMultiplier, "spawnFocusDensityMultiplier", issues);
 
             issues.AddRange(catalog.GetValidationIssues());
             var resolvedRules = new List<ResolvedRule>();

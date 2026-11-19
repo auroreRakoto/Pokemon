@@ -32,7 +32,8 @@ namespace Pokemon.Project.World.Spherical.Environment
             SphericalGeographicFieldSet fields,
             SphericalEnvironmentPlacementJson.ResolvedDocument document,
             Transform parent,
-            Vector3 planetCenter)
+            Vector3 planetCenter,
+            Vector3 spawnDirection)
         {
             if (fields == null) throw new ArgumentNullException(nameof(fields));
             if (document == null || document.Settings == null || document.Rules == null)
@@ -71,10 +72,19 @@ namespace Pokemon.Project.World.Spherical.Environment
                         if (rule == null || !rule.enabled || resolved.Prefab == null)
                             continue;
 
+                        Vector3 cellCenterDirection = CubeSphereTopology.GetDirection(
+                            face, (u0 + u1) * 0.5f, (v0 + v1) * 0.5f);
+                        float spawnDistanceMeters = Vector3.Angle(
+                            cellCenterDirection, spawnDirection.normalized) * Mathf.Deg2Rad * radius;
+                        float focusMultiplier = spawnDistanceMeters <= document.Settings.spawnFocusRadiusMeters
+                            ? document.Settings.spawnFocusDensityMultiplier
+                            : 1f;
+
                         double expected = cellAreaKm2 *
                             rule.targetDensityPerSquareKilometre *
                             Mathf.Max(0f, rule.selectionWeight) *
-                            document.Settings.globalDensityMultiplier;
+                            document.Settings.globalDensityMultiplier *
+                            focusMultiplier;
                         if (expected <= 0.0) continue;
 
                         int baseCount = (int)Math.Floor(expected);

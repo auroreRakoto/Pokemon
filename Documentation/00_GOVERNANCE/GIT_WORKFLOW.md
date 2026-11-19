@@ -8,6 +8,8 @@
 
 Every work package must be traceable from its approved plan to its implementation and verification. Commit messages identify the change type, affected scope and responsible agent.
 
+**Owner-operated repository rule:** the project owner runs Git in the local Unity repository. AI assistants prepare file deliverables and exact commands, but do not have standing access to the local working tree or remote and must never claim to have committed or pushed. The owner reviews the diff, executes the commands and shares the resulting output/hash when verification is needed.
+
 This project adopts **Conventional Commits 1.0.0** as its commit-message structure, with a mandatory `Agent` footer. The two-milestone process below is an additional project rule; it is not part of the Conventional Commits specification itself.
 
 ## 2. Commit message format
@@ -199,6 +201,37 @@ Agent: WORLD
 If no source files changed during the session, do not invent a code commit; report that there is nothing to commit and provide the next-step handoff. Documentation-only changes use `docs(...)`.
 
 ## 7. Branch and push rules
+
+All commands below are instructions for the project owner to execute in a terminal opened at the Unity repository root. They are not commands the assistant claims to have run.
+
+Before applying a delivered file package:
+
+```bash
+git status --short --branch
+```
+
+Review each changed file and preserve unrelated local edits. After copying the delivered files into the stated project-relative paths, review:
+
+```bash
+git diff --check
+git status --short
+git diff -- <path/to/changed/file>
+```
+
+Stage only the intended paths, then commit and push the current working branch:
+
+```bash
+git add <path/to/file1> <path/to/file2>
+git diff --cached --check
+git diff --cached
+git commit -m "<subject>" -m "Agent: <ID>"
+git push
+```
+
+Replace placeholders with the exact paths and commit message supplied for the work package. Do not use broad staging such as `git add .` unless the owner has reviewed and intentionally wants every working-tree change included. If the push is rejected, stop and inspect the Git output; do not force-push or rewrite shared history without explicit owner approval.
+
+The owner should return the commit hash and relevant command output when the assistant needs to update documentation status or prepare the next milestone. A proposed command is not evidence that it was executed successfully.
+
 
 - The plan and implementation milestones for a work package must be on the same working branch.
 - Push Milestone A before implementation starts.

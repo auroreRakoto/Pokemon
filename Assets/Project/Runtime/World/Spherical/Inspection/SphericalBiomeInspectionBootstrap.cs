@@ -83,8 +83,8 @@ namespace Pokemon.Project.World.Spherical.Inspection
             _generatedRoot.SetParent(transform, false);
 
             BuildPlanet();
-            GenerateEnvironmentPlacement();
             Vector3 spawnDirection = FindSpawnDirection(spawnBiome);
+            GenerateEnvironmentPlacement(spawnDirection);
             CreatePlayerAndCamera(spawnDirection);
             CreateLighting();
 
@@ -145,7 +145,7 @@ namespace Pokemon.Project.World.Spherical.Inspection
             }
         }
 
-        private void GenerateEnvironmentPlacement()
+        private void GenerateEnvironmentPlacement(Vector3 spawnDirection)
         {
             if (environmentPlacementConfig == null)
             {
@@ -166,7 +166,7 @@ namespace Pokemon.Project.World.Spherical.Inspection
             environmentRoot.SetParent(_generatedRoot, false);
 
             SphericalEnvironmentPlacementGenerator.Result result =
-                SphericalEnvironmentPlacementGenerator.Generate(_fields, resolved, environmentRoot, Vector3.zero);
+                SphericalEnvironmentPlacementGenerator.Generate(_fields, resolved, environmentRoot, Vector3.zero, spawnDirection);
 
             Debug.Log(
                 $"[WORLD-011] Environment placement complete. Candidates={result.CandidateCount}, " +
