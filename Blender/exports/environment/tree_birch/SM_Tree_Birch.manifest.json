@@ -1,0 +1,41 @@
+{
+  "animations": [],
+  "asset_category": "Trees",
+  "asset_domain": "Environment",
+  "asset_id": "environment.tree_birch",
+  "asset_type": "static_mesh",
+  "dependencies": [],
+  "domain": "environment",
+  "export": {
+    "format": "fbx",
+    "path": "SM_Tree_Birch.fbx",
+    "profile": "static_mesh"
+  },
+  "extra": {
+    "authoring": "Blender procedural mesh",
+    "generator_version": "0.2.0",
+    "seed": 1,
+    "test_only": false
+  },
+  "geometry": {
+    "edge_count": 360,
+    "object_count": 1,
+    "polygon_count": 190,
+    "vertex_count": 200
+  },
+  "pipeline": {
+    "core_version": "0.1.0"
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "Blender/source/environment/tree_birch/"
+  },
+  "unity": {
+    "destination": "Assets/Project/Content/Models/Environment/Trees/SM_Tree_Birch.fbx"
+  },
+  "validation": {
+    "errors": [],
+    "status": "passed",
+    "warnings": []
+  }
+}

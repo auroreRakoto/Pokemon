@@ -136,6 +136,162 @@ def build_log(name, length=.65, radius=.12):
     o=bpy.context.object; o.name=name; o.data.materials.append(_mat("wood"))
     return o
 
+
+def _add_tree_branch(name, start, end, radius_start, radius_end, material_key, vertices=7):
+    """Create one tapered branch between two local-space points."""
+    start_v = Vector(start)
+    end_v = Vector(end)
+    direction = end_v - start_v
+    length = direction.length
+    if length <= 1e-5:
+        raise ValueError("Tree branch length must be positive.")
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=vertices,
+        radius1=radius_start,
+        radius2=radius_end,
+        depth=length,
+        location=(start_v + end_v) * 0.5,
+    )
+    branch = bpy.context.object
+    branch.name = name
+    branch.rotation_mode = 'QUATERNION'
+    branch.rotation_quaternion = Vector((0, 0, 1)).rotation_difference(direction.normalized())
+    branch.data.materials.append(_mat(material_key))
+    return branch
+
+
+def _add_canopy_cluster(name, location, scale, material_key, subdivisions=1):
+    bpy.ops.mesh.primitive_ico_sphere_add(
+        subdivisions=subdivisions, radius=1.0, location=location
+    )
+    canopy = bpy.context.object
+    canopy.name = name
+    canopy.scale = scale
+    canopy.data.materials.append(_mat(material_key))
+    return canopy
+
+
+def _finish_tree(parts, name):
+    """Join tree parts and put the object origin at the trunk base."""
+    tree = _join(parts, name)
+    bpy.context.scene.cursor.location = (0.0, 0.0, 0.0)
+    bpy.context.view_layer.objects.active = tree
+    tree.select_set(True)
+    bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+    tree.location = (0.0, 0.0, 0.0)
+    tree.rotation_euler = (0.0, 0.0, 0.0)
+    tree.scale = (1.0, 1.0, 1.0)
+    return tree
+
+
+def build_tree_deciduous(name, height=8.0, seed=31):
+    """Stylized broadleaf tree: sturdy trunk and a layered, irregular crown."""
+    rng = random.Random(seed)
+    parts = []
+    trunk_height = height * 0.62
+    trunk_radius = height * 0.045
+
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=9, radius1=trunk_radius, radius2=trunk_radius * 0.48,
+        depth=trunk_height, location=(0, 0, trunk_height * 0.5)
+    )
+    trunk = bpy.context.object
+    trunk.name = name + "_Trunk"
+    trunk.data.materials.append(_mat("wood"))
+    parts.append(trunk)
+
+    # Four visible low-poly branches support the canopy silhouette.
+    for index, angle in enumerate((0.35, 1.9, 3.45, 5.1)):
+        start_z = trunk_height * rng.uniform(0.52, 0.78)
+        reach = height * rng.uniform(0.19, 0.25)
+        end = (math.cos(angle) * reach, math.sin(angle) * reach,
+               start_z + height * rng.uniform(0.13, 0.22))
+        parts.append(_add_tree_branch(
+            f"{name}_Branch_{index + 1:02d}", (0, 0, start_z), end,
+            trunk_radius * 0.48, trunk_radius * 0.12, "wood_light", 7
+        ))
+
+    # The overlapping faceted clusters create a readable rounded crown without textures.
+    crown_base = height * 0.56
+    crown_radius = height * 0.34
+    clusters = [
+        ((0.0, 0.0, crown_base + height * 0.20), (0.30, 0.28, 0.27), "leaf"),
+        ((-0.20, 0.02, crown_base + height * 0.04), (0.25, 0.24, 0.23), "leaf_dark"),
+        ((0.19, -0.08, crown_base + height * 0.06), (0.26, 0.24, 0.24), "leaf_light"),
+        ((0.02, 0.21, crown_base + height * 0.08), (0.24, 0.25, 0.23), "leaf"),
+        ((-0.06, -0.22, crown_base + height * 0.08), (0.25, 0.23, 0.24), "leaf_dark"),
+    ]
+    for index, (location, normalized_scale, material_key) in enumerate(clusters):
+        # Slight deterministic asymmetry prevents a perfect lollipop silhouette.
+        jitter = Vector((rng.uniform(-0.12, 0.12), rng.uniform(-0.12, 0.12),
+                         rng.uniform(-0.08, 0.08))) * crown_radius
+        loc = Vector(location) * (height / 8.0) + jitter
+        scale = tuple(component * height for component in normalized_scale)
+        parts.append(_add_canopy_cluster(
+            f"{name}_Crown_{index + 1:02d}", loc, scale, material_key, 1
+        ))
+
+    return _finish_tree(parts, name)
+
+
+def build_tree_birch(name, height=9.0, seed=47):
+    """Stylized slender birch-like tree with a pale trunk and airy crown."""
+    rng = random.Random(seed)
+    parts = []
+    trunk_height = height * 0.82
+    trunk_radius = height * 0.026
+
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=8, radius1=trunk_radius, radius2=trunk_radius * 0.42,
+        depth=trunk_height, location=(0, 0, trunk_height * 0.5)
+    )
+    trunk = bpy.context.object
+    trunk.name = name + "_Trunk"
+    trunk.data.materials.append(_mat("wood_light"))
+    parts.append(trunk)
+
+    # Dark bark bands are small geometry accents so the model remains readable without textures.
+    for band_index, fraction in enumerate((0.22, 0.39, 0.57, 0.72)):
+        z = trunk_height * fraction
+        radius = trunk_radius * (1.0 - fraction * 0.48)
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=8, radius1=radius * 1.015, radius2=radius * 0.99,
+            depth=max(0.045, height * 0.012), location=(0, 0, z)
+        )
+        band = bpy.context.object
+        band.name = f"{name}_BarkBand_{band_index + 1:02d}"
+        band.data.materials.append(_mat("wood"))
+        parts.append(band)
+
+    for index, angle in enumerate((0.15, 1.45, 2.85, 4.25, 5.55)):
+        start_z = trunk_height * rng.uniform(0.48, 0.82)
+        reach = height * rng.uniform(0.16, 0.22)
+        end = (math.cos(angle) * reach, math.sin(angle) * reach,
+               start_z + height * rng.uniform(0.10, 0.18))
+        parts.append(_add_tree_branch(
+            f"{name}_Branch_{index + 1:02d}", (0, 0, start_z), end,
+            trunk_radius * 0.55, trunk_radius * 0.10, "wood_light", 6
+        ))
+
+    # Birch foliage is arranged in narrower, separated clusters.
+    crown_positions = [
+        (0.0, 0.0, height * 0.84, 0.19, 0.18, 0.18, "leaf_light"),
+        (-0.13, 0.02, height * 0.69, 0.17, 0.16, 0.17, "leaf"),
+        (0.13, -0.04, height * 0.70, 0.17, 0.16, 0.18, "leaf_light"),
+        (0.02, 0.13, height * 0.75, 0.16, 0.16, 0.17, "leaf_dark"),
+        (-0.04, -0.13, height * 0.76, 0.17, 0.16, 0.18, "leaf"),
+    ]
+    for index, (x, y, z, sx, sy, sz, material_key) in enumerate(crown_positions):
+        jitter = Vector((rng.uniform(-0.07, 0.07), rng.uniform(-0.07, 0.07),
+                         rng.uniform(-0.06, 0.06))) * height
+        parts.append(_add_canopy_cluster(
+            f"{name}_Crown_{index + 1:02d}",
+            (x * height + jitter.x, y * height + jitter.y, z + jitter.z),
+            (sx * height, sy * height, sz * height), material_key, 1
+        ))
+
+    return _finish_tree(parts, name)
+
 def build_stump(name, height=.32, radius=.18):
     bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=radius, depth=height, location=(0,0,height/2))
     o=bpy.context.object; o.name=name; o.data.materials.append(_mat("wood"))
@@ -158,6 +314,8 @@ BUILDERS = {
     "leaf_litter": build_leaf_litter,
     "log": build_log,
     "stump": build_stump,
+    "tree_deciduous": build_tree_deciduous,
+    "tree_birch": build_tree_birch,
 }
 
 def generate_asset(asset_key, asset_id, object_name, unity_destination, builder, kwargs=None,

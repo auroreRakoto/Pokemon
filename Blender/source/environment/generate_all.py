@@ -23,26 +23,17 @@ MODE = "PRODUCTION"
 
 # Safety switch: the batch is paused by default.
 # Set RUN_BATCH = True only when you explicitly intend to generate/export assets.
-RUN_BATCH = False
+RUN_BATCH = True
 
 # True: run every discovered generator. False: use ASSET_FILTER.
 # Keep this False by default to avoid selecting every discovered generator.
 GENERATE_ALL = False
 
 # Used only when GENERATE_ALL is False. Names are source subfolder names.
+
 ASSET_FILTER = [
-    "grass_short",
-    "grass_tall",
-    "wild_grass",
-    "flower_yellow",
-    "flower_blue",
-    "mushroom_red",
-    "stone_cluster_small",
-    "stone_cluster_large",
-    "leaf_litter",
-    "reed_clump",
-    "fallen_log",
-    "tree_stump",
+    "tree_deciduous",
+    "tree_birch",
 ]
 
 # Test-named generator folders are excluded by default.
@@ -66,6 +57,8 @@ PRODUCTION_ASSETS = {
     "stone_cluster_small": {"category": "Rocks", "destination": "Environment/Rocks/Stone_Cluster_Small/SM_Stone_Cluster_Small.fbx"},
     "tree_stump": {"category": "NaturalFeatures", "destination": "Environment/NaturalFeatures/Tree_Stump/SM_Tree_Stump.fbx"},
     "wild_grass": {"category": "Vegetation", "destination": "Environment/Vegetation/Wild_Grass/SM_Grass_Wild.fbx"},
+    "tree_deciduous": {"category": "Trees", "destination": "Environment/Trees/SM_Tree_Deciduous.fbx"},
+    "tree_birch": {"category": "Trees", "destination": "Environment/Trees/SM_Tree_Birch.fbx"},
 }
 
 # -----------------------------------------------------------------------------

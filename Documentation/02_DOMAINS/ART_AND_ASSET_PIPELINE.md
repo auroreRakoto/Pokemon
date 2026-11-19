@@ -521,6 +521,8 @@ The canonical batch launcher is `Blender/source/environment/generate_all.py`. It
 | `stone_cluster_large` | `Rocks` | `Environment/Rocks/Stone_Cluster_Large/SM_Stone_Cluster_Large.fbx` |
 | `stone_cluster_small` | `Rocks` | `Environment/Rocks/Stone_Cluster_Small/SM_Stone_Cluster_Small.fbx` |
 | `tree_stump` | `NaturalFeatures` | `Environment/NaturalFeatures/Tree_Stump/SM_Tree_Stump.fbx` |
+| `tree_deciduous` | `Trees` | `Environment/Trees/SM_Tree_Deciduous.fbx` |
+| `tree_birch` | `Trees` | `Environment/Trees/SM_Tree_Birch.fbx` |
 | `wild_grass` | `Vegetation` | `Environment/Vegetation/Wild_Grass/SM_Grass_Wild.fbx` |
 
 ### Policy resolution and generator contract
