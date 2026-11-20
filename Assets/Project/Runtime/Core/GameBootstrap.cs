@@ -1,99 +1,99 @@
 
 using UnityEngine;
 using Pokemon.World;
-using Pokemon.CharacterSystem;
-using Pokemon.Visualization;
+using Pokemon.Visual;
 
 namespace Pokemon.Core
 {
     public class GameBootstrap : MonoBehaviour
     {
-        [Header("World")]
-        [SerializeField]
-        private GridMapData mapData;
+        [Header("Received Data")]
+        private MapData mapData;
 
         [SerializeField]
-        private Vector2Int startPosition = new Vector2Int(2, 2);
+        private string characterData = "ready player one";
 
-        private Character character;
+        [SerializeField]
+        private string pokemonData = "pokemon data";
 
-        private IWorldVisualization visualization;
+        [SerializeField]
+        private string visualData = "something working";
+
+        [SerializeField]
+        private string storyData = "once upon a time there goes pokemon";
+
+        [Header("Visualization")]
+        [SerializeField]
+        private MapVisualizationMode mode = MapVisualizationMode.Simple;
+
+        [Header("Created Objects")]
+        private Map map;
+
+        private CoordTranslator coordTranslator;
 
         private void Start()
         {
-            if (mapData == null)
-            {
-                Debug.LogError("No MapData assigned.");
-                enabled = false;
-                return;
-            }
+            // 1. Create the shared coordinate translator.
+            coordTranslator = new CoordTranslator();
 
-            if (!mapData.Validate(out string error))
-            {
-                Debug.LogError("Invalid map: " + error);
-                enabled = false;
-                return;
-            }
+            // 2. Receive data from providers.
+            mapData = MapExample.Generate();
 
-            try
-            {
-                character = new Character(startPosition, mapData);
-            }
-            catch (System.Exception exception)
-            {
-                Debug.LogError(exception.Message);
-                enabled = false;
-                return;
-            }
-
-            visualization = new TerminalVisualization();
-
-            visualization.Render(
+            // 3. Validate received data.
+            if (!ValidateData(
                 mapData,
-                character,
-                "Game started."
-            );
+                characterData,
+                pokemonData,
+                visualData,
+                storyData))
+            {
+                Debug.LogError("Data validation failed.");
+                enabled = false;
+                return;
+            }
+
+            // 4. Create runtime objects.
+            CreateWorld();
         }
 
-        private void Update()
+        private bool ValidateData(
+            MapData map,
+            string character,
+            string pokemon,
+            string visual,
+            string story)
         {
-            Vector2Int direction = ReadMovementInput();
+            if (map == null || !map.Validate())
+                return false;
 
-            if (direction == Vector2Int.zero)
-                return;
+            if (string.IsNullOrWhiteSpace(character))
+                return false;
 
-            bool moved = character.TryMove(direction, mapData);
+            if (string.IsNullOrWhiteSpace(pokemon))
+                return false;
 
-            string message = moved
-                ? "Player moved."
-                : "Movement blocked.";
+            if (string.IsNullOrWhiteSpace(visual))
+                return false;
 
-            visualization.Render(
-                mapData,
-                character,
-                message
-            );
+            if (string.IsNullOrWhiteSpace(story))
+                return false;
+
+            return true;
         }
 
-        private Vector2Int ReadMovementInput()
+        private void CreateWorld()
         {
-            if (Input.GetKeyDown(KeyCode.Z) ||
-                Input.GetKeyDown(KeyCode.UpArrow))
-                return Vector2Int.down;
+            Debug.Log("Creating world...");
 
-            if (Input.GetKeyDown(KeyCode.S) ||
-                Input.GetKeyDown(KeyCode.DownArrow))
-                return Vector2Int.up;
+            map = new Map(mapData);
 
-            if (Input.GetKeyDown(KeyCode.Q) ||
-                Input.GetKeyDown(KeyCode.LeftArrow))
-                return Vector2Int.left;
+            Debug.Log("Map object created.");
 
-            if (Input.GetKeyDown(KeyCode.D) ||
-                Input.GetKeyDown(KeyCode.RightArrow))
-                return Vector2Int.right;
-
-            return Vector2Int.zero;
+            MapVisualizer.RunVisualization(
+                map,
+                mode,
+                coordTranslator
+            );
         }
     }
 }
