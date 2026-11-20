@@ -4,18 +4,44 @@
 - **Current goal:** explore the spherical world on foot, see the four land biomes clearly, and optionally encounter one Pokémon.
 - **Status convention:** `BLOCKED` = a known issue prevents reliable progress; `NEXT` = highest-priority work; `READY` = scoped but waiting on dependencies; `PROPOSED` = scope requires owner confirmation before implementation.
 
+## P0 — MOD-001-C: World Core without biome classification
+**Status: IMPLEMENTED — owner Unity validation required.**
+
+- [x] Add an explicit generator path that skips biome arrays/classification.
+- [x] Preserve the legacy Generate(settings) behaviour.
+- [x] Expose explicit biome availability and TryGet/TrySample APIs; legacy biome access fails clearly when absent.
+- [x] Keep ground probing independent of biome classification.
+- [x] Add deterministic EditMode tests comparing World Core outputs with/without biomes.
+- [ ] Run the new EditMode tests and the relevant World/Spherical regression suites in Unity.
+- [ ] Validate the isolated geography preview without renderer/player.
+
+**Boundary:** this is a data/contract increment. Biome presentation, environment placement and the inspection bootstrap are not yet composed around optional activation; those remain MOD-001-D/E/F work.
+
+**Next:** MOD-001-D is BLOCKED pending owner Unity validation of MOD-001-C.
+
+
 ## Queue
 
 ### P0 — MOD-001-A: world profile module configuration
-**Status: IMPLEMENTED — owner Unity validation required.**
+**Status: IMPLEMENTED — owner Editor-window/profile validation required.**
 
 - [x] Add versioned optional module selection to JSON world profiles.
 - [x] Preserve legacy profile defaults through a module sub-schema migration.
 - [x] Add an Editor window to configure modules on an existing world profile.
 - [ ] Run the new EditMode tests and verify the Editor window in Unity.
-- [ ] Implement runtime dependency validation and activation report in MOD-001-B.
+- [x] Implement runtime dependency validation and activation report in MOD-001-B.
 
 **Boundary:** module choices are saved at world creation/profile authoring and remain fixed for the active session. Runtime systems are not yet activated/deactivated by these options.
+
+
+### P0 — MOD-001-B: dependency validation and activation report
+**Status: VALIDATED at module-test level — owner screenshot confirms 10/10 EditMode tests passed; full composition integration pending.**
+
+- [x] Add provider-availability validation context and deterministic activation report.
+- [x] Add 10 EditMode tests for dependency and local-failure behaviour.
+- [x] Owner ran `SphericalWorldModuleValidatorTests`: 10 passed, 0 failed, 0 skipped.
+- [ ] Wire activation report into the real world composition root (subsequent MOD-001-D/E/F work).
+
 
 
 

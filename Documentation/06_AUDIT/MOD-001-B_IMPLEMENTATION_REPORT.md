@@ -1,6 +1,6 @@
 # MOD-001-B — Dependency validation and activation report
 
-- **Status:** IMPLEMENTED — Unity validation NOT RUN
+- **Status:** VALIDATED at module-test level — owner screenshot confirms 10/10 EditMode tests passed; full composition integration remains NOT RUN
 - **Work package:** MOD-001 (APPROVED)
 - **Increment:** MOD-001-B
 - **Owner:** ARCH / World Composition
@@ -107,3 +107,8 @@ MOD-001-C — separate World Core geographic fields from optional biome classifi
 
 `Work-Package: MOD-001`
 `Agent: ARCH`
+
+## 7. Owner Unity test evidence (2026-11-20)
+
+- `SphericalWorldModuleValidatorTests`: **10 passed, 0 failed, 0 skipped**, as shown in the owner-provided Unity Test Runner screenshot.
+- This validates the pure dependency validator test suite only. It does not prove runtime composition wiring or full-world integration.

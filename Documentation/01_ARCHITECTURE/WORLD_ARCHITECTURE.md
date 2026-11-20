@@ -199,3 +199,14 @@ See `Documentation/03_ENGINEERING/WORK_PACKAGES/WORLD-004_PLAYER_CONTROLLER_AND_
 The World domain owns player world-position mutation. `SphericalPlayerMotor` stores world-space velocity and applies gravity toward the explicit planet centre. `SphericalGroundProbe` queries the same `SphericalGeographicFieldSet` that drives WORLD-002 terrain/biome rendering; it does not depend on the six coarse preview meshes or their colliders. `SphericalPlayerController` is the current PC Input System adapter and consumes the existing `SphericalThirdPersonCamera` tangent movement basis.
 
 This first slice supports field-based ground contact, radial falling, grounded jump, camera-relative walking, a slope threshold and blocking grounded entry into water. It does not yet provide swept capsule collision, step climbing, prop collision, swimming, traversal abilities, animation, multiplayer prediction or server-authoritative player state. Those remain separate follow-up work packages.
+
+
+## Optional biome classification (MOD-001-C)
+
+The spherical `SphericalGeographicFieldSet` is the authoritative World Core snapshot. Its topology, altitude, temperature, slope, distance-to-water, moisture and water-class fields are generated regardless of whether biome classification is requested.
+
+`SphericalGeographicFieldGenerator.Generate(settings)` retains the historical behaviour and includes biome classification. `Generate(settings, includeBiomeClassification)` allows a caller to request World Core without allocating biome face arrays or classifying biome nodes. The generated field set exposes `HasBiomeClassification`, `TryGetBiome` and `TrySampleBiome` so consumers can declare whether biome data is available.
+
+Legacy `GetBiome` and `SampleBiome` remain available for existing biome-dependent consumers, but throw `InvalidOperationException` when classification is absent. They never substitute `Plains` or another default. The ground probe is a World Core consumer and therefore remains operational without biome classification; its result exposes `HasBiomeClassification` and uses `SphericalBiome.None` only as the explicit absent-value paired with that flag.
+
+Biome presentation, biome-dependent environment placement and the inspection bootstrap remain biome-dependent until their respective MOD-001-D/E/F composition work packages connect the activation report and optional providers. This change does not claim that the full world-creation pipeline can yet run without biomes.

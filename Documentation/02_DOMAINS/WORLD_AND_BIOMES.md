@@ -221,3 +221,10 @@ Expose queries such as:
 - ground/slope/water condition.
 
 Other domains should not inspect private terrain-generation data structures directly.
+
+
+### Optional classification in spherical World Core (MOD-001-C)
+
+Biome classification is not required to generate authoritative spherical geography. World Core always provides altitude, temperature, slope, distance-to-water, moisture and water class. The biome classifier may be skipped as a derived output without changing those fields.
+
+A field set explicitly reports classification availability. Biome consumers must use the `Try*` APIs when absence is valid, or retain the legacy throwing APIs when classification is a hard dependency. No consumer may treat `SphericalBiome.None` as Plains. Ground probing and movement queries do not require biome classification.

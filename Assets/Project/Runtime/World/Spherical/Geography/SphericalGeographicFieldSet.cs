@@ -4,10 +4,10 @@ using UnityEngine;
 namespace Pokemon.Project.World.Spherical.Geography
 {
     /// <summary>
-    /// Immutable-by-contract snapshot of continuous and categorical geographic fields on
-    /// one shared six-face Cube-Sphere lattice. All arrays are owned by this instance.
+    /// Immutable-by-contract snapshot of authoritative continuous and categorical world fields.
+    /// Biome classification is optional; topology, altitude, climate, moisture and water remain available.
     /// </summary>
-    public sealed class SphericalGeographicFieldSet
+    public sealed partial class SphericalGeographicFieldSet
     {
         private readonly float[][] _altitude;
         private readonly float[][] _temperature;
@@ -25,7 +25,11 @@ namespace Pokemon.Project.World.Spherical.Geography
         public float ActualOceanCoveragePercent { get; }
         public float OceanCoverageQuantizationTolerancePercent { get; }
         public float DerivedSeaLevelMeters { get; }
+        public bool HasBiomeClassification => _biomes != null;
 
+        /// <summary>
+        /// Creates an immutable snapshot; a null biome array explicitly means classification was not generated.
+        /// </summary>
         internal SphericalGeographicFieldSet(
             int resolution, int seed, float radius,
             float[][] altitude, float[][] temperature, float[][] slope,
@@ -48,6 +52,9 @@ namespace Pokemon.Project.World.Spherical.Geography
             DerivedSeaLevelMeters = seaLevelMeters;
         }
 
+        /// <summary>
+        /// Returns one continuous geographic field value at a validated face-lattice coordinate.
+        /// </summary>
         public float GetValue(SphericalGeographicFieldType field, CubeSphereFace face, int x, int y)
         {
             int index = GetIndex(face, x, y);
@@ -62,19 +69,18 @@ namespace Pokemon.Project.World.Spherical.Geography
             }
         }
 
+        /// <summary>
+        /// Returns the categorical water class at a validated face-lattice coordinate.
+        /// </summary>
         public SphericalWaterClass GetWaterClass(CubeSphereFace face, int x, int y)
         {
             int index = GetIndex(face, x, y);
             return _water[(int)face][index];
         }
 
-        public SphericalBiome GetBiome(CubeSphereFace face, int x, int y)
-        {
-            int index = GetIndex(face, x, y);
-            return _biomes[(int)face][index];
-        }
-
-        /// <summary>Bilinearly samples continuous fields using canonical spherical direction coordinates.</summary>
+        /// <summary>
+        /// Bilinearly samples continuous fields using canonical spherical direction coordinates.
+        /// </summary>
         public float Sample(SphericalGeographicFieldType field, Vector3 direction)
         {
             CubeSphereTopology.DirectionToFaceCoordinates(ValidateDirection(direction), out CubeSphereFace face, out Vector2 uv);
@@ -90,52 +96,24 @@ namespace Pokemon.Project.World.Spherical.Geography
             return Mathf.Lerp(a, b, ty);
         }
 
-        /// <summary>Nearest-lattice categorical lookup; never interpolates enum IDs across class boundaries.</summary>
+        /// <summary>
+        /// Nearest-lattice categorical lookup for water; enum identifiers are never interpolated.
+        /// </summary>
         public SphericalWaterClass SampleWaterClass(Vector3 direction)
         {
             GetNearestCell(direction, out CubeSphereFace face, out int x, out int y);
             return GetWaterClass(face, x, y);
         }
 
-        public SphericalBiome SampleBiome(Vector3 direction)
-        {
-            GetNearestCell(direction, out CubeSphereFace face, out int x, out int y);
-            return GetBiome(face, x, y);
-        }
-
+        /// <summary>
+        /// Returns the canonical unit direction for one validated face-lattice coordinate.
+        /// </summary>
         public Vector3 GetDirection(CubeSphereFace face, int x, int y)
         {
             ValidateCell(face, x, y);
             float u = -1f + 2f * x / Resolution;
             float v = -1f + 2f * y / Resolution;
             return CubeSphereTopology.GetDirection(face, u, v);
-        }
-
-        private void GetNearestCell(Vector3 direction, out CubeSphereFace face, out int x, out int y)
-        {
-            CubeSphereTopology.DirectionToFaceCoordinates(ValidateDirection(direction), out face, out Vector2 uv);
-            x = Mathf.Clamp(Mathf.RoundToInt((uv.x + 1f) * 0.5f * Resolution), 0, Resolution);
-            y = Mathf.Clamp(Mathf.RoundToInt((uv.y + 1f) * 0.5f * Resolution), 0, Resolution);
-        }
-
-        private int GetIndex(CubeSphereFace face, int x, int y)
-        {
-            ValidateCell(face, x, y);
-            return y * (Resolution + 1) + x;
-        }
-
-        private void ValidateCell(CubeSphereFace face, int x, int y)
-        {
-            int faceIndex = (int)face;
-            if (faceIndex < 0 || faceIndex >= 6) throw new ArgumentOutOfRangeException(nameof(face));
-            if (x < 0 || x > Resolution) throw new ArgumentOutOfRangeException(nameof(x));
-            if (y < 0 || y > Resolution) throw new ArgumentOutOfRangeException(nameof(y));
-        }
-
-        private static Vector3 ValidateDirection(Vector3 direction)
-        {
-            if (direction.sqrMagnitude < 1e-12f) throw new ArgumentException("Direction must be non-zero.", nameof(direction));
-            return direction.normalized;
         }
     }
 }

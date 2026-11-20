@@ -1,7 +1,7 @@
 # MOD-001-C — World Core sans classification des biomes
 
-- **Statut:** PROPOSED — validation du propriétaire requise.
-- **Milestone:** A — plan uniquement; aucune implémentation autorisée avant commit/push et approbation.
+- **Statut:** IMPLEMENTED — validation Unity du propriétaire requise.
+- **Milestones:** A — APPROVED and owner-reported pushed; B — IMPLEMENTED in this delivery, Unity validation pending.
 - **Owner module:** WORLD
 - **Dépendances:** MOD-001-B validé; dernière version appliquée de MOD-001-A; snapshot courant des consommateurs et tests.
 - **Décisions applicables:** DEC-007, DEC-019, DEC-020, DEC-044, DEC-047, DEC-048 et DEC-049.
@@ -37,7 +37,18 @@ Les chemins ci-dessous sont des candidats identifiés dans le snapshot fourni. I
 - `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldGenerator.cs`
 - `Assets/Project/Runtime/World/Spherical/Movement/SphericalGroundProbe.cs`
 - `Assets/Project/Runtime/World/Spherical/Studio/SphericalPlanetStudioGenerator.cs (uniquement si son contrat biome l'exige)`
-- `tests géographiques et movement concernés, à confirmer par recherche exhaustive des appels`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldSet.Biomes.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldSet.Validation.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldGenerator.Sampling.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldGenerator.Geometry.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldGenerator.Nodes.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldGenerator.Derived.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalGeographicFieldGenerator.Biomes.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalWeightedElevation.cs`
+- `Assets/Project/Runtime/World/Spherical/Geography/SphericalIndexedMinHeap.cs`
+- `Assets/Project/Editor/World/Spherical/SphericalGeographicFieldsPreviewWindow.cs`
+- `Assets/Project/Tests/EditMode/World/Spherical/SphericalGeographicBiomeOptionalTests.cs`
+- `Assets/Project/Runtime/World/Spherical/Movement/SphericalGroundProbe.cs`
 
 ## 5. Contrats et invariants
 
@@ -52,7 +63,7 @@ Les chemins ci-dessous sont des candidats identifiés dans le snapshot fourni. I
 
 ## 6. Preview indépendante
 
-Preview géographique isolée sans renderer, player ni assets. Même seed/profil dans les deux modes; inspection des six faces, coutures, eau et champs continus.
+Preview pure-data `Tools > World > Spherical Geographic Fields Preview`, sans renderer, player, caméra ou assets. Le profil source est cloné; seed/résolution de fixture sont appliqués au clone. Generate/Clear/Reset to Fixture/Validate et diagnostics affichent les champs et la disponibilité biome.
 
 ## 7. Tests et critères d'acceptation
 
@@ -62,7 +73,7 @@ Preview géographique isolée sans renderer, player ni assets. Même seed/profil
 4. SphericalGroundProbe et les requêtes de surface fonctionnent sans classification.
 5. Les tests de topologie, coutures, déterminisme, drainage, océan et movement restent verts.
 6. La génération sans biomes n'alloue pas les buffers de classification biome.
-7. Preview indépendante exécutable sans terrain rendu ni joueur.
+7. Preview indépendante exécutable sans terrain rendu ni joueur; comparer les deux modes avec le même profil/seed.
 
 ### Critères d'acceptation
 
@@ -92,8 +103,8 @@ SphericalGroundProbe lit actuellement SampleBiome; SphericalPlanetStudioGenerato
 
 ## 11. Milestones et statut
 
-- **Milestone A — Plan:** PROPOSED; à approuver, committer et pousser par le propriétaire.
-- **Milestone B — Implémentation:** NOT STARTED; autorisé seulement après Milestone A poussé, confirmation du hash et approbation explicite de démarrer cette étape.
+- **Milestone A — Plan:** APPROVED and owner-reported pushed; exact commit hash not supplied in this conversation.
+- **Milestone B — Implementation:** IMPLEMENTED in this delivery; Unity validation remains NOT RUN.
 - **Validation:** Unity compilation, tests, preview et intégration sont NOT RUN tant que le propriétaire ne les exécute pas.
 
 ## 12. Commit proposé

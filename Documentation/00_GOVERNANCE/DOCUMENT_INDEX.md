@@ -76,3 +76,8 @@
 ## MOD-001 — Optional world modules
 - `../03_ENGINEERING/WORK_PACKAGES/MOD-001_OPTIONAL_WORLD_MODULE_COMPOSITION.md` — approved/pushed architecture plan for independently selected world capabilities.
 - `../06_AUDIT/MOD-001-A_IMPLEMENTATION_REPORT.md` — profile module configuration implementation, migration and owner validation status.
+
+## MOD-001 optional world modules
+- `03_ENGINEERING/WORK_PACKAGES/MOD-001-C_WORLD_CORE_BIOME_DATA_SEPARATION.md` — optional biome classification over authoritative spherical World Core fields.
+- `07_Testing/Work_Packages/MOD-001-C_WORLD_CORE_BIOME_DATA_SEPARATION_TEST_PLAN.md` — deterministic tests and independent geography preview checks.
+- `00_GOVERNANCE/DECISIONS/DEC-049_OPTIONAL_INDEPENDENT_MODULES.md` — owner-confirmed independent world/gameplay capability decision.

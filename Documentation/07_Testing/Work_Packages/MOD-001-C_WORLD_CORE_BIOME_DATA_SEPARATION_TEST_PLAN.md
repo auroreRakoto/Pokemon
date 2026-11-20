@@ -2,7 +2,7 @@
 
 - **Statut:** PROPOSED — tests à exécuter après implémentation.
 - **Owner:** WORLD
-- **WP:** `MOD-001-C_C_PLAN.md`
+- **WP:** `MOD-001-C_WORLD_CORE_BIOME_DATA_SEPARATION.md`
 - **Exécution locale:** Unity Test Runner; les previews et vérifications PlayMode sont exécutées par le propriétaire.
 - **Déterminisme:** seeds/profils fixes; les comparaisons doivent porter sur les données produites et les objets créés, pas seulement sur l'absence d'exception.
 
@@ -35,3 +35,8 @@ Preview géographique isolée sans renderer, player ni assets. Même seed/profil
 - Captures de chaque mode de preview.
 - Confirmation Generate/Clear idempotent.
 - NOT RUN / BLOCKED / N/A avec raison; aucune validation ne doit être supposée.
+
+## Added Unity test fixture
+
+- `Assets/Project/Tests/EditMode/World/Spherical/SphericalGeographicBiomeOptionalTests.cs`
+- `Assets/Project/Editor/World/Spherical/SphericalGeographicFieldsPreviewWindow.cs` provides a pure-data preview without scene, terrain renderer, player or environment assets.

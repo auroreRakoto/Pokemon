@@ -1,3 +1,5 @@
+> **SUPERSEDED:** this draft is retained for history. The owner-confirmed decision is `DEC-049_OPTIONAL_INDEPENDENT_MODULES.md` and is indexed in `DECISION_REGISTER.md`.
+
 # DEC-049 — Optional independent gameplay and world capabilities
 
 - **Owner requirement:** CONFIRMED by the owner's explicit instruction on 2026-11-19.

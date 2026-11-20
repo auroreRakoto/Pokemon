@@ -9,6 +9,7 @@
 Record meaningful documentation changes. Keep entries concise and link to proposals/decision IDs.
 
 ## Unreleased
+- MOD-001-C: added optional spherical biome classification, explicit absence APIs, biome-independent ground probing, independent geographic data preview and EditMode regression tests. Recorded DEC-049 as owner-confirmed.
 - Added DEC-042 confirming hybrid vegetation presentation (biome-aware ground textures/materials plus deterministic 3D vegetation instances). Added the proposed WORLD-002 spherical geographic-fields plan, including a globe-correct hydrology/distance design gate, independent map outputs, dual-view inspection/export, biome and settlement suitability, and vegetation preview scope.
 - Clarified the single source-data location at `Assets/Project/Data`; renamed the runtime data-services folder to `Runtime/DataServices` to avoid a second `Data` directory. Added DEC-020 and updated the canonical Unity layout.
 - Added the confirmed two-milestone Git workflow, Conventional Commit format and mandatory agent attribution footer.

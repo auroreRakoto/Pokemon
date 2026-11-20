@@ -125,3 +125,16 @@ The current Unity slice implements the following narrow boundaries:
 | `IEcologyResourceReadModel` / `IEcologyResourceInstance` | Ecology contract; FruitBushManager | Infrastructure telemetry | Expose read-only resource quantities and regeneration statistics |
 
 The Unity composition root wires concrete adapters. World-owned spatial contracts are `IWorldSpawnLocationQuery` and `IWorldMovement`; they do not create a reverse World-to-Pokemon implementation dependency. Pokemon behaviour does not reference `FruitBushManager`, `PokemonSpawnManager`, `WorldBiomeGenerator`, or `Transform` mutation directly. The current food adapter is fruit-bush based; continuous vegetation biomass is a separate Ecology resource model and is not yet a consumable Pokémon source.
+
+
+### Spherical geographic field snapshot
+
+`SphericalGeographicFieldSet` is the immutable-by-contract World-owned query snapshot for spherical topology and geography. Its continuous fields use explicit units/normalization in `SphericalGeographicFieldType`; categorical water data is always available after successful World Core generation.
+
+Biome classification is an optional derived capability:
+- `HasBiomeClassification` declares whether biome data exists.
+- `TryGetBiome(face, x, y, out biome)` and `TrySampleBiome(direction, out biome)` return `false` and `SphericalBiome.None` when it does not.
+- `GetBiome` and `SampleBiome` are compatibility APIs for biome-dependent consumers and throw `InvalidOperationException` when classification is absent. They do not silently map absence to Plains.
+- `SphericalGroundProbe` consumes World Core fields independently; its sample carries `HasBiomeClassification` so callers cannot mistake an absent biome for a valid classification.
+
+The generator's legacy `Generate(settings)` overload still includes biomes. `Generate(settings, includeBiomeClassification: false)` omits biome arrays and classification while preserving the same authoritative altitude, temperature, slope, water, distance-to-water and moisture outputs for the same seed/settings. No presentation, environment placement or gameplay ownership is transferred by this API.

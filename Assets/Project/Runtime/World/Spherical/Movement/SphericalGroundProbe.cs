@@ -16,9 +16,13 @@ namespace Pokemon.Project.World.Spherical.Movement
             public float SlopeDegrees;
             public SphericalWaterClass WaterClass;
             public SphericalBiome Biome;
+            public bool HasBiomeClassification;
             public bool IsLand => WaterClass == SphericalWaterClass.Land;
         }
 
+        /// <summary>
+        /// Samples authoritative ground fields without requiring optional biome classification.
+        /// </summary>
         public static bool TrySample(SphericalGeographicFieldSet fields, Vector3 planetCentre,
             float planetRadiusMeters, Vector3 direction, out Sample sample)
         {
@@ -30,6 +34,7 @@ namespace Pokemon.Project.World.Spherical.Movement
             float altitude = fields.Sample(SphericalGeographicFieldType.AltitudeMeters, direction);
             Vector3 surface = planetCentre + direction * (planetRadiusMeters + altitude);
             Vector3 normal = EstimateNormal(fields, planetCentre, planetRadiusMeters, direction);
+            bool hasBiomeClassification = fields.TrySampleBiome(direction, out SphericalBiome biome);
             sample = new Sample
             {
                 Direction = direction,
@@ -38,11 +43,15 @@ namespace Pokemon.Project.World.Spherical.Movement
                 AltitudeMeters = altitude,
                 SlopeDegrees = fields.Sample(SphericalGeographicFieldType.SlopeDegrees, direction),
                 WaterClass = fields.SampleWaterClass(direction),
-                Biome = fields.SampleBiome(direction)
+                HasBiomeClassification = hasBiomeClassification,
+                Biome = biome
             };
             return true;
         }
 
+        /// <summary>
+        /// Estimates the local terrain normal from tangent-offset surface samples.
+        /// </summary>
         private static Vector3 EstimateNormal(SphericalGeographicFieldSet fields, Vector3 centre,
             float radius, Vector3 direction)
         {
@@ -58,6 +67,9 @@ namespace Pokemon.Project.World.Spherical.Movement
             return Vector3.Dot(normal, direction) < 0f ? -normal : normal;
         }
 
+        /// <summary>
+        /// Returns the sampled terrain surface point for one unit direction.
+        /// </summary>
         private static Vector3 Surface(SphericalGeographicFieldSet fields, Vector3 centre, float radius, Vector3 direction)
         {
             float altitude = fields.Sample(SphericalGeographicFieldType.AltitudeMeters, direction);
