@@ -1,6 +1,6 @@
 # MOD-001 — Optional World Module Composition
 
-- **Status:** PROPOSED — owner design approval required
+- **Status:** APPROVED — owner confirmed scope and dependency failure policy on 2026-11-20; plan milestone reported pushed
 - **Owner module:** Architecture / World composition (`ARCH`, implementation coordination with `WORLD`)
 - **Priority:** P0 architecture prerequisite for continued WORLD-004 integration
 - **Roadmap phase:** Phase 0 / Phase 1 boundary
@@ -96,7 +96,7 @@ A disabled provider is not silently replaced by a fake object. The composition r
 - optional consumers must handle an unavailable capability explicitly;
 - no null-reference-driven optionality.
 
-The final failure policy (disable dependent capability vs reject whole profile) must be confirmed during design review. Preferred proposal: disable only the dependent capability and emit a structured diagnostic, unless World Core itself is invalid.
+**Owner decision confirmed 2026-11-20:** a missing dependency blocks only the dependent optional capability and emits a precise diagnostic. Unrelated capabilities continue when their own dependencies are valid. Invalid World Core blocks world creation and every requested optional capability.
 
 ## 5. Current-state audit
 
@@ -271,7 +271,7 @@ No implementation begins until this plan is approved and the plan milestone is p
 
 - **Implemented:** none.
 - **Validated:** static audit of supplied `Pokemon-clean.zip`.
-- **Blocked:** owner approval of the remaining module dependency/failure policy and plan milestone. Module selection timing is CONFIRMED: world creation only.
+- **Approved:** owner approved MOD-001 scope and confirmed dependency failure policy on 2026-11-20. Owner reports the plan milestone has been pushed; the exact commit hash was not supplied in this conversation. Module selection timing is CONFIRMED: world creation only.
 - **Not run:** Unity compilation, tests and previews by assistant.
 - **Remaining:** owner review, push plan milestone, then implementation in bounded increments.
 - **Next objective:** approve MOD-001 design and plan commit before touching runtime code.

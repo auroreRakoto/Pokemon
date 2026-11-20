@@ -1,7 +1,7 @@
 # DEC-049 — Optional independent gameplay and world capabilities
 
 - **Owner requirement:** CONFIRMED by the owner's explicit instruction on 2026-11-19.
-- **Architecture details:** OPEN pending MOD-001 review and approval.
+- **Architecture details:** APPROVED through MOD-001 on 2026-11-20.
 
 ## Decision statement
 
@@ -33,11 +33,17 @@ The module model must support observation-only sessions with no player and futur
 - Runtime hot-toggle/unload/reload is not required and is excluded from MOD-001.
 - A different module combination is selected by creating a new world/session.
 
-## Open design questions for MOD-001
+## Confirmed dependency failure policy
 
-- Whether a missing dependency disables only its dependent capability or rejects the whole profile.
-- Exact separation between biome classification and biome ground presentation.
-- Whether environment assets without biomes use generic surface suitability or require an explicitly selected placement policy.
-- Exact future Pokémon submodule boundaries.
+- A missing dependency blocks only the dependent optional capability and emits a precise diagnostic.
+- Unrelated capabilities continue when their own dependencies are valid.
+- Invalid World Core blocks world creation and all requested optional capabilities.
+- A missing provider for a disabled capability is not an error.
+- Environment placement declares whether its selected policy requires biome classification; generic placement can operate without biome classification when that policy explicitly says it does not require biomes.
+- Pokémon remains unavailable until an actual runtime implementation exists; enabling its profile flag reports a local blocked capability and never creates a placeholder.
 
-This decision confirms the required product behaviour; it does not approve MOD-001 implementation until its work package and plan milestone are approved/pushed.
+## Remaining future design work
+
+- Exact future Pokémon submodule boundaries remain deferred to a separate Pokémon work package.
+
+This decision and MOD-001 were approved by the owner on 2026-11-20. The owner reports the plan milestone has been pushed; the commit hash was not supplied in this conversation.
