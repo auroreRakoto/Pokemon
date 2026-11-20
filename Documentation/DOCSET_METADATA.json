@@ -1,7 +1,0 @@
-{
-  "project": "Pokemon Ecology",
-  "artifact": "Holy Grail Documentation v1.1 — Repository Audit Integration Draft",
-  "file_count": 54,
-  "status": "Review draft; includes confirmed Git workflow and initial static audit. Not yet approved or pushed.",
-  "note": "The Unity audit is based on a supplied source ZIP; no Unity compile/runtime or Blender verification was performed."
-}

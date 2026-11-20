@@ -1,1 +1,0 @@
-"""Environment asset generation package."""
